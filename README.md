@@ -23,14 +23,14 @@ Castling and en passant information is passed as template parameters, so it does
 A dispatcher method selects the proper template version. This is sort of paradigm of the library to make this information "weightless", like a ray of light.
 
 C++ 20 makes quite a lot of work in compile-time (see data.h for generation of constexpr data).
-C++ 20 uses fast uniform bit manipulation instructions like std::popcount or std::countr_zero. Based on this a utility macro was created to be able to efficiently iterate through bits
+C++ 20 uses fast uniform bit manipulation instructions like std::popcount or std::countr_zero. Based on this, a utility macro was created to be able to efficiently iterate through bits:
 ```
 #define BEGIN_FOR_EACH_POS_IN_MASK(pos, mask) if (mask) { const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask);
 #define END_FOR_EACH_POS_IN_MASK(pos, mask)  mask &= mask - 1; ++loop_iter; } while (loop_iter != loop_count); }
 ```
 This way of looping, though with slightly more instructions, proved to be the fastest in performance tests. This is because loop end condition is easily predictable for CPU and no CPU cycles are lost for branching (reload of instruction cache).
-The utility was created in about 3 weeks including bug fixing mainly thanks to AI, which provided efficient implementations e.g. for the following Hyperbola Quintessence functions:
-get_raw_rook_moves_hq and get_raw_bishop_moves_hq (although it was an iterative process and further manual optimizations were added later on this code).
+<!-- -->
+The utility was created in about 3 weeks including bug fixing mainly thanks to AI, which provided efficient implementations e.g. for Hyperbola Quintessence functions get_raw_rook_moves_hq and get_raw_bishop_moves_hq (although it was an iterative process and further manual optimizations were added later on this code).
 
 Checkmate search is ultrafast thanks to almost branchless operations on bitmasks. 
 For example CanBlackMoveInBetween first calculates branchless (sometimes cmov) the bitmask of all the squares between the two given squares (GetBetweenMask), then filters out Black pieces that cannot possibly reach any of these squares, then every remaining Black piece is matched agains this bitmask, AllBetweenEmpty (branchless) is called on every candidate, then pinning is verified (IsBlackPinned; BTW: there is also a config macro __PREEMPTIVE_BLACKPINNEDPIECES__, but it is better off for Black moves).
@@ -41,6 +41,6 @@ Macros are avoided, although BEGIN_FOR_EACH_POS_IN_MASK may be considered useful
 The main idea of this piece of code is simplicity and conciseness (buffers from only 6.5kB to 22.5kB) - CPUs really like it. 
 As already said, performing a small, branchless calculation should be preferred over fetching data from large buffers for maximum speed.
 
-I admit with remorse that one of the last things was writing a few UTs... However my situation was specific: 
-1) I had a test suite of more than 10k vers from https://jgisland.pl/download/reports/testsuite.php (two last subpages)
-2) I added a cross-check versus legacy methods inside a debug version (well, release with asserts to complete it faster) of JGIsland and ran it on the whole test suite (including all moremovers).
+I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
+1) I had a test suite of more than 10k two-movers from https://jgisland.pl/download/reports/testsuite.php (two last subpages)
+2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers and ran it on the whole test suite (including all moremovers).
