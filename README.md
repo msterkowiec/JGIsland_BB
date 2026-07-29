@@ -8,18 +8,19 @@ distribution is subject to license (see accompanying file license.txt)
 
 JGIsland_BB contains a ultrafast methods of:
 1) finding immediate checkmate,
-2) solving chess two-movers 
-using solely bitboard representation of chessboard and Hyperbola Quintessence in order to reduce memory usage - it is, dependent on configuration (config.h), only 6.5kB-22.5kB, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
+2) solving chess two-movers
+<!-- -->
+using solely bitboard representation of chessboard and Hyperbola Quintessence in order to reduce memory usage. Tt is, dependent on configuration (config.h), only 6.5kB-22.5kB, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
 More than 25 two-movers per second can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
-You can freely reuse this code inside your engine(s) - see licence.txt for details.
+You can freely reuse this code inside your engine(s) - see LICENCE file for details.
 
-JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers (jgisland.pl) with its source code, contrary to the main product, made public.
+JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers (https://jgisland.pl) with its source code, contrary to the main product, made public.
 JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by almost -15%.
 
-As already mentioned one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
+As already mentioned, one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
 That's why Magic Bitboards were not used but Hyperbola Quintessence (super small calculations using data in CPU registers and L1 cache).
 Castling and en passant information is passed as template parameters, so it doesn't have any physical representation (except for the possible en passant square). 
-A dispatcher method selects the proper template version. This is sort of paradigm of the library to make this information "weightless", like ray of light.
+A dispatcher method selects the proper template version. This is sort of paradigm of the library to make this information "weightless", like a ray of light.
 
 C++ 20 makes quite a lot of work in compile-time (see data.h for generation of constexpr data).
 C++ 20 uses fast uniform bit manipulation instructions like std::popcount or std::countr_zero. Based on this a utility macro was created to be able to efficiently iterate through bits
