@@ -1,18 +1,19 @@
-JGIsland_BB
-Copyright Marcin Sterkowiec, 2026. Use, modification and
+__JGIsland_BB__
+<!-- -->
+Copyright Marcin Sterkowiec, 2026. Use, modification and\
 distribution is subject to license (see accompanying file license.txt)
 
 [![CMake-MSVC-2022](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-msvc-2022.yml/badge.svg)](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-msvc-2022.yml)
 [![CMake-GCC](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-gcc.yml/badge.svg)](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-gcc.yml)
 [![CMake-Clang](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-clang.yml/badge.svg)](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-clang.yml)
 
-JGIsland_BB contains a ultrafast methods of:
+JGIsland_BB contains ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers
 <!-- -->
 using solely bitboard representation of chessboard and Hyperbola Quintessence in order to reduce memory usage. Tt is, dependent on configuration (config.h), only 6.5kB-22.5kB, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
 More than 25 two-movers per second can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
-You can freely reuse this code inside your engine(s) - see LICENCE file for details.
+You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
 JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers (https://jgisland.pl) with its source code, contrary to the main product, made public.
 JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%.
