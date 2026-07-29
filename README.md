@@ -15,7 +15,7 @@ More than 25 two-movers per second can be solved in all solutions mode (without 
 You can freely reuse this code inside your engine(s) - see LICENCE file for details.
 
 JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers (https://jgisland.pl) with its source code, contrary to the main product, made public.
-JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by almost -15%.
+JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%.
 
 As already mentioned, one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
 That's why Magic Bitboards were not used but Hyperbola Quintessence (super small calculations using data in CPU registers and L1 cache).
@@ -43,4 +43,4 @@ As already said, performing a small, branchless calculation should be preferred 
 
 I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
 1) I already had a test suite of more than 10k two-movers on https://jgisland.pl/download/reports/testsuite.php (two last subpages) and converted it into [integration test suite](tests/integration_tests_suite.h) of this project
-2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers and ran it on the whole test suite (including all moremovers).
+2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers 11.0 and ran it on the whole test suite (including all moremovers).
