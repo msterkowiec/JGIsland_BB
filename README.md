@@ -29,7 +29,7 @@ C++ 20 uses fast uniform bit manipulation instructions like std::popcount or std
 #define BEGIN_FOR_EACH_POS_IN_MASK(pos, mask) if (mask) { const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask);
 #define END_FOR_EACH_POS_IN_MASK(pos, mask)  mask &= mask - 1; ++loop_iter; } while (loop_iter != loop_count); }
 ```
-This way of looping, though with slightly more instructions, proved to be the fastest in performance tests. This is because loop end condition is easily predictable for CPU and no CPU cycles are lost for branching (reload of instruction cache).
+This way of looping, though with slightly more instructions, proved to be the fastest in performance tests. This is because loop end condition is easily predictable for CPU and no CPU cycles are lost for branching (reload of instruction cache). Note also that there is a separate macro for const-iterating (leaving mask intact).
 <!-- -->
 JGIsland_BB was created in about 3 weeks including bug fixing mainly thanks to AI, which provided efficient implementations e.g. for Hyperbola Quintessence functions get_raw_rook_moves_hq and get_raw_bishop_moves_hq (although it was an iterative process and further manual optimizations were added later on this code).
 
