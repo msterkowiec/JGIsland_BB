@@ -15,7 +15,7 @@ using solely bitboard representation of chessboard and **Hyperbola Quintessence*
 **More than 25 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
-JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers (https://jgisland.pl) with its source code, contrary to the main product, made public.
+**JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers** (https://jgisland.pl) with its source code, contrary to the main product, made public.
 JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%.
 
 As already mentioned, one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
