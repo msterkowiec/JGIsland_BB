@@ -1,8 +1,8 @@
 JGIsland_BB contains a ultrafast methods of:
 1) finding immediate checkmate,
-2) solving chess twomovers 
+2) solving chess two-movers 
 using solely bitboard representation of chessboard and Hyperbola Quintessence in order to reduce memory usage - it is, dependent on configuration (config.h), only 6.5kB-22.5kB, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
-More than 25 twomovers per second can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
+More than 25 two-movers per second can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your engine(s) - see licence.txt for details.
 
 JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers (jgisland.pl) with its source code, contrary to the main product, made public.
@@ -33,5 +33,5 @@ The main idea of this piece of code is simplicity and conciseness (buffers from 
 As already said, performing a small, branchless calculation should be preferred over fetching data from large buffers for maximum speed.
 
 I admit with remorse that one of the last things was writing a few UTs... However my situation was specific: 
-1) I had a test suite of more than 10k twomovers from https://jgisland.pl/download/reports/testsuite.php (two last subpages)
+1) I had a test suite of more than 10k vers from https://jgisland.pl/download/reports/testsuite.php (two last subpages)
 2) I added a cross-check versus legacy methods inside a debug version (well, release with asserts to complete it faster) of JGIsland and ran it on the whole test suite (including all moremovers).
