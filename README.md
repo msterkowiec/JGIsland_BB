@@ -1,3 +1,9 @@
+JGIsland_BB
+Copyright Marcin Sterkowiec, 2026. Use, modification and
+distribution is subject to license (see accompanying file license.txt)
+
+[![CMake-MSVC-2022](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-msvc-2022.yml/badge.svg)](https://github.com/msterkowiec/JGIsland_BB/actions/workflows/cmake-msvc-2022.yml)
+
 JGIsland_BB contains a ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers 
