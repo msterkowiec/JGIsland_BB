@@ -43,5 +43,5 @@ The main idea of this piece of code is simplicity and conciseness (buffers from 
 As already said, performing a small, branchless calculation should be preferred over fetching data from large buffers for maximum speed.
 
 I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
-1) I already had a test suite of more than 10k two-movers on https://jgisland.pl/download/reports/testsuite.php (two last subpages) and converted it into [integration test suite](tests/integration_tests_suite.h) of this project
+1) I already had a test suite of more than 10k two-movers on [https://jgisland.pl/download/reports/testsuite.php](https://jgisland.pl/download/reports/testsuite.php?page=6&m=0&sort=2) (two last subpages) and converted it into [integration test suite](tests/integration_tests_suite.h) of this project
 2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers 11.0 and ran it on the whole test suite (including all moremovers).
