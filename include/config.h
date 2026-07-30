@@ -27,3 +27,4 @@
 
 // #define __PREEMPTIVE_BLACKPINNEDPIECES__ // It should be off (not defined), since statistically already the first Black move found is a refutation, so we should not make this preemptive check (this macro is for IsImmediateMateAfterAnyBlackResponse)
 
+// #define __VERIFY_PINNING_PREREQUISITE__ // an older attempt; although a few branchless operations, no performance gain when using it
