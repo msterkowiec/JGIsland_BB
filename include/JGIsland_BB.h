@@ -3725,7 +3725,7 @@ private:
 			const bool bPromoFowardPossible = IsEmptyAt(ppos + 8);
 			if (bPromoFowardPossible)
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-				if (!pinned || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, GetWhiteKingPos()))
+				if (!pinned) // promo forward cannot be along the pinning line or diagonal || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, GetWhiteKingPos()))
 				#else
 				if (!IsWhitePinned(ppos, ppos + 8))
 				#endif
