@@ -36,7 +36,7 @@ JGIsland_BB was created in about 3 weeks (including bug fixing) mainly thanks to
 Checkmate search is ultrafast thanks to almost branchless operations on bitmasks. 
 For example CanBlackMoveInBetween first calculates branchless (sometimes cmov) the bitmask of all the squares between the two given squares (GetBetweenMask), then filters out Black pieces that cannot possibly reach any of these squares, then every remaining Black piece is matched agains this bitmask, AllBetweenEmpty (branchless) is called on every candidate, then pinning is verified (IsBlackPinned; BTW: there is also a config macro __PREEMPTIVE_BLACKPINNEDPIECES__, but it is better off for Black moves).
 
-The C++20 code is maybe not super-clean (e.g. name conventions mixed) but should be considered clean enough. I have a weakness for a prefix "t" for template parameter names and for some remnants of Hungarian notation (e.g. tbInclKing stands for template boolean parameter that specifies if a method includes king or not). 
+The C++20 code is maybe not super-clean (e.g. name conventions mixed, Clang warns about 'dangling else') but should be considered clean enough. I have a weakness for a prefix "t" for template parameter names and for some remnants of Hungarian notation (e.g. tbInclKing stands for template boolean parameter that specifies if a method includes king or not). 
 Macros are avoided, although BEGIN_FOR_EACH_POS_IN_MASK may be considered useful focusing on logic and hiding the implementation details, at the same time providing maximum performance.
 
 The main idea of this piece of code is simplicity and conciseness (buffers using only from 6kB to 23kB) - CPUs really like it. 
