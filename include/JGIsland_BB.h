@@ -1780,7 +1780,7 @@ private:
 		const auto blackKingPos = GetBlackKingPos();
 		if (posTo >= _A8_)
 		{
-			if constexpr (fPromo) // analyze specific promo only or any one?
+			if constexpr (fPromo != 0) // analyze specific promo only or any one?
 			{
 				bool bDirectCheck;
 				if constexpr (fPromo == FGR_KNIGHT)
@@ -4193,11 +4193,11 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-			if constexpr (tbBlackCastlingFlags)
+			if constexpr (tbBlackCastlingFlags != 0)
 			{
 				if (posBlackKing == _E8_) // this is probably redundant (assert might be enough) but a very predictable branch anyway
 				{
-					if constexpr (tbBlackCastlingFlags & 1)
+					if constexpr ((tbBlackCastlingFlags & 1) != 0)
 					{
 						if (IsBlackRookAt(_H8_) && IsEmptyAt(_F8_) && IsEmptyAt(_G8_))
 							if (!IsSquareAttackedByWhite(_F8_) && !IsSquareAttackedByWhite(_G8_))
@@ -4207,7 +4207,7 @@ private:
 									return false;
 							}
 					}
-					if constexpr (tbBlackCastlingFlags & 2)
+					if constexpr ((tbBlackCastlingFlags & 2) != 0)
 					{
 						if (IsBlackRookAt(_A8_) && IsEmptyAt(_B8_) && IsEmptyAt(_C8_) && IsEmptyAt(_D8_))
 							if (!IsSquareAttackedByWhite(_C8_) && !IsSquareAttackedByWhite(_D8_))
@@ -4996,7 +4996,7 @@ private:
 			END_FOR_EACH_POS_IN_MASK(pos, maskMoves);
 
 			// Castling short?
-			if constexpr (tbWhiteCastlingFlags & 1)
+			if constexpr ((tbWhiteCastlingFlags & 1) != 0)
 				if (posWhiteKing == _E1_ && IsWhiteRookAt(_H1_))
 					if (IsEmptyAt(_F1_) && IsEmptyAt(_G1_))
 						if (!IsSquareAttackedByBlack(_F1_) && !IsSquareAttackedByBlack(_G1_))
@@ -5007,7 +5007,7 @@ private:
 									pMoves[count++].set(_E1_, _G1_);
 
 			// Castling long?
-			if constexpr (tbWhiteCastlingFlags & 2)
+			if constexpr ((tbWhiteCastlingFlags & 2) != 0)
 				if (posWhiteKing == _E1_ && IsWhiteRookAt(_A1_))
 					if (IsEmptyAt(_B1_) && IsEmptyAt(_C1_) && IsEmptyAt(_D1_))
 						if (!IsSquareAttackedByBlack(_C1_) && !IsSquareAttackedByBlack(_D1_))
