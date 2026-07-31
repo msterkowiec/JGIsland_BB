@@ -178,9 +178,12 @@ ALWAYS_INLINE int sgn(T val) {
 // Version that leaves mask intact (minimal overhead to make a copy of uint64_t)
 #define BEGIN_FOR_EACH_POS_IN_CONST_MASK(pos, mask) if (mask) { auto mask##Copy = mask; const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask##Copy);
 #define END_FOR_EACH_POS_IN_CONST_MASK(pos, mask)  mask##Copy &= mask##Copy - 1; ++loop_iter; } while (loop_iter != loop_count); }
-// Version to be used when mask already known to be non-zero:
+// Version to be used when the bitmask is already known to be non-zero:
 #define BEGIN_DOWHILE_POS_IN_MASK(pos, mask) { assert(mask); const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask);
 #define END_DOWHILE_POS_IN_MASK(pos, mask)  mask &= mask - 1; ++loop_iter; } while (loop_iter != loop_count); }
+// Version to be used when the bitmask is likely to be non-zero:
+#define BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask) {const int loop_count = std::popcount(mask); int loop_iter = 0; while(loop_iter != loop_count) { const int pos = std::countr_zero(mask);
+#define END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask) mask &= mask - 1; ++ loop_iter;}}
 
 
 ALWAYS_INLINE constexpr bool SameDiagonalOrLine(const int pos1, const int pos2)
