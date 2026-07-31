@@ -24,8 +24,8 @@ public:
     ALWAYS_INLINE uint64_t GetBetweenMask(int s1, int s2) const
     {
         // Compiles directly to branchless CMOV hardware instructions
-        int low = std::min(s1, s2);
-        int high = std::max(s1, s2);
+        int low = (std::min)(s1, s2);
+        int high = (std::max)(s1, s2);
 
         // When low == high, this naturally evaluates to: row_offsets[low] - 1
         // If low == 0, it hits masks[0], which is initialized to 0ULL.
@@ -87,7 +87,7 @@ private:
 
                     while (curr_f != f2 || curr_r != r2) {
                         int square = curr_r * 8 + curr_f;
-                        path_mask |= (sq_to_bb(square));
+                        path_mask |= (1ULL << square);
 
                         curr_f += step_f;
                         curr_r += step_r;
