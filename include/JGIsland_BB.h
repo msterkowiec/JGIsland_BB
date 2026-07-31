@@ -2542,7 +2542,7 @@ private:
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
 
 		auto mask = King_Attacks[std::countr_zero(blackKing)] & ~black;
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+		BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask)
 		{
 			if (!IsSquareAttackedByWhite(pos))
 			{
@@ -2551,7 +2551,7 @@ private:
 				return true;
 			}
 		}
-		END_FOR_EACH_POS_IN_MASK(pos, mask);
+		END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
@@ -3591,13 +3591,13 @@ private:
 				const int diff = GetSquareDiff(kpos, posBlackKing);
 				auto mask = King_Attacks[kpos] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
 
-				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+				BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask)
 				{
 					if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
 						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterKingDiscoveredCheck(kpos, pos, posWhiteLongDistAttacker))
 							return true;
 				}
-				END_FOR_EACH_POS_IN_MASK(pos, mask);
+				END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 			}
 		}
 
@@ -4023,7 +4023,7 @@ private:
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
 			mask = pawns & white;
-			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant, IsPosInBitmask(pos, whitePinnedPieces)))
@@ -4032,7 +4032,7 @@ private:
 				#endif
 					return true;
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, mask);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 
 			if (CanWhiteKingCheckMate<tbCastlingShortPossible, tbCastlingLongPossible>(posWhiteKing))
 				return true;
@@ -4055,13 +4055,13 @@ private:
 		if (posBlackKingChecker >= 0)
 		{			
 			auto mask = King_Attacks[posBlackKing] & ~black;
-			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(posTo, mask)
 			{
 				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
 					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posBlackKing, posTo))
 						return false;
 			}
-			END_FOR_EACH_POS_IN_MASK(posTo, mask);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(posTo, mask);
 
 			if (posBlackKingChecker != DBL_CHECKED)
 			{
@@ -4182,7 +4182,7 @@ private:
 			assert(mask);
 			const auto posBlackKing = std::countr_zero(mask);
 			mask = King_Attacks[posBlackKing] & ~black;
-			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(posTo, mask)
 			{
 				if (!IsSquareAttackedByWhite(posTo))
 				{
@@ -4191,7 +4191,7 @@ private:
 					legalMovesFound = true;
 				}
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, mask);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 
 			if constexpr (tbBlackCastlingFlags != 0)
 			{
@@ -4222,7 +4222,7 @@ private:
 
 			// pawn:
 			mask = black & pawns;
-			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask)
 			{								
 				auto captureMask = Black_Pawn_Attacks[pos] & white;
 				BEGIN_FOR_EACH_POS_IN_MASK(capturePos, captureMask)
@@ -4267,7 +4267,7 @@ private:
 						}
 
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, mask);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 
 			return legalMovesFound; // otherwise stalemate
 		}
@@ -4831,7 +4831,7 @@ private:
 
 			// 3) Escape by white king:
 			auto mask = King_Attacks[posWhiteKing] & ~white;
-			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(posTo, mask)
 			{
 				if (!IsSquareAttackedByBlackIfTakeOffWhiteKing(posTo))
 					if (IsImmediateMateAfterAnyBlackResponseAfterWhiteKingMove<tbBlackCastlingFlags>(posWhiteKing, posTo))
@@ -4840,7 +4840,7 @@ private:
 						else
 							pMoves[count++].set(posWhiteKing, posTo);
 			}
-			END_FOR_EACH_POS_IN_MASK(posTo, mask);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(posTo, mask);
 		}
 		else
 		{
@@ -4938,7 +4938,7 @@ private:
 
 
 			mask = white & pawns;
-			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask)
 			{
 				auto maskMoves = White_Pawn_Attacks[pos] & black;
 				if (IsEmptyAt(pos + 8))
@@ -4981,10 +4981,10 @@ private:
 								else
 									pMoves[count++].set(pos, bposToCaptureWithEnPassant + 8);
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, mask);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(pos, mask);
 
 			auto maskMoves = King_Attacks[posWhiteKing] & ~white;
-			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskMoves)
+			BEGIN_FOR_EACH_POS_IN_MASK__LIKELY(posTo, maskMoves)
 			{
 				if (!IsSquareAttackedByBlack(posTo))
 					if (IsImmediateMateAfterAnyBlackResponseAfterWhiteKingMove<tbBlackCastlingFlags>(posWhiteKing, posTo))
@@ -4993,7 +4993,7 @@ private:
 						else
 							pMoves[count++].set(posWhiteKing, posTo);
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, maskMoves);
+			END_FOR_EACH_POS_IN_MASK__LIKELY(pos, maskMoves);
 
 			// Castling short?
 			if constexpr ((tbWhiteCastlingFlags & 1) != 0)
