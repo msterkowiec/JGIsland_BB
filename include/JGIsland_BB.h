@@ -3520,12 +3520,11 @@ private:
 		#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 		assert(IsPinnedFlagOK(kpos, false));
 		#endif
-
-
-		const auto posWhiteKing = GetWhiteKingPos();
+		
 		#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 		constexpr bool pinned = false; // already verified before the call; compiler will optimize out the below 'if' condition
 		#else
+		const auto posWhiteKing = GetWhiteKingPos();
 		const bool pinned = SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, kpos) && BlackLongDistanceFigureInDir(kpos, posWhiteKing);
 		#endif
 		if (!pinned)
