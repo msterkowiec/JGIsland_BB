@@ -5271,10 +5271,8 @@ public:
 	{
 		std::vector<TMove> res;
 		res.reserve(moves.size() / 4 + 1);
-
-		size_t i = 0;
+		
 		char szMove[256];
-
 		size_t idx = 0;
 		for (size_t i = 0; i < moves.size(); ++i)
 			if (moves[i] != ' ')
