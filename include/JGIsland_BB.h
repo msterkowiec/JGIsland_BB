@@ -880,11 +880,9 @@ private:
 		assert(black & kings);
 		assert((sq_to_bb(pos)) & black);
 
-		int posLongDistanceAttacker;
 		const int posBlackKing = GetBlackKingPos();
-
 		if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))
-			if ((posLongDistanceAttacker = WhiteLongDistanceFigureInDir<1>(pos, posBlackKing)) >= 0)
+			if (WhiteLongDistanceFigureInDir(pos, posBlackKing))
 				return true;
 
 		return false;
@@ -895,11 +893,9 @@ private:
 		assert(white & kings);
 		assert((sq_to_bb(pos)) & white);
 
-		int posLongDistanceAttacker;
 		const int posWhiteKing = GetWhiteKingPos();
-
 		if (SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos))
-			if ((posLongDistanceAttacker = BlackLongDistanceFigureInDir<1>(pos, posWhiteKing)) >= 0)
+			if (BlackLongDistanceFigureInDir(pos, posWhiteKing))
 				return true;
 
 		return false;
