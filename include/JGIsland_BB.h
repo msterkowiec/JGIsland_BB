@@ -3588,7 +3588,6 @@ private:
 			const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(kpos, posBlackKing);
 			if (posWhiteLongDistAttacker >= 0)
 			{
-				const int diff = GetSquareDiff(kpos, posBlackKing);
 				auto mask = King_Attacks[kpos] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
 
 				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
