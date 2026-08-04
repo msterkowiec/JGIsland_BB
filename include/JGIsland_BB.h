@@ -515,17 +515,18 @@ private:
 		{
 			const bool bRayUpward = pos > posBase;
 			const int posPiece = bRayUpward ? std::countr_zero(mask) : (63 - std::countl_zero(mask));
-			if (AllBetweenEmpty(pos, posPiece))
-				if constexpr (tbGetPos)
-					return posPiece;
-				else
-					return true;
+			const bool bAllBetweenEmpty = AllBetweenEmpty(pos, posPiece);
+			if constexpr (tbGetPos)
+				return bAllBetweenEmpty ? posPiece : -1;
+			else
+				return bAllBetweenEmpty;
 		}
 		if constexpr (tbGetPos)
 			return -1;
 		else
 			return false;
 	}
+
 	template<bool tbGetPos = false, bool tbBlack = true>
 	ALWAYS_INLINE int LongDistanceFigureInDir(const int pos, const int dx, const int dy) const
 	{
@@ -539,12 +540,13 @@ private:
 		{
 			const bool bRayUpward = (dy > 0) | ((dy == 0) & (dx > 0));
 			const int posPiece = bRayUpward ? std::countr_zero(mask) : (63 - std::countl_zero(mask));
-			if (AllBetweenEmpty(pos, posPiece))
-				if constexpr (tbGetPos)
-					return posPiece;
-				else
-					return true;
+			const bool bAllBetweenEmpty = AllBetweenEmpty(pos, posPiece);
+			if constexpr (tbGetPos)
+				return bAllBetweenEmpty ? posPiece : -1;
+			else
+				return bAllBetweenEmpty;
 		}
+		
 		if constexpr (tbGetPos)
 			return -1;
 		else
