@@ -413,7 +413,7 @@ ALWAYS_INLINE std::conditional_t<std::is_same<T, bool>::value, int, T> MUL(const
 // --------------------------------------------------------
 // Hyperbola Quintessence
 
-template<char Dir> //Dir 0 = any, 1/-1 == horizontal, 8/-8 == vertical
+template<char Dir = 0> //Dir 0 = any, 1/-1 == horizontal, 8/-8 == vertical
 ALWAYS_INLINE uint64_t get_raw_rook_moves_hq(const int square, const uint64_t occupancy)
 {
 	static_assert(Dir == 0 || Dir == 1 || Dir == -1 || Dir == 8 || Dir == -8, "");
