@@ -689,14 +689,83 @@ private:
 		return res;
 	}
 
+	// Improved implementations using methods of Hyperbola Quintessence
+	template<bool tbInclKing = true, bool tbFindAll = true>
+	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_hq(const int target_sq) const
+	{
+		assert(IsValidPos(target_sq));
+
+		Bitboard occ = white | black;
+		Bitboard white_pawns = white & pawns;
+		Bitboard white_knights = white & knights;
+		
+		Bitboard direct_attackers;
+		if constexpr(tbInclKing)
+			direct_attackers = (Knight_Attacks[target_sq] & white_knights) | (King_Attacks[target_sq] & white & kings) | (Black_Pawn_Attacks[target_sq] & white_pawns);
+		else
+			direct_attackers = (Knight_Attacks[target_sq] & white_knights) | (Black_Pawn_Attacks[target_sq] & white_pawns);
+
+		if constexpr (!tbFindAll)
+			if (direct_attackers)
+				return direct_attackers;
+
+		Bitboard direct_b_moves = get_raw_bishop_moves_hq(target_sq, occ);
+		Bitboard direct_r_moves = get_raw_rook_moves_hq(target_sq, occ);
+
+		Bitboard direct_b_pieces = direct_b_moves & white & (bishops | queens);
+		Bitboard direct_r_pieces = direct_r_moves & white & (rooks | queens);
+
+		direct_attackers |= direct_b_pieces | direct_r_pieces;
+		return direct_attackers;
+	}
+
+	template<bool tbInclKing = true, bool tbFindAll = true>
+	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack_hq(const int target_sq) const
+	{
+		assert(IsValidPos(target_sq));
+
+		Bitboard occ = white | black;
+		Bitboard black_pawns = black & pawns;
+		Bitboard black_knights = black & knights;
+
+		Bitboard direct_attackers; 
+		if constexpr (tbInclKing)
+			direct_attackers = (Knight_Attacks[target_sq] & black_knights) | (King_Attacks[target_sq] & black & kings) | (White_Pawn_Attacks[target_sq] & black_pawns);
+		else
+			direct_attackers = (Knight_Attacks[target_sq] & black_knights) | (White_Pawn_Attacks[target_sq] & black_pawns);
+
+		if constexpr (!tbFindAll)
+			if (direct_attackers)
+				return direct_attackers;
+
+		Bitboard direct_b_moves = get_raw_bishop_moves_hq(target_sq, occ);
+		Bitboard direct_r_moves = get_raw_rook_moves_hq(target_sq, occ);
+
+		Bitboard direct_b_pieces = direct_b_moves & black & (bishops | queens);
+		Bitboard direct_r_pieces = direct_r_moves & black & (rooks | queens);
+
+		direct_attackers |= direct_b_pieces | direct_r_pieces;
+		return direct_attackers;
+	}
+
 	// bitmask of attackers is returned, even if tbOneIsEnough = false provided that tbOneIsEnough > 1 (see tbReturnBitmaskEvenIfOneIsEnough)
 	template<bool tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
 	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite(const int sq) const
 	{
 		constexpr bool tbReturnBitmaskEvenIfOneIsEnough = tbOneIsEnough > 1;
 		assert(IsValidPos(sq));
-		uint64_t mask;
 
+		if constexpr (tbInclPinned) // TODO: use IsSquareAttackedByWhite_hq also when pinned attackers must be excluded
+		{
+			constexpr bool tbFindAll = !tbOneIsEnough;
+			const auto mask = IsSquareAttackedByWhite_hq<tbInclKing, tbFindAll>(sq);
+			if constexpr (tbOneIsEnough == 1)
+				return mask != 0;
+			else
+				return mask;
+		}
+		
+		uint64_t mask;
 		if constexpr (tbInclKing)
 			mask = ((Black_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights) | (King_Attacks[sq] & kings)) & white;
 		else
@@ -759,6 +828,17 @@ private:
 	{
 		constexpr bool tbReturnBitmaskEvenIfOneIsEnough = tbOneIsEnough > 1;
 		assert(IsValidPos(sq));
+
+		if constexpr (tbInclPinned) // TODO: use IsSquareAttackedByBlack_hq also when pinned attackers must be excluded
+		{
+			constexpr bool tbFindAll = !tbOneIsEnough;
+			const auto mask = IsSquareAttackedByBlack_hq<tbInclKing, tbFindAll>(sq);			
+			if constexpr (tbOneIsEnough == 1)
+				return mask != 0;
+			else
+				return mask;						
+		}
+		
 		uint64_t mask;
 		if constexpr (tbInclKing)
 			mask = ((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights) | (King_Attacks_Ext[sq] & kings)) & black;
