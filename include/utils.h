@@ -242,13 +242,21 @@ ALWAYS_INLINE constexpr BYTE Distance(const int sqr1, const int sqr2)
 	return Distance(sqr1 & 7, sqr1 >> 3, sqr2 & 7, sqr2 >> 3);
 }
 
-// Returns true also on the same squares!
+// NOTE: Returns true also on the same squares
 ALWAYS_INLINE constexpr bool AreSquaresAdjacent(const int sq1, const int sq2)
 {
 	assert(IsValidPos(sq1));
 	assert(IsValidPos(sq2));
 
 	return (King_Attacks_Ext[sq1] & (sq_to_bb(sq2))) != 0; // this version wins PerfTests (hmm..., maybe dependent on L1 cache usage but King_Attacks_Ext is on all hot paths of the engine...)
+}
+// NOTE: Returns true also on the same squares
+ALWAYS_INLINE constexpr bool AreSquaresAdjacentOrKnightDiff(const int sq1, const int sq2)
+{
+	assert(IsValidPos(sq1));
+	assert(IsValidPos(sq2));
+
+	return ((Knight_Attacks[sq1] | King_Attacks_Ext[sq1]) & (sq_to_bb(sq2))) != 0;
 }
 
 ALWAYS_INLINE constexpr bool IsSquareAlongTheLineOrDiag(const int sq, const int sq1, const int sq2)
