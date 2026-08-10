@@ -4154,7 +4154,7 @@ private:
 				if (captureMask)
 					return false; // tbOnlyIfPreventsImmediateMateAndFlags already verified, so we can return
 
-				if (Distance(posBlackKing, posBlackKingChecker) > 1 && !IsKnightDiff(posBlackKing, posBlackKingChecker))
+				if (!AreSquaresAdjacentOrKnightDiff(posBlackKing, posBlackKingChecker))
 					if (CanBlackMoveInBetween<0, tbOnlyIfPreventsImmediateMateAndFlags + 2 * tbWhiteCastlingFlags>(posBlackKing, posBlackKingChecker))
 						return false; // tbOnlyIfPreventsImmediateMateAndFlags already verified, so we can return
 			}
