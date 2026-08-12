@@ -304,12 +304,16 @@ private:
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		const_cast<FullBitboards*>(this)->white ^= mask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= mask;
+		#endif
 
 		const auto res = (GetBetweenMask(pos1, pos2) & (white | black)) == 0;
 
 		const_cast<FullBitboards*>(this)->white ^= mask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= mask;
+		#endif
 
 		return res;
 	}
@@ -409,12 +413,16 @@ private:
 
 		const auto pawnMask = (sq_to_bb(posWhitePawnToTakeOff));
 		const_cast<FullBitboards*>(this)->white ^= pawnMask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= pawnMask;
+		#endif
 
 		const auto res = AllBetweenEmptyByLookup(pos1, pos2);
 
 		const_cast<FullBitboards*>(this)->white ^= pawnMask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= pawnMask;
+		#endif
 
 		return res;
 	}
@@ -582,12 +590,16 @@ private:
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		const auto res = WhiteLongDistanceFigureInDir<tbGetPos>(pos, posBase);
 
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		return res;
@@ -603,12 +615,16 @@ private:
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		const auto res = WhiteLongDistanceFigureInDir<tbGetPos>(pos, dx, dy);
 
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		return res;
@@ -624,12 +640,16 @@ private:
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		const auto res = BlackLongDistanceFigureInDir<tbGetPos>(pos, posBase);
 
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		return res;
@@ -645,12 +665,16 @@ private:
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		const auto res = BlackLongDistanceFigureInDir<tbGetPos>(pos, dx, dy);
 
+		#ifdef __JGI_BB_PEDANTIC__
 		pawns ^= mask;
+		#endif
 		white ^= mask;
 
 		return res;
@@ -663,12 +687,16 @@ private:
 
 		const auto blackKing = black & kings;
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
+		#endif
 
 		const auto res = IsSquareAttackedByWhite<tbInclKing>(sq);
 
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
+		#endif
 
 		return res;
 	}
@@ -679,12 +707,16 @@ private:
 
 		const auto whiteKing = white & kings;
 		const_cast<FullBitboards*>(this)->white ^= whiteKing;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= whiteKing;
+		#endif
 
 		const auto res = IsSquareAttackedByBlack<tbInclKing>(sq);
 
 		const_cast<FullBitboards*>(this)->white ^= whiteKing;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= whiteKing;
+		#endif
 
 		return res;
 	}
@@ -1069,12 +1101,16 @@ private:
 
 		const auto whitePawnMask = sq_to_bb(posWhitePawnToTakeOff);
 		const_cast<FullBitboards*>(this)->white ^= whitePawnMask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= whitePawnMask;
+		#endif
 
 		const auto res = IsBlackPinned(pos, posTo);
 
 		const_cast<FullBitboards*>(this)->white ^= whitePawnMask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= whitePawnMask;
+		#endif
 
 		return res;
 	}
@@ -1092,12 +1128,16 @@ private:
 
 		const auto blackPawnMask = sq_to_bb(posBlackPawnToTakeOff);
 		const_cast<FullBitboards*>(this)->black ^= blackPawnMask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= blackPawnMask;
+		#endif
 
 		const auto res = IsWhitePinned<tbSkipAssertionForEnPassant>(pos, posTo);
 
 		const_cast<FullBitboards*>(this)->black ^= blackPawnMask;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->pawns ^= blackPawnMask;
+		#endif
 
 		return res;
 	}
@@ -2617,7 +2657,9 @@ private:
 	{
 		const auto blackKing = black & kings;
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
+		#endif
 
 		auto mask = King_Attacks[std::countr_zero(blackKing)] & ~black;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
@@ -2625,14 +2667,18 @@ private:
 			if (!IsSquareAttackedByWhite(pos))
 			{
 				const_cast<FullBitboards*>(this)->black ^= blackKing;
+				#ifdef __JGI_BB_PEDANTIC__
 				const_cast<FullBitboards*>(this)->kings ^= blackKing;
+				#endif
 				return true;
 			}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, mask);
 
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
+		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
+		#endif
 
 		return false;
 	}
@@ -2737,7 +2783,7 @@ private:
 		const auto bbSaved = *this; // save
 
 		const_cast<FullBitboards*>(this)->white ^= moveMask;
-		const_cast<FullBitboards*>(this)->queens |= toMask; // TODO: maybe take off from fromMask? (anyway it does not matter before FindOneValidMove4BlackWhenChecked since no white or black at this pos)
+		const_cast<FullBitboards*>(this)->queens |= toMask; // TODO: with __JGI_BB_PEDANTIC__ maybe take off from fromMask? (anyway it does not matter before FindOneValidMove4BlackWhenChecked since no white or black at this pos)
 		const_cast<FullBitboards*>(this)->black ^= captureMask;
 		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_QUEEN>(captureMask);
 
@@ -2764,7 +2810,7 @@ private:
 		const auto bbSaved = *this; // save
 
 		const_cast<FullBitboards*>(this)->white ^= moveMask;
-		const_cast<FullBitboards*>(this)->rooks |= toMask; // TODO: maybe take off from fromMask? (anyway it does not matter before FindOneValidMove4BlackWhenChecked since no white or black at this pos)
+		const_cast<FullBitboards*>(this)->rooks |= toMask; // TODO: with __JGI_BB_PEDANTIC__ maybe take off from fromMask? (anyway it does not matter before FindOneValidMove4BlackWhenChecked since no white or black at this pos)
 		const_cast<FullBitboards*>(this)->black ^= captureMask;
 		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_ROOK>(captureMask);
 
@@ -2791,7 +2837,7 @@ private:
 		const auto bbSaved = *this; // save
 
 		const_cast<FullBitboards*>(this)->white ^= moveMask;
-		const_cast<FullBitboards*>(this)->bishops |= toMask; // TODO: maybe take off from fromMask? (anyway it does not matter before FindOneValidMove4BlackWhenChecked since no white or black at this pos)
+		const_cast<FullBitboards*>(this)->bishops |= toMask; // TODO: with __JGI_BB_PEDANTIC__ maybe take off from fromMask? (anyway it does not matter before FindOneValidMove4BlackWhenChecked since no white or black at this pos)
 		const_cast<FullBitboards*>(this)->black ^= captureMask;
 		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_BISHOP>(captureMask);
 
