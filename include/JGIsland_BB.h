@@ -1211,7 +1211,7 @@ private:
 			return bDirectCheck ? toPos : -1;
 	}
 
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackQueen(const int fromPos, const int toPos) const
 	{
 		assert(IsValidPos(fromPos));
@@ -1222,29 +1222,49 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (white & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
-
-		const auto bbSaved = *this; // save
-
-		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
-		const_cast<FullBitboards*>(this)->black ^= moveMask;
-		const_cast<FullBitboards*>(this)->queens ^= moveMask;
-		const_cast<FullBitboards*>(this)->white ^= captureMask;
-
-		// Verify if white king checked and dispatch to proper template version:
-		const bool bDirectCheck = IsDirectCheckByBlackQueen(toPos);
 		bool res;
-		if (bDirectCheck)
-			res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
+
+		if constexpr (!tbKnownThatItIsNotACapture)
+		{		
+			const bool bCapture = (white & toMask) != 0;
+			const auto captureMask = bCapture ? toMask : 0;
+	
+			const auto bbSaved = *this; // save
+	
+			const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->queens ^= moveMask;
+			const_cast<FullBitboards*>(this)->white ^= captureMask;
+	
+			// Verify if white king checked and dispatch to proper template version:
+			const bool bDirectCheck = IsDirectCheckByBlackQueen(toPos);		
+			if (bDirectCheck)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+	
+			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+		}
 		else
-			res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+		{
+			assert(IsEmptyAt(toPos));
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->queens ^= moveMask;
 
-		*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+			// Verify if white king checked and dispatch to proper template version:
+			const bool bDirectCheck = IsDirectCheckByBlackQueen(toPos);
+			if (bDirectCheck)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->queens ^= moveMask;			
+		}
+		
 		return res;
 	}
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackRook(const int fromPos, const int toPos) const
 	{
 		assert(IsValidPos(fromPos));
@@ -1255,29 +1275,49 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (white & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
-
-		const auto bbSaved = *this; // save
-
-		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
-		const_cast<FullBitboards*>(this)->black ^= moveMask;
-		const_cast<FullBitboards*>(this)->rooks ^= moveMask;
-		const_cast<FullBitboards*>(this)->white ^= captureMask;
-
-		// Find checker(s) and dispatch to proper template version:
-		const auto posWhiteKingChecker = IsCheckByBlackRook(fromPos, toPos);
 		bool res;
-		if (posWhiteKingChecker >= 0)
-			res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+
+		if constexpr (!tbKnownThatItIsNotACapture)
+		{		
+			const bool bCapture = (white & toMask) != 0;
+			const auto captureMask = bCapture ? toMask : 0;
+	
+			const auto bbSaved = *this; // save
+	
+			const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->rooks ^= moveMask;
+			const_cast<FullBitboards*>(this)->white ^= captureMask;
+	
+			// Find checker(s) and dispatch to proper template version:
+			const auto posWhiteKingChecker = IsCheckByBlackRook(fromPos, toPos);
+			if (posWhiteKingChecker >= 0)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+	
+			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+		}
 		else
-			res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+		{
+			assert(IsEmptyAt(toPos));
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->rooks ^= moveMask;
 
-		*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+			// Find checker(s) and dispatch to proper template version:
+			const auto posWhiteKingChecker = IsCheckByBlackRook(fromPos, toPos);
+			if (posWhiteKingChecker >= 0)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->rooks ^= moveMask;			
+		}
+		
 		return res;
 	}
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackBishop(const int fromPos, const int toPos) const
 	{
 		assert(IsValidPos(fromPos));
@@ -1288,29 +1328,49 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (white & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
-
-		const auto bbSaved = *this; // save
-
-		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
-		const_cast<FullBitboards*>(this)->black ^= moveMask;
-		const_cast<FullBitboards*>(this)->bishops ^= moveMask;
-		const_cast<FullBitboards*>(this)->white ^= captureMask;
-
-		// First find checker(s) and dispatch to proper template version:
-		const auto posWhiteKingChecker = IsCheckByBlackBishop(fromPos, toPos);
 		bool res;
-		if (posWhiteKingChecker >= 0)
-			res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+
+		if constexpr (!tbKnownThatItIsNotACapture)
+		{		
+			const bool bCapture = (white & toMask) != 0;
+			const auto captureMask = bCapture ? toMask : 0;
+	
+			const auto bbSaved = *this; // save
+	
+			const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->bishops ^= moveMask;
+			const_cast<FullBitboards*>(this)->white ^= captureMask;
+	
+			// First find checker(s) and dispatch to proper template version:
+			const auto posWhiteKingChecker = IsCheckByBlackBishop(fromPos, toPos);		
+			if (posWhiteKingChecker >= 0)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+	
+			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+		}
 		else
-			res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+		{
+			assert(IsEmptyAt(toPos));
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->bishops ^= moveMask;
 
-		*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+			// First find checker(s) and dispatch to proper template version:
+			const auto posWhiteKingChecker = IsCheckByBlackBishop(fromPos, toPos);			
+			if (posWhiteKingChecker >= 0)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->bishops ^= moveMask;
+		}
+		
 		return res;
 	}
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKnight(const int fromPos, const int toPos) const
 	{
 		assert(IsValidPos(fromPos));
@@ -1321,28 +1381,47 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (white & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
-
-		const auto bbSaved = *this; // save
-
-		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
-		const_cast<FullBitboards*>(this)->black ^= moveMask;
-		const_cast<FullBitboards*>(this)->knights ^= moveMask;
-		const_cast<FullBitboards*>(this)->white ^= captureMask;
-
-		// First find checker(s) and dispatch to proper template version:
-		const auto posWhiteKingChecker = IsCheckByBlackKnight(fromPos, toPos);
 		bool res;
-		if (posWhiteKingChecker >= 0)
-			res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+
+		if constexpr (!tbKnownThatItIsNotACapture)
+		{
+			const bool bCapture = (white & toMask) != 0;
+			const auto captureMask = bCapture ? toMask : 0;
+	
+			const auto bbSaved = *this; // save
+	
+			const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_EMPTY>(captureMask);
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->knights ^= moveMask;
+			const_cast<FullBitboards*>(this)->white ^= captureMask;
+	
+			// First find checker(s) and dispatch to proper template version:
+			const auto posWhiteKingChecker = IsCheckByBlackKnight(fromPos, toPos);
+			if (posWhiteKingChecker >= 0)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+	
+			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+		}
 		else
-			res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+		{
+			assert(IsEmptyAt(toPos));
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->knights ^= moveMask;
 
-		*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+			// First find checker(s) and dispatch to proper template version:
+			const auto posWhiteKingChecker = IsCheckByBlackKnight(fromPos, toPos);			
+			if (posWhiteKingChecker >= 0)
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->knights ^= moveMask;			
+		}
+		
 		return res;
-
 	}
 
 	// NOTE: It verifies if it is a promo move and in such case up to 4 attempts are made to prevent checkmate
@@ -2213,7 +2292,7 @@ private:
 	// !!! Method does not take into account en passant nor castling (en passant can never prevent a discovered check by a long distance black attacker)
 	// Method assumes that either bl.king is not checked, or is checked so that moving in between can prevent it
 	// NOTE!!! If tbOnlyIfPreventsImmediateMate is on, together white castling flags must be passed in tbOnlyIfPreventsImmediateMateAndFlags
-	template<bool tbFindAllAndFillBuf = false, char tbOnlyIfPreventsImmediateMateAndFlags = false> // if tbFindAllAndFillBuf == false, aMoves will not be filled in
+	template<bool tbFindAllAndFillBuf = false, char tbOnlyIfPreventsImmediateMateAndFlags = false> // if tbFindAllAndFillBuf == false, then aMoves will not be filled in
 	int CanBlackMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const
 	{
 		constexpr bool tbOnlyIfPreventsImmediateMate = (tbOnlyIfPreventsImmediateMateAndFlags & 1) != 0;
@@ -2230,6 +2309,11 @@ private:
 		constexpr bool tbIncludingEnds = false;
 		constexpr bool tbOneIsEnough = !tbFindAllAndFillBuf;
 		constexpr bool tbVerifyPinning = true;
+		#ifdef __USE_OPTIM_FOR_NON_CAPTURE__
+		constexpr bool tbKnownThatItIsNotACapture = true; // (maskBetween & occ()) == 0 is a prerequisite (see assert below)
+		#else
+		constexpr bool tbKnownThatItIsNotACapture = false;
+		#endif		
 
 		const auto maskBetween = GetBetweenMask<tbIncludingEnds>(sq1, sq2);
 		assert((maskBetween & occ()) == 0); // prerequisite
