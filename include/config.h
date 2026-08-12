@@ -13,6 +13,8 @@
 // Some of these options require additional small lookup tables (mentioned below)
 //
 
+//#define __JGI_BB_PEDANTIC__ // this should be off - some redundant parts of code are wrapped around with this macro
+
 //#define __USE_SQUARE_BITBOARD__ // should rather be off (shifting usually faster than taking from L1 cache); requires 512B of additional lookup; performance tests didn't show significant difference
 
 
