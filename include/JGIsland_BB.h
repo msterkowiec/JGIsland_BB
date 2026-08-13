@@ -4261,6 +4261,30 @@ private:
 		if (posBlackKingChecker >= 0)
 		{			
 			auto mask = King_Attacks[posBlackKing] & ~black;
+
+			#ifdef __USE_OPTIM_FOR_NON_CAPTURE_BY_KING__
+			// First let's analyze capture moves (they have higher probability of being a refutation and additionally it allows to call IsImmediateMateAfterMoveByBlackKing with param. tbKnownThatItIsNotACapture == true in the next loop
+			auto maskCaptureMoves = mask & white; 
+			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskCaptureMoves)
+			{
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
+					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posBlackKing, posTo))
+						return false;
+			}
+			END_FOR_EACH_POS_IN_MASK(posTo, maskCaptureMoves);
+
+			// Now non-capture moves by black king:
+			auto maskForNonCapture = mask & ~white;
+			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskForNonCapture)
+			{
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
+					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(posBlackKing, posTo))
+						return false;
+			}
+			END_FOR_EACH_POS_IN_MASK(posTo, maskForNonCapture);		
+
+			#else
+			
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
 			{
 				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
@@ -4268,6 +4292,8 @@ private:
 						return false;
 			}
 			END_FOR_EACH_POS_IN_MASK(posTo, mask);
+
+			#endif
 
 			if (posBlackKingChecker != DBL_CHECKED)
 			{
