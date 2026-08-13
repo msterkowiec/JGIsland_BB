@@ -744,10 +744,11 @@ private:
 		Bitboard direct_b_moves = get_raw_bishop_moves_hq(target_sq, occ);
 		Bitboard direct_r_moves = get_raw_rook_moves_hq(target_sq, occ);
 
-		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens);
-		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens);
+		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & white;
+		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & white;
 
-		direct_attackers |= (direct_b_pieces | direct_r_pieces) & white;
+		direct_attackers |= direct_b_pieces | direct_r_pieces;
+		
 		return direct_attackers;
 	}
 
@@ -773,10 +774,10 @@ private:
 		Bitboard direct_b_moves = get_raw_bishop_moves_hq(target_sq, occ);
 		Bitboard direct_r_moves = get_raw_rook_moves_hq(target_sq, occ);
 
-		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens);
-		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens);
+		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & black;
+		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & black;
 
-		direct_attackers |= (direct_b_pieces | direct_r_pieces) & black;
+		direct_attackers |= direct_b_pieces | direct_r_pieces;
 		return direct_attackers;
 	}
 
