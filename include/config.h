@@ -32,3 +32,4 @@
 // #define __VERIFY_PINNING_PREREQUISITE__ // an older attempt; although a few branchless operations, no performance gain when using it
 
 #define __USE_OPTIM_FOR_NON_CAPTURE__ // should rather be on - the observed speed-up is about 1-2%
+//#define __USE_OPTIM_FOR_NON_CAPTURE_BY_KING__ // should rather be off; here the difference is that we have to pay one branch for this feature but as an additional advantage we have black king's moves sorted (captures analyzed first) - anyway perf.tests indicate a tiny slow down
