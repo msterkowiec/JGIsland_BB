@@ -2342,7 +2342,7 @@ private:
 			{
 				if (AllBetweenEmpty(pos, posBetween))
 					if (!tbVerifyPinning || !IsBlackPinned(pos, posBetween))
-						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackQueen<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(pos, posBetween))
+						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackQueen<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 						{
 							if constexpr (tbOneIsEnough)
 								return 1;
@@ -2363,7 +2363,7 @@ private:
 			{
 				if (AllBetweenEmpty(pos, posBetween))
 					if (!tbVerifyPinning || !IsBlackPinned(pos, posBetween))
-						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackRook<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(pos, posBetween))
+						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackRook<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 						{
 							if constexpr (tbOneIsEnough)
 								return 1;
@@ -2384,7 +2384,7 @@ private:
 			{
 				if (AllBetweenEmpty(pos, posBetween))
 					if (!tbVerifyPinning || !IsBlackPinned(pos, posBetween))
-						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackBishop<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(pos, posBetween))
+						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackBishop<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 						{
 							if constexpr (tbOneIsEnough)
 								return 1;
@@ -2410,7 +2410,7 @@ private:
 						// matchMask already known to be non-zero:
 						BEGIN_DOWHILE_POS_IN_MASK(posBetween, matchMask)
 						{
-							if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKnight<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(pos, posBetween))
+							if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKnight<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 								if constexpr (tbOneIsEnough)
 									return 1;
 								else
