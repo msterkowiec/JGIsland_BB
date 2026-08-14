@@ -1697,7 +1697,7 @@ private:
 	}
 
 	// Alias: FindMoveThatMatesAfterMoveByBlackKing
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKing(const int fromPos, const int toPos) const
 	{
 		assert(IsValidPos(fromPos));
@@ -1708,27 +1708,49 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (white & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
-
-		const auto bbSaved = *this; // save
-
-		const_cast<FullBitboards*>(this)->black ^= moveMask;
-		const_cast<FullBitboards*>(this)->kings ^= moveMask;
-		const_cast<FullBitboards*>(this)->white ^= captureMask;
-		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_KING>(captureMask);
-
-		// First find potential discovered checker and dispatch to proper template version:
-		const int posWhiteKing = GetWhiteKingPos();
-		const int posWhiteKingChecker = (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing)) ? BlackLongDistanceFigureInDir<1>(fromPos, posWhiteKing) : -1; // verification is AFTER making move on bitboard, so no need to bother with a move along the line
 		bool res;
-		if (posWhiteKingChecker >= 0) // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
-			res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+
+		if constexpr (!tbKnownThatItIsNotACapture)
+		{		
+			const bool bCapture = (white & toMask) != 0;
+			const auto captureMask = bCapture ? toMask : 0;
+	
+			const auto bbSaved = *this; // save
+	
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->kings ^= moveMask;
+			const_cast<FullBitboards*>(this)->white ^= captureMask;
+			const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_KING>(captureMask);
+	
+			// First find potential discovered checker and dispatch to proper template version:
+			const int posWhiteKing = GetWhiteKingPos();
+			const int posWhiteKingChecker = (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing)) ? BlackLongDistanceFigureInDir<1>(fromPos, posWhiteKing) : -1; // verification is AFTER making move on bitboard, so no need to bother with a move along the line
+			
+			if (posWhiteKingChecker >= 0) // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+	
+			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+		}
 		else
-			res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+		{
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->kings ^= moveMask;
 
-		*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+			// First find potential discovered checker and dispatch to proper template version:
+			const int posWhiteKing = GetWhiteKingPos();
+			const int posWhiteKingChecker = (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing)) ? BlackLongDistanceFigureInDir<1>(fromPos, posWhiteKing) : -1; // verification is AFTER making move on bitboard, so no need to bother with a move along the line
 
+			if (posWhiteKingChecker >= 0) // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
+				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+			else
+				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+
+			const_cast<FullBitboards*>(this)->black ^= moveMask;
+			const_cast<FullBitboards*>(this)->kings ^= moveMask;			
+		}
+		
 		return res;
 	}
 
