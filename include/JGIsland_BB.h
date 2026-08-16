@@ -4568,7 +4568,6 @@ private:
 
 			mask = kings & black;
 			assert(mask);
-			const auto posBlackKing = std::countr_zero(mask);
 			mask = King_Attacks[posBlackKing] & ~black;
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
 			{
