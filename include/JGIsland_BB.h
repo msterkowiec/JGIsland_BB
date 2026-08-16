@@ -4346,11 +4346,49 @@ private:
 			const auto blackPinnedPieces = GetBlackPinnedPieces();
 			#endif
 
+			const auto occ = this->occ();
 			bool legalMovesFound = false;
+
+			// Queens:
 			auto mask = queens & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves_hq(pos, occ(), black) | get_rook_moves_hq(pos, occ(), black);
+				auto movesMask = get_bishop_moves_hq(pos, occ, black) | get_rook_moves_hq(pos, occ, black);
+				
+				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__
+				auto captureMovesMask = movesMask & white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
+				{					
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
+				auto nonCaptureMovesMask = movesMask & ~white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+				{					
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+			
+				#else				
+			
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
@@ -4365,13 +4403,49 @@ private:
 					}
 				}
 				END_FOR_EACH_POS_IN_MASK(posTo, movesMask);
+				#endif
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
 			mask = rooks & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_rook_moves_hq(pos, occ(), black);
+				auto movesMask = get_rook_moves_hq(pos, occ, black);
+
+				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__ 
+				auto captureMovesMask = movesMask & white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
+				{					
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
+				auto nonCaptureMovesMask = movesMask & ~white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+				{					
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+
+				#else
+				
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
@@ -4386,13 +4460,49 @@ private:
 					}
 				}
 				END_FOR_EACH_POS_IN_MASK(posTo, movesMask);
+				#endif
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
 			mask = bishops & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves_hq(pos, occ(), black);
+				auto movesMask = get_bishop_moves_hq(pos, occ, black);
+
+				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__ 
+				auto captureMovesMask = movesMask & white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
+				{
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
+				auto nonCaptureMovesMask = movesMask & ~white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+				{
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+
+				#else
+				
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{
 					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
@@ -4407,6 +4517,7 @@ private:
 					}
 				}
 				END_FOR_EACH_POS_IN_MASK(posTo, movesMask);
+				#endif
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
@@ -4422,6 +4533,27 @@ private:
 				#endif
 				{
 					auto movesMask = Knight_Attacks[pos] & ~black;
+					
+					#ifdef __USE_OPTIM_FOR_NON_CAPTURE__ 
+					auto captureMovesMask = movesMask & white;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
+					auto nonCaptureMovesMask = movesMask & ~white;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+				
+					#else
+					
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 					{
 						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
@@ -4429,6 +4561,7 @@ private:
 						legalMovesFound = true;
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, movesMask);
+					#endif
 				}
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
