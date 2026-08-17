@@ -33,3 +33,5 @@
 
 #define __USE_OPTIM_FOR_NON_CAPTURE__ // should rather be on - the observed speed-up is about 1-2%
 #define __USE_OPTIM_FOR_NON_CAPTURE_BY_KING__ // should rather be on; here the difference is that we have to pay one branch for this feature but as an additional advantage we have black king's moves sorted (captures analyzed first) - perf.tests indicate a tiny improvement
+
+#define __USE_OPTIM_FOR_SAMEDIAGORLINE__ // seems to cause a tiny performance speed-up, ~0.5%
