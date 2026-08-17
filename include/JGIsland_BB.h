@@ -3656,7 +3656,12 @@ private:
 		{
 			// Direct check:
 			auto mask = Rook_Attacks[posBlackKing] & Rook_Attacks[rpos] & (~white);
-
+			#ifdef __USE_OPTIM_FOR_SAMEDIAGORLINE__
+			const bool sameLine = SameLine(posBlackKing, rpos);
+			const auto maskCapture = mask & black;
+			mask = sameLine ? maskCapture : mask; // cmov; only a capture can be a checkmate when on the same line with black king
+			#endif
+			
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
 				if (AllBetweenEmpty(rpos, pos) & AllBetweenEmpty(pos, posBlackKing))
@@ -3726,6 +3731,11 @@ private:
 		{
 			// Direct check:
 			auto mask = Bishop_Attacks[posBlackKing] & Bishop_Attacks[bpos] & (~white);
+			#ifdef __USE_OPTIM_FOR_SAMEDIAGORLINE__
+			const bool sameDiag = SameDiag(posBlackKing, bpos);
+			const auto maskCapture = mask & black;
+			mask = sameDiag ? maskCapture : mask; // cmov; only a capture can be a checkmate when on the same diagonal with black king
+			#endif			
 
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
