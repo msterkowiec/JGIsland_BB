@@ -12,7 +12,7 @@ JGIsland_BB contains ultrafast methods of:
 2) solving chess two-movers
 <!-- -->
 using solely bitboard representation of chessboard and **Hyperbola Quintessence** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-23kB**, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
-**More than 30 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
+**More than 35 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
 **JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers** (https://jgisland.pl) with its source code, contrary to the main product, made public.
