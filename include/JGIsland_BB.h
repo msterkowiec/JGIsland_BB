@@ -284,7 +284,22 @@ private:
 		const auto mask = sq_to_bb(pos);
 		assert(mask & occ());
 
-		return ((bishops & mask) != 0) * FGR_BISHOP + ((rooks & mask) != 0) * FGR_ROOK + MUL<FGR_QUEEN>((queens & mask) != 0);
+		const bool bBishopLike = ((queens | bishops) & mask);
+		const bool bRookLike = ((queens | rooks) & mask);
+
+		return bBishopLike * FGR_BISHOP + bRookLike * FGR_ROOK; // bit shifting twice
+	}
+	// A version that returns 1 for bishop, 2 for rook and 3 for queen (slightly optimized, since it avoids bit shifting at all)
+	ALWAYS_INLINE int GetLongDistanceFigureAtExt(const int pos) const
+	{
+		assert(IsValidPos(pos));
+		const auto mask = sq_to_bb(pos);
+		assert(mask & occ());
+
+		const bool bBishopLike = ((queens | bishops) & mask);
+		const bool bRookLike = ((queens | rooks) & mask);
+
+		return bBishopLike + bRookLike + bRookLike;
 	}
 	ALWAYS_INLINE bool AllBetweenEmpty(const int pos1, const int pos2) const
 	{
@@ -1146,14 +1161,14 @@ private:
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackLongDistFigure(const int from, const int to) const
 	{
-		const auto f = GetLongDistanceFigureAt(from);
+		const auto f = GetLongDistanceFigureAtExt(from);
 		switch (f)
 		{
-		case FGR_BISHOP:
+		case 1: // bishop
 			return IsImmediateMateAfterMoveByBlackBishop<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(from, to);
-		case FGR_ROOK:
+		case 2: // rook
 			return IsImmediateMateAfterMoveByBlackRook<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(from, to);
-		case FGR_QUEEN:
+		case 3: // queen
 			return IsImmediateMateAfterMoveByBlackQueen<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(from, to);
 		}
 		
@@ -1942,17 +1957,17 @@ private:
 		assert(posFrom != posTo);
 		assert(IsWhiteAt(posFrom));
 		
-		const FIGURE f = GetLongDistanceFigureAt(posFrom);
+		const auto f = GetLongDistanceFigureAtExt(posFrom);
 
 		switch (f)
 		{
-			case FGR_BISHOP:
+			case 1: // bishop
 				return WillWhiteBishopMoveBeCheck<tbCheckMateOnly>(posFrom, posTo);
 			
-			case FGR_ROOK:			
+			case 2: // rook
 				return WillWhiteRookMoveBeCheck<tbCheckMateOnly>(posFrom, posTo);			
 
-			case FGR_QUEEN:			
+			case 3: // queen
 				return WillWhiteQueenMoveBeCheck<tbCheckMateOnly>(posFrom, posTo);
 			
 		}
