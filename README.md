@@ -11,7 +11,7 @@ JGIsland_BB contains ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers
 <!-- -->
-using solely bitboard representation of chessboard and **Hyperbola Quintessence** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-31kB**, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
+using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-31kB**, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
 **More than 35 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
@@ -34,7 +34,7 @@ This way of looping, though with slightly more instructions, proved to be the fa
 JGIsland_BB was created in about 3 weeks (including bug fixing) mainly thanks to AI, which provided efficient implementations e.g. for Hyperbola Quintessence functions get_raw_rook_moves_hq and get_raw_bishop_moves_hq (although it was an iterative process and further manual optimizations were added later on this code).
 
 Checkmate search is ultrafast thanks to almost branchless operations on bitmasks. 
-For example CanBlackMoveInBetween first calculates branchless (sometimes cmov) the bitmask of all the squares between the two given squares (GetBetweenMask), then filters out Black pieces that cannot possibly reach any of these squares, then every remaining Black piece is matched agains this bitmask, AllBetweenEmpty (branchless) is called on every candidate, then pinning is verified (IsBlackPinned; BTW: there is also a config macro __PREEMPTIVE_BLACKPINNEDPIECES__, but it is better off for Black moves).
+For example CanBlackMoveInBetween first calculates branchless (sometimes cmov) the bitmask of all the squares between the two given squares (GetBetweenMask), then filters out Black pieces that cannot possibly reach any of these squares, then every remaining Black piece is matched agains this bitmask, AllBetweenEmpty (branchless) is called on every candidate, then pinning is verified (IsBlackPinned; BTW: there is also a config macro \_\_PREEMPTIVE_BLACKPINNEDPIECES\_\_, but it is better off for Black moves).
 
 The C++20 code is maybe not super-clean (e.g. name conventions mixed, Clang warns about 'dangling else') but should be considered clean enough. I have a weakness for a prefix "t" for template parameter names and for some remnants of Hungarian notation (e.g. tbInclKing stands for template boolean parameter that specifies if a method includes king or not). 
 Macros are avoided, although BEGIN_FOR_EACH_POS_IN_MASK may be considered useful focusing on logic and hiding the implementation details, at the same time providing maximum performance.
@@ -45,3 +45,7 @@ As already said, performing a small, branchless calculation should be preferred 
 I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
 1) I already had a test suite of more than 10k two-movers on [https://jgisland.pl/download/reports/testsuite.php](https://jgisland.pl/download/reports/testsuite.php?page=6&m=0&sort=2) (two last subpages) and converted it into [integration test suite](tests/integration_tests_suite.h) of this project
 2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers 11.0 and ran it on the whole test suite (including all moremovers).
+
+**UPDATE**
+*For comparison there are also added methods of Fancy Magic Bitboards (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb) but they are not used by default. Their usage can be activated using macro \_\_USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ\_\_ (see config.h)
+Fancy Magic Bitboards use more than 800kB on hot path and in isolated tests cause a speed-up about 10-12% (44 two-movers per millisecond vs. 39 with Hyperbola Quintessence). Later I'll provide results of integration tests. Interestingly, in case of complex analyses with Plain Magic Bitboards (more than 2MB), the speed-up completely disappears (due to cache-unfriendliness).
