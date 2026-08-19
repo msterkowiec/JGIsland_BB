@@ -16,6 +16,10 @@
 #include <cassert>
 #include <bit>
 
+#ifdef __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
+#include "fancy_magics.h"
+#endif
+
 // Some legacy/mailbox coding that will occasionally be used. 
 inline constexpr int CLR_WHITE = 64;
 inline constexpr int CLR_BLACK = 128;
@@ -427,6 +431,11 @@ ALWAYS_INLINE uint64_t get_raw_rook_moves_hq(const int square, const uint64_t oc
 	static_assert(Dir == 0 || Dir == 1 || Dir == -1 || Dir == 8 || Dir == -8, "");
 	assert(IsValidPos(square));
 
+	#ifdef __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
+	if constexpr (Dir == 0)
+		return get_raw_rook_moves_fmb(square, occupancy);
+	#endif
+	
 	uint64_t raw_moves = 0ULL;
 
 	const uint64_t slider = sq_to_bb(square);	
@@ -488,6 +497,11 @@ ALWAYS_INLINE auto get_raw_bishop_moves_hq(const int square, const uint64_t occu
 {
 	assert(IsValidPos(square));
 
+	#ifdef __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
+	if constexpr (Dir == 0)
+		return get_raw_bishop_moves_fmb(square, occupancy);
+	#endif
+	
 	const uint64_t slider = sq_to_bb(square);	
 	const uint64_t helper = 2ULL << (square ^ 56); // 2 * bswap64(slider);
 	const uint64_t slider2 = 2 * slider;
