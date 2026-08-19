@@ -43,4 +43,4 @@
 // ==========================================================================================================================
 // For reference some less cache-friendly approaches than Hyperbola Quintessence
 
-#define __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ // uses more than 800kB in hot path; in isolated tests increases speed by 10-12%
+// #define __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ // uses more than 800kB in hot path; in isolated tests increases speed by 10-12%
