@@ -19,6 +19,9 @@
 #ifdef __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
 #include "fancy_magics.h"
 #endif
+#ifdef __USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
+#include "dense_fancy_magics.h"
+#endif
 
 // Some legacy/mailbox coding that will occasionally be used. 
 inline constexpr int CLR_WHITE = 64;
@@ -435,6 +438,10 @@ ALWAYS_INLINE uint64_t get_raw_rook_moves_hq(const int square, const uint64_t oc
 	if constexpr (Dir == 0)
 		return get_raw_rook_moves_fmb(square, occupancy);
 	#endif
+	#ifdef __USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
+	if constexpr (Dir == 0)
+		return get_raw_rook_moves_dfmb(square, occupancy);
+	#endif	
 	
 	uint64_t raw_moves = 0ULL;
 
@@ -501,6 +508,10 @@ ALWAYS_INLINE auto get_raw_bishop_moves_hq(const int square, const uint64_t occu
 	if constexpr (Dir == 0)
 		return get_raw_bishop_moves_fmb(square, occupancy);
 	#endif
+	#ifdef __USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
+	if constexpr (Dir == 0)
+		return get_raw_bishop_moves_dfmb(square, occupancy);
+	#endif	
 	
 	const uint64_t slider = sq_to_bb(square);	
 	const uint64_t helper = 2ULL << (square ^ 56); // 2 * bswap64(slider);
