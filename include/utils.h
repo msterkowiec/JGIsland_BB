@@ -20,7 +20,7 @@
 #include "fancy_magics.h"
 #endif
 #ifdef __USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
-#include "dense_fancy_magics.h"
+#include "fancy_magics_dense.h"
 #endif
 
 // Some legacy/mailbox coding that will occasionally be used. 
