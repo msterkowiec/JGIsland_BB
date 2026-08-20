@@ -45,7 +45,18 @@ As already said, performing a small, branchless calculation should be preferred 
 I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
 1) I already had a test suite of more than 10k two-movers on [https://jgisland.pl/download/reports/testsuite.php](https://jgisland.pl/download/reports/testsuite.php?page=6&m=0&sort=2) (two last subpages) and converted it into [integration test suite](tests/integration_tests_suite.h) of this project
 2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers 11.0 and ran it on the whole test suite (including all moremovers).
+   
+-----------------------------------------------------------------------------------------
+**UPDATE**\
+*For comparison there are also added methods of 
+* __Fancy Magic Bitboards__ (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb), data used on hot paths is more than 800kB
+* __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is more than 160kB
 
-**UPDATE**
-*For comparison there are also added methods of Fancy Magic Bitboards (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb) but they are not used by default. Their usage can be activated using macro \_\_USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ\_\_ (see config.h)
-Fancy Magic Bitboards use more than 800kB on hot path and in isolated tests cause a speed-up about 10-12% (44 two-movers per millisecond vs. 39 with Hyperbola Quintessence). Later I'll provide results of integration tests. Interestingly, in case of complex analyses with Plain Magic Bitboards (more than 2MB), the speed-up completely disappears (due to cache-unfriendliness).
+but they are not used by default. Their usage can be activated using macros in config.h: \_\_USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ\_\_ or \_\_USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ\_\_ respectively
+
+* Fancy Magic Bitboards use more than 800kB on hot path and in isolated tests cause a speed-up about 10-12% (44 two-movers per millisecond vs. 39 with Hyperbola Quintessence).\
+* Dense Fancy Magic Bitboards use more than 160kB on hot path and in isolated tests cause a speed up to about 45 two-movers per millisecond.
+
+This example shows quite well how cache-friendliness and smaller buffers directly translate into performance.
+I will later provide some more information about results of integrations tests with Dense Fancy Magic Bitboards (using full test suite of J.G.Island - Chess Moremovers)
+
