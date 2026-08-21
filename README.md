@@ -48,7 +48,7 @@ I admit with remorse that one of the last things was writing several UTs... Howe
    
 -----------------------------------------------------------------------------------------
 **UPDATE**\
-*For comparison there are also added methods of 
+*For comparison there are also added - created in close co-operation with AI - methods of: 
 * __Fancy Magic Bitboards__ (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb), data used on hot paths is more than 800kB
 * __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is more than 160kB
 
