@@ -198,7 +198,7 @@ inline bool initialize_sliding_attacks()
 {
     size_t current_offset = 0;
 
-    const size_t pool_size = calculate_total_pool_size();
+    [[maybe_unused]] const size_t pool_size = calculate_total_pool_size();
     uint64_t occupancies[4096]; // 32kB on stack
 
     // 1. Initialize Rooks
