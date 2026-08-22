@@ -11,7 +11,7 @@ JGIsland_BB contains ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers
 <!-- -->
-using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-31kB**, so it entirely fits into L1 cache of modern CPUs (usually a small, branchless calculation on data in CPU registers and/or L1 cache is much better then fetching a precalculated value from a large buffer in memory, even if in L3 cache).
+using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-31kB**, so it entirely fits into L1 cache of modern CPUs (a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache\*\*).
 **More than 35 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
@@ -52,7 +52,7 @@ I admit with remorse that one of the last things was writing several UTs... Howe
 * __Fancy Magic Bitboards__ (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb), data used on hot paths is more than 800kB
 * __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is more than 160kB
 
-but they are not used by default. Their usage can be activated using macros in config.h: \_\_USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ\_\_ or \_\_USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ\_\_ respectively
+but they are not used by default. However in order to activate them it's enough to use another value of template parameter MoveGenMethod of class FullBitboards: MoveGenMethodT::FancyMagics or MoveGenMethodT::DenseFancyMagics.
 
 * Fancy Magic Bitboards use more than 800kB on hot path and in isolated tests cause a speed-up about 10-12% (44 two-movers per millisecond vs. 39 with Hyperbola Quintessence).\
 * Dense Fancy Magic Bitboards use more than 160kB on hot path and in isolated tests cause a speed up to about 45 two-movers per millisecond.
@@ -60,3 +60,11 @@ but they are not used by default. Their usage can be activated using macros in c
 This example shows quite well how cache-friendliness and smaller buffers directly translate into performance.
 I will later provide some more information about results of integrations tests with Dense Fancy Magic Bitboards (using full test suite of J.G.Island - Chess Moremovers)
 
+-----------------------------------------------------------------------------------------
+**UPDATE 2**\
+As mentioned above, a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache.
+However after the more thorough analysis of Hyperbola Quintessence performance finally I came out to a conclusion that is suffers from another bottleneck: __register spilling__. This is because this small calculation uses quite many variables and compiler is not able to put them all in CPU registers, so it is forced to put them on stack.
+<!-- -->
+Another finding was the following: Originally I considered this two-mover performance test, an "isolated" test. In a way it is true: in this test memory usage is very low, transposition table is not used, simplicity is at its maximum. However recently I decided to make a fully isolated performance test of Hyperbola Quintessence vs (Dense) Fancy Magic Bitboards. And, to my surprise, I observed performance reversal: Hyperbola Quintessence proved to be 15% faster in this fully isolated test. At first I was really confused, I suspected some error in in my performace test (admittedly, it is very easy to create a wrong performance test). However it turned out that most probably all is OK and the results, although unintuitive to me, are fully explainable: in fully isolated test Hyperbola Quintessence does not suffer from register spilling. CPU does nothing but move calculations and does not need registers for anything else. Dense Fancy Magic Bitboards advantage is total simplicity: it does not need any registers for any calculations and this advantage reveals in a more complex context. Need to reach for L2 cache does not seem be a matter.
+<!-- -->
+First, tentative conclusions: __Although Hyperbola Quitenssence was my first choice and looked L1 cache-friendly and flawless, register-spilling seems to be an important obstacle that may encourage to turn to Dense Fancy Magic Bitboards__ (i.e. using FullBitboards_DFMB). This is confirmed by the results of performance test (single thread) on two-movers on Intel i7-14700: almost 45 two-movers per millisecond can be solved using Dense Fancy Magic Bitboards, while only 39 with Hyperbola Quintessence. Integrated tests of J.G.Island - Chess Moremovers with Dense Fancy Magic Bitboards also confirm this conclusion so far.
