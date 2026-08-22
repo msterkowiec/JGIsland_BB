@@ -494,11 +494,13 @@ TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_HQ)
 	EXPECT_EQ(numFailed, 0);
 }
 
+#if defined(__INCLUDE_FANCY_MAGIC_BITBOARDS__)
 TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_FMB)
 {
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::FancyMagics>();
 	EXPECT_EQ(numFailed, 0);
 }
+#endif
 
 TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_DFMB)
 {

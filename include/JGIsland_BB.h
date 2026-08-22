@@ -5702,9 +5702,11 @@ private:
 		static_assert(Dir == 0 || Dir == 1 || Dir == -1 || Dir == 8 || Dir == -8, "");
 		assert(IsValidPos(square));
 
+		#ifdef __INCLUDE_FANCY_MAGIC_BITBOARDS__
 		if constexpr (MoveGenMethod == MoveGenMethodT::FancyMagics)
 			if constexpr (Dir == 0)
 				return get_raw_rook_moves_fmb(square, occupancy);
+		#endif
 
 		if constexpr (MoveGenMethod == MoveGenMethodT::DenseFancyMagics)
 			if constexpr (Dir == 0)
@@ -5734,9 +5736,11 @@ private:
 	{
 		assert(IsValidPos(square));
 
+		#ifdef __INCLUDE_FANCY_MAGIC_BITBOARDS__
 		if constexpr (MoveGenMethod == MoveGenMethodT::FancyMagics)
 			if constexpr (Dir == 0)
 				return get_raw_bishop_moves_fmb(square, occupancy);
+		#endif
 
 		if constexpr (MoveGenMethod == MoveGenMethodT::DenseFancyMagics)
 			if constexpr (Dir == 0)

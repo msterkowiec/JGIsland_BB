@@ -9,6 +9,8 @@
 
 #include "config.h"
 
+#if defined(__INCLUDE_FANCY_MAGIC_BITBOARDS__) // dense fancy magics are better and have much faster initialization
+
 #include <cstdint>
 #include <array>
 #include <random>
@@ -386,4 +388,4 @@ ALWAYS_INLINE uint64_t get_raw_rook_moves_fmb(int sq, uint64_t occupancy)
     return GlobalRooks->shared_pool[m.offset + hash];
 }
 
-
+#endif
