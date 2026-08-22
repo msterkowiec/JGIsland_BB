@@ -15,6 +15,13 @@
 #include "utils.h"
 #include "BetweenLookup.h"
 
+#include "hyperbola.h"
+#include "fancy_magics.h"
+#include "fancy_magics_dense.h"
+
+enum class MoveGenMethodT { HyperbolaQuintessence, FancyMagics, DenseFancyMagics };
+
+template<MoveGenMethodT MoveGenMethod = MoveGenMethodT::HyperbolaQuintessence>
 struct alignas(64) FullBitboards
 {
 	// SolveTwoMover(FEN, pBufOutputMoves)
@@ -738,7 +745,7 @@ private:
 
 	// Improved implementations using methods of Hyperbola Quintessence
 	template<bool tbInclKing = true, bool tbFindAll = true>
-	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_hq(const int target_sq) const
+	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_GenMoves(const int target_sq) const
 	{
 		assert(IsValidPos(target_sq));
 
@@ -756,8 +763,8 @@ private:
 			if (direct_attackers)
 				return direct_attackers;
 
-		Bitboard direct_b_moves = get_raw_bishop_moves_hq(target_sq, occ);
-		Bitboard direct_r_moves = get_raw_rook_moves_hq(target_sq, occ);
+		Bitboard direct_b_moves = get_raw_bishop_moves(target_sq, occ);
+		Bitboard direct_r_moves = get_raw_rook_moves(target_sq, occ);
 
 		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & white;
 		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & white;
@@ -768,7 +775,7 @@ private:
 	}
 
 	template<bool tbInclKing = true, bool tbFindAll = true>
-	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack_hq(const int target_sq) const
+	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack_GenMoves(const int target_sq) const
 	{
 		assert(IsValidPos(target_sq));
 
@@ -786,8 +793,8 @@ private:
 			if (direct_attackers)
 				return direct_attackers;
 
-		Bitboard direct_b_moves = get_raw_bishop_moves_hq(target_sq, occ);
-		Bitboard direct_r_moves = get_raw_rook_moves_hq(target_sq, occ);
+		Bitboard direct_b_moves = get_raw_bishop_moves(target_sq, occ);
+		Bitboard direct_r_moves = get_raw_rook_moves(target_sq, occ);
 
 		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & black;
 		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & black;
@@ -803,10 +810,10 @@ private:
 		constexpr bool tbReturnBitmaskEvenIfOneIsEnough = tbOneIsEnough > 1;
 		assert(IsValidPos(sq));
 
-		if constexpr (tbInclPinned) // TODO: use IsSquareAttackedByWhite_hq also when pinned attackers must be excluded
+		if constexpr (tbInclPinned) // TODO: use IsSquareAttackedByWhite_GenMoves also when pinned attackers must be excluded
 		{
 			constexpr bool tbFindAll = !tbOneIsEnough;
-			const auto mask = IsSquareAttackedByWhite_hq<tbInclKing, tbFindAll>(sq);
+			const auto mask = IsSquareAttackedByWhite_GenMoves<tbInclKing, tbFindAll>(sq);
 			if constexpr (tbOneIsEnough == 1)
 				return mask != 0;
 			else
@@ -877,10 +884,10 @@ private:
 		constexpr bool tbReturnBitmaskEvenIfOneIsEnough = tbOneIsEnough > 1;
 		assert(IsValidPos(sq));
 
-		if constexpr (tbInclPinned) // TODO: use IsSquareAttackedByBlack_hq also when pinned attackers must be excluded
+		if constexpr (tbInclPinned) // TODO: use IsSquareAttackedByBlack_GenMoves also when pinned attackers must be excluded
 		{
 			constexpr bool tbFindAll = !tbOneIsEnough;
-			const auto mask = IsSquareAttackedByBlack_hq<tbInclKing, tbFindAll>(sq);			
+			const auto mask = IsSquareAttackedByBlack_GenMoves<tbInclKing, tbFindAll>(sq);			
 			if constexpr (tbOneIsEnough == 1)
 				return mask != 0;
 			else
@@ -3637,7 +3644,7 @@ private:
 		if (int posWhiteLongDistAttacker; SameDiagAndAllBetweenEmpty(posBlackKing, rpos) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(rpos, posBlackKing)) >= 0)
 		{
 			// Discovered check (and direct check maybe)
-			auto trgtBitboard = get_rook_moves_hq(rpos, occ(), white);
+			auto trgtBitboard = get_rook_moves(rpos, occ(), white);
 
 			const auto posWhiteKing = GetWhiteKingPos();
 			#if !defined(__PREEMPTIVE_WHITEPINNEDPIECES__)
@@ -3712,7 +3719,7 @@ private:
 		if (int posWhiteLongDistAttacker; SameLineAndAllBetweenEmpty(posBlackKing, bpos) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(bpos, posBlackKing)) >= 0)
 		{
 			// Discovered check (and direct check maybe)
-			auto trgtBitboard = get_bishop_moves_hq(bpos, occ(), white);
+			auto trgtBitboard = get_bishop_moves(bpos, occ(), white);
 
 			const auto posWhiteKing = GetWhiteKingPos();
 			#if !defined(__PREEMPTIVE_WHITEPINNEDPIECES__)
@@ -4378,7 +4385,7 @@ private:
 			auto mask = queens & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves_hq(pos, occ, black) | get_rook_moves_hq(pos, occ, black);
+				auto movesMask = get_bishop_moves(pos, occ, black) | get_rook_moves(pos, occ, black);
 				
 				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__
 				auto captureMovesMask = movesMask & white;
@@ -4435,7 +4442,7 @@ private:
 			mask = rooks & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_rook_moves_hq(pos, occ, black);
+				auto movesMask = get_rook_moves(pos, occ, black);
 
 				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__ 
 				auto captureMovesMask = movesMask & white;
@@ -4492,7 +4499,7 @@ private:
 			mask = bishops & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves_hq(pos, occ, black);
+				auto movesMask = get_bishop_moves(pos, occ, black);
 
 				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__ 
 				auto captureMovesMask = movesMask & white;
@@ -5121,8 +5128,8 @@ private:
 		Bitboard pinned = 0ULL;
 
 		const auto posWhiteKing = GetWhiteKingPos();
-		const auto potential_pinners_rook = get_rook_moves_hq(posWhiteKing, black, 0) & black & (rooks|queens); // here own pieces are 0 - as if we can "move through" them
-		const auto potential_pinners_bishop = get_bishop_moves_hq(posWhiteKing, black, 0) & black & (bishops|queens);
+		const auto potential_pinners_rook = get_rook_moves(posWhiteKing, black, 0) & black & (rooks|queens); // here own pieces are 0 - as if we can "move through" them
+		const auto potential_pinners_bishop = get_bishop_moves(posWhiteKing, black, 0) & black & (bishops|queens);
 		auto potential_pinners = potential_pinners_rook | potential_pinners_bishop;
 
 		BEGIN_FOR_EACH_POS_IN_MASK(posPinner, potential_pinners)
@@ -5145,8 +5152,8 @@ private:
 		Bitboard pinned = 0ULL;
 
 		const auto posBlackKing = GetBlackKingPos();
-		const auto potential_pinners_rook = get_rook_moves_hq(posBlackKing, white, 0) & white & (rooks | queens); // here own pieces are 0 - as if we can "move through" them
-		const auto potential_pinners_bishop = get_bishop_moves_hq(posBlackKing, white, 0) & white & (bishops | queens);
+		const auto potential_pinners_rook = get_rook_moves(posBlackKing, white, 0) & white & (rooks | queens); // here own pieces are 0 - as if we can "move through" them
+		const auto potential_pinners_bishop = get_bishop_moves(posBlackKing, white, 0) & white & (bishops | queens);
 		auto potential_pinners = potential_pinners_rook | potential_pinners_bishop;
 
 		BEGIN_FOR_EACH_POS_IN_MASK(posPinner, potential_pinners)
@@ -5261,7 +5268,7 @@ private:
 			auto mask = white & queens;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves_hq(pos, occ(), white);
+				auto movesMask = get_bishop_moves(pos, occ(), white);
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					if (!IsPosInBitmask(pos, whitePinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posWhiteKing))
@@ -5272,7 +5279,7 @@ private:
 								pMoves[count++].set(pos, posTo);
 				}
 				END_FOR_EACH_POS_IN_MASK(posTo, movesMask);
-				movesMask = get_rook_moves_hq(pos, occ(), white);
+				movesMask = get_rook_moves(pos, occ(), white);
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					if (!IsPosInBitmask(pos, whitePinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posWhiteKing))
@@ -5289,7 +5296,7 @@ private:
 			mask = white & rooks;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_rook_moves_hq(pos, occ(), white);
+				auto movesMask = get_rook_moves(pos, occ(), white);
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					if (!IsPosInBitmask(pos, whitePinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posWhiteKing))
@@ -5318,7 +5325,7 @@ private:
 			mask = white & bishops;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves_hq(pos, occ(), white);
+				auto movesMask = get_bishop_moves(pos, occ(), white);
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					if (!IsPosInBitmask(pos, whitePinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posWhiteKing))
@@ -5677,6 +5684,72 @@ private:
 		return move;
 	}
 
+	// Move generation:
+
+	template<char Dir = 0> //Dir 0 = any, 1/-1 == horizontal, 8/-8 == vertical
+	ALWAYS_INLINE static  uint64_t get_raw_rook_moves(const int square, const uint64_t occupancy)
+	{
+		static_assert(Dir == 0 || Dir == 1 || Dir == -1 || Dir == 8 || Dir == -8, "");
+		assert(IsValidPos(square));
+
+		if constexpr (MoveGenMethod == MoveGenMethodT::FancyMagics)
+			if constexpr (Dir == 0)
+				return get_raw_rook_moves_fmb(square, occupancy);
+
+		if constexpr (MoveGenMethod == MoveGenMethodT::DenseFancyMagics)
+			if constexpr (Dir == 0)
+				return get_raw_rook_moves_dfmb(square, occupancy);
+
+		return get_raw_rook_moves_hq(square, occupancy);
+	}
+
+	//Dir 0 = any, 1/-1 == horizontal, 8/-8 == vertical
+	template<char Dir = 0, bool tbCapturesOnly = false>
+	ALWAYS_INLINE static  uint64_t get_rook_moves(const int square, const uint64_t occupancy, const uint64_t pieces_of_same_color)
+	{
+		assert(IsValidPos(square));
+
+		uint64_t raw_moves = get_raw_rook_moves<Dir>(square, occupancy);
+
+		if constexpr (tbCapturesOnly)
+			return raw_moves & (occupancy & ~pieces_of_same_color);
+		else
+			// Filter own pieces:
+			return raw_moves & ~pieces_of_same_color;
+	}
+
+	// These are not moves yet, since blocking piece is not considered properly
+	template<char Dir = 0>
+	ALWAYS_INLINE static auto get_raw_bishop_moves(const int square, const uint64_t occupancy)
+	{
+		assert(IsValidPos(square));
+
+		if constexpr (MoveGenMethod == MoveGenMethodT::FancyMagics)
+			if constexpr (Dir == 0)
+				return get_raw_bishop_moves_fmb(square, occupancy);
+
+		if constexpr (MoveGenMethod == MoveGenMethodT::DenseFancyMagics)
+			if constexpr (Dir == 0)
+				return get_raw_bishop_moves_dfmb(square, occupancy);
+
+		return get_raw_bishop_moves_hq<Dir>(square, occupancy);
+	}
+
+	// Dir == 0 == any, 1==main diagonal, -1==anti diagonal
+	template<bool tbCapturesOnly = false, char Dir = 0>
+	ALWAYS_INLINE static uint64_t get_bishop_moves(const int square, const uint64_t occupancy, const uint64_t own_pieces) // own_pieces should be white_pieces for white bishop and vice versa
+	{
+		static_assert(Dir == 0 || Dir == 1 || Dir == -1, "");
+		assert(IsValidPos(square));
+
+		uint64_t raw_moves = get_raw_bishop_moves<Dir>(square, occupancy);
+		if constexpr (tbCapturesOnly)
+			raw_moves &= (occupancy & ~own_pieces);
+		else
+			raw_moves &= ~own_pieces;
+		return raw_moves;
+	}
+
 public:
 	// Returns empty vector on error:
 	std::vector<TMove> StringToMoves(const std::string& moves) const
@@ -5714,4 +5787,7 @@ public:
 
 };
 
+using FullBitboards_HQ = FullBitboards<MoveGenMethodT::HyperbolaQuintessence>;
+using FullBitboards_FMB = FullBitboards<MoveGenMethodT::FancyMagics>;
+using FullBitboards_DFMB = FullBitboards<MoveGenMethodT::DenseFancyMagics>;
 
