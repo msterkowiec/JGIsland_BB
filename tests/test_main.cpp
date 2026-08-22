@@ -443,9 +443,10 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.SolveTwoMover("6Nq/5p2/2P1k1P1/2P1P3/2P1R2P/2K5/8/5B2"), 1);
 }
 
-TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves)
+template<MoveGenMethodT MoveGenMethod>
+size_t RunTestFindMoveThatMatesInTwoMoves()
 {
-	FullBitboards bb;
+	FullBitboards<MoveGenMethod> bb;
 	std::array<TMove, 256> aMoves;
 
 	auto start = std::chrono::steady_clock::now();
@@ -484,6 +485,23 @@ TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves)
 	std::cout << "[   INFO   ] Elapsed time: " << duration.count() << " ms" << std::endl;
 	std::cout << "[   INFO   ] Twomovers per millisecond: " << std::to_string(((double)(numSuccessful + numFailed)) / duration.count()) << "\n";
 
+	return numFailed;
+}
+
+TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_HQ)
+{
+	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::HyperbolaQuintessence>();
 	EXPECT_EQ(numFailed, 0);
 }
 
+TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_FMB)
+{
+	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::FancyMagics>();
+	EXPECT_EQ(numFailed, 0);
+}
+
+TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_DFMB)
+{
+	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
+	EXPECT_EQ(numFailed, 0);
+}
