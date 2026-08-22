@@ -8,7 +8,7 @@
 #include "../include/JGIsland_BB.h"
 
 
-bool IsSolutionAsExpected(int count, TMove* aMoves, const std::vector<TMove>& expectedSolutions)
+bool IsSolutionAsExpected(int count, const TMove* aMoves, const std::vector<TMove>& expectedSolutions)
 {
 	if (count != expectedSolutions.size())
 		return false;
