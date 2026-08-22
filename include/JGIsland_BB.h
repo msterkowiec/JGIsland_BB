@@ -43,6 +43,34 @@ struct alignas(64) FullBitboards
 		else
 			return -1;
 	}
+	// Added two wrappers for SolveTwoMover to avoid special syntax for calling a template method of a template class:
+	int SolveTwoMover_OneSolution(const char* szFEN)
+	{
+		const auto res = fromFEN(szFEN);
+		if (res.first)
+		{
+			const auto info = res.second;
+			const auto castlingFlags = info.whiteCastlingLongPossible * 8 + info.whiteCastlingShortPossible * 4 + info.blackCastlingLongPossible * 2 + info.blackCastlingShortPossible;
+
+			return SolveTwoMoverDispatcher<0>(IsWhiteKingChecked(), info.enPassantSquare, castlingFlags, nullptr);
+		}
+		else
+			return -1;
+	}
+	int SolveTwoMover_AllSolutions(const char* szFEN, TMove* pBufOutputMoves = nullptr)
+	{
+		const auto res = fromFEN(szFEN);
+		if (res.first)
+		{
+			const auto info = res.second;
+			const auto castlingFlags = info.whiteCastlingLongPossible * 8 + info.whiteCastlingShortPossible * 4 + info.blackCastlingLongPossible * 2 + info.blackCastlingShortPossible;
+
+			return SolveTwoMoverDispatcher<1>(IsWhiteKingChecked(), info.enPassantSquare, castlingFlags, pBufOutputMoves);
+		}
+		else
+			return -1;
+	}
+
 	// Returns -1 on invalid FEN or 1/0.
 	ALWAYS_INLINE char IsImmediateCheckMate(const char* szFEN)
 	{
