@@ -17,7 +17,7 @@
 
 #include "hyperbola.h"
 #include "fancy_magics.h"
-#include "dense_fancy_magics.h"
+#include "fancy_magics_dense.h"
 
 enum class MoveGenMethodT { HyperbolaQuintessence, FancyMagics, DenseFancyMagics };
 
