@@ -438,9 +438,9 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.IsImmediateCheckMate("4rr2/3k1P2/2R5/N3pP2/3p2QB/8/8/R3K3 w Q e6 0 2"), 0);
 
 	// A few simple twomovers:
-	EXPECT_EQ(bb.template SolveTwoMover<>("2n5/3p1p1R/pp1Pk1p1/b2qP1K1/3pNP1p/n1pb2P1/QP6/2r2B2"), 0); // NOTE: SolveTwoMover is a template method in a template class... gcc and clang require this slightly weird syntax...
-	EXPECT_EQ(bb.template SolveTwoMover<>("R7/P2PP2k/R1P2p2/PP3N2/1B1P3N/4R2P/P1K3P1/3N4"), 1);
-	EXPECT_EQ(bb.template SolveTwoMover<>("6Nq/5p2/2P1k1P1/2P1P3/2P1R2P/2K5/8/5B2"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("2n5/3p1p1R/pp1Pk1p1/b2qP1K1/3pNP1p/n1pb2P1/QP6/2r2B2"), 0); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("R7/P2PP2k/R1P2p2/PP3N2/1B1P3N/4R2P/P1K3P1/3N4"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("6Nq/5p2/2P1k1P1/2P1P3/2P1R2P/2K5/8/5B2"), 1);
 }
 
 template<MoveGenMethodT MoveGenMethod>
@@ -460,7 +460,7 @@ size_t RunTestFindMoveThatMatesInTwoMoves()
 		const auto& sExpectedSolutions = test_suite[i].second;
 
 
-		auto res = bb.template SolveTwoMover<1>(szFEN, aMoves.data()); // NOTE: SolveTwoMover is a template method in a template class... gcc and clang require this slightly weird syntax...
+		auto res = bb.SolveTwoMover_AllSolutions(szFEN, aMoves.data()); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
 		if (res < 0)
 			std::cout << "Error parsing FEN: " << szFEN << "\n";
 		else
