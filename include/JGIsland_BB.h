@@ -753,7 +753,7 @@ private:
 		return res;
 	}
 
-	// Improved implementations using methods of Hyperbola Quintessence
+	// Improved implementations using move generation methods (get_raw_bishop_moves and get_raw_rook_moves)
 	template<bool tbInclKing = true, bool tbFindAll = true>
 	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_GenMoves(const int target_sq) const
 	{
