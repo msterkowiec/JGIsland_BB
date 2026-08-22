@@ -9,8 +9,6 @@
 
 #include "config.h"
 
-#ifdef __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
-
 #include <cstdint>
 #include <array>
 #include <random>
@@ -388,5 +386,4 @@ ALWAYS_INLINE uint64_t get_raw_rook_moves_fmb(int sq, uint64_t occupancy)
     return GlobalRooks->shared_pool[m.offset + hash];
 }
 
-#endif // #ifdef __USE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__ 
 
