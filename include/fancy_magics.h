@@ -9,7 +9,7 @@
 
 #include "config.h"
 
-#if !defined(__INCLUDE_FANCY_MAGIC_BITBOARDS__) // dense fancy magics are better and have much faster initialization
+#if defined(__INCLUDE_FANCY_MAGIC_BITBOARDS__) // dense fancy magics are better and have much faster initialization
 
 #include <cstdint>
 #include <array>
