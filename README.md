@@ -50,12 +50,12 @@ I admit with remorse that one of the last things was writing several UTs... Howe
 **UPDATE**\
 *For comparison there are also added - created in close co-operation with AI - methods of: 
 * __Fancy Magic Bitboards__ (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb), data used on hot paths is more than 800kB
-* __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is more than 160kB
+* __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is more than 130kB
 
 but they are not used by default. However in order to activate them it's enough to use another value of template parameter MoveGenMethod of class FullBitboards: MoveGenMethodT::FancyMagics or MoveGenMethodT::DenseFancyMagics.
 
 * Fancy Magic Bitboards use more than 800kB on hot path and in isolated tests cause a speed-up about 10-12% (44 two-movers per millisecond vs. 39 with Hyperbola Quintessence).\
-* Dense Fancy Magic Bitboards use more than 160kB on hot path and in isolated tests cause a speed up to about 45 two-movers per millisecond.
+* Dense Fancy Magic Bitboards use more than 130kB on hot path and in isolated tests cause a speed up to about 45 two-movers per millisecond.
 
 This example shows quite well how cache-friendliness and smaller buffers directly translate into performance.
 I will later provide some more information about results of integrations tests with Dense Fancy Magic Bitboards (using full test suite of J.G.Island - Chess Moremovers)
