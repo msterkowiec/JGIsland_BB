@@ -5787,4 +5787,7 @@ public:
 
 };
 
+using FullBitboards_HQ = FullBitboards<MoveGenMethodT::HyperbolaQuintessence>;
+using FullBitboards_FMB = FullBitboards<MoveGenMethodT::FancyMagics>;
+using FullBitboards_DFMB = FullBitboards<MoveGenMethodT::DenseFancyMagics>;
 
