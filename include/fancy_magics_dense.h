@@ -9,8 +9,6 @@
 
 #include "config.h"
 
-#ifdef __USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__
-
 #include <cstdint>
 #include <iostream>
 #include <random>
@@ -105,7 +103,7 @@ constexpr inline size_t calculate_total_pool_size()
 inline uint64_t MassiveDenseAttackTable[calculate_total_pool_size()] = { 0 };
 
 struct RuntimeMagic {
-    uint64_t* ptr; // Points to the dense, tightly packed lookup table
+    uint64_t* ptr; // Points to the dense, tightly packed lookup table; TODO: might be reduced to uint32_t offset
     uint64_t mask; // Relevant blocker mask
     uint64_t magic;  // Magic multiplier
     int shift; // Dynamically scaled shift value (minimized per square)
@@ -253,16 +251,16 @@ const bool init_done = DenseFancyMagicBitboards::initialize_sliding_attacks();
 
 ALWAYS_INLINE uint64_t get_raw_rook_moves_dfmb(int sq, uint64_t occupancy)
 {
-    uint64_t blockers = occupancy & DenseFancyMagicBitboards::RookMagics[sq].mask;
-    uint64_t idx = (blockers * DenseFancyMagicBitboards::RookMagics[sq].magic) >> DenseFancyMagicBitboards::RookMagics[sq].shift;
-    return DenseFancyMagicBitboards::RookMagics[sq].ptr[idx];
+    const auto& magicRecord = DenseFancyMagicBitboards::RookMagics[sq];
+    uint64_t blockers = occupancy & magicRecord.mask;
+    uint64_t idx = (blockers * magicRecord.magic) >> magicRecord.shift;
+    return magicRecord.ptr[idx];
 }
 
 ALWAYS_INLINE uint64_t get_raw_bishop_moves_dfmb(int sq, uint64_t occupancy)
 {
-    uint64_t blockers = occupancy & DenseFancyMagicBitboards::BishopMagics[sq].mask;
-    uint64_t idx = (blockers * DenseFancyMagicBitboards::BishopMagics[sq].magic) >> DenseFancyMagicBitboards::BishopMagics[sq].shift;
-    return DenseFancyMagicBitboards::BishopMagics[sq].ptr[idx];
+    const auto& magicRecord = DenseFancyMagicBitboards::BishopMagics[sq];
+    uint64_t blockers = occupancy & magicRecord.mask;
+    uint64_t idx = (blockers * magicRecord.magic) >> magicRecord.shift;
+    return magicRecord.ptr[idx];
 }
-
-#endif // __USE_DENSE_FANCY_MAGIC_BITBOARDS_INSTEAD_OF_HQ__
