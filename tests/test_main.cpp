@@ -31,7 +31,7 @@ bool IsSolutionAsExpected(int count, TMove* aMoves, const std::vector<TMove>& ex
 
 TEST(JGIsland_BB_Tests, TestAllBetweenEmpty)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 	EXPECT_EQ(bb.AllBetweenEmpty(_B1_, _B6_), true);
 	EXPECT_EQ(bb.AllBetweenEmpty(_H2_, _E5_), true);
@@ -46,7 +46,7 @@ TEST(JGIsland_BB_Tests, TestAllBetweenEmpty)
 
 TEST(JGIsland_BB_Tests, TestAllBetweenEmptyIfTakeOffWhitePawn)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.AllBetweenEmptyIfTakeOffWhitePawn(_B1_, _B8_, _B6_), true);
@@ -57,29 +57,29 @@ TEST(JGIsland_BB_Tests, TestAllBetweenEmptyIfTakeOffWhitePawn)
 
 TEST(JGIsland_BB_Tests, TestGetBetweenMask)
 {
-	EXPECT_EQ(FullBitboards::GetBetweenMask(_A1_, _H1_), 255 - 1 - 128);
-	EXPECT_EQ(FullBitboards::GetBetweenMask<1>(_A1_, _H1_), 255);
-	EXPECT_EQ(FullBitboards::GetBetweenMask(_A5_, _H5_), (255ULL - 1 - 128) << 32);
-	EXPECT_EQ(FullBitboards::GetBetweenMask(_A1_, _A3_), 256);
-	EXPECT_EQ(FullBitboards::GetBetweenMask(_A1_, _A4_), 256 + (256<<8));
-	EXPECT_EQ(FullBitboards::GetBetweenMask(_C1_, _C4_), (256 + (256 << 8)) << 2);
-	EXPECT_EQ(FullBitboards::GetBetweenMask(_A1_, _C3_), 512);
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask(_A1_, _H1_), 255 - 1 - 128);
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask<1>(_A1_, _H1_), 255);
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask(_A5_, _H5_), (255ULL - 1 - 128) << 32);
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask(_A1_, _A3_), 256);
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask(_A1_, _A4_), 256 + (256<<8));
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask(_C1_, _C4_), (256 + (256 << 8)) << 2);
+	EXPECT_EQ(FullBitboards_HQ::GetBetweenMask(_A1_, _C3_), 512);
 }
 
 TEST(JGIsland_BB_Tests, TestIsSquareBetween)
 {
-	EXPECT_EQ(FullBitboards::IsSquareBetween<1>(_E1_, _A1_, _H1_), true);
-	EXPECT_EQ(FullBitboards::IsSquareBetween<1>(_G1_, _A1_, _E1_), false);
-	EXPECT_EQ(FullBitboards::IsSquareBetween(_C2_, _E4_, _B1_), true);
-	EXPECT_EQ(FullBitboards::IsSquareBetween(_E8_, _E4_, _B1_), false);
-	EXPECT_EQ(FullBitboards::IsSquareBetween(_E7_, _E8_, _E1_), true);
-	EXPECT_EQ(FullBitboards::IsSquareBetween(_E8_, _E7_, _E1_), false);
-	EXPECT_EQ(FullBitboards::IsSquareBetween<1>(_F7_, _E8_, _E1_), false);
-	EXPECT_EQ(FullBitboards::IsSquareBetween<1>(_H1_, _H1_, _A8_), false);
-	EXPECT_EQ(FullBitboards::IsSquareBetween<1>(_F3_, _H1_, _A8_), true);
-	EXPECT_EQ(FullBitboards::IsSquareBetween(_F4_, _H1_, _A8_), false);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_E1_, _A1_, _H1_), true);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_G1_, _A1_, _E1_), false);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_C2_, _E4_, _B1_), true);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_E8_, _E4_, _B1_), false);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_E7_, _E8_, _E1_), true);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_E8_, _E7_, _E1_), false);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_F7_, _E8_, _E1_), false);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_H1_, _H1_, _A8_), false);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_F3_, _H1_, _A8_), true);
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_F4_, _H1_, _A8_), false);
 	#ifdef __USE_BETWEENLOOKUP__ 
-	EXPECT_EQ((FullBitboards::IsSquareBetween<1,0>(_H1_, _H1_, _A8_)), true);// incl.ends
+	EXPECT_EQ((FullBitboards_HQ::IsSquareBetween<1,0>(_H1_, _H1_, _A8_)), true);// incl.ends
 	#endif
 }
 
@@ -93,7 +93,7 @@ TEST(JGIsland_BB_Tests, TestGetRay)
 
 TEST(JGIsland_BB_Tests, TestSameDiagonalOrLineAndAllBetweenEmpty)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.SameDiagonalOrLineAndAllBetweenEmpty(_B1_, _B6_), 1);
@@ -107,7 +107,7 @@ TEST(JGIsland_BB_Tests, TestSameDiagonalOrLineAndAllBetweenEmpty)
 
 TEST(JGIsland_BB_Tests, TestSameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(_B1_, _B8_, _B6_), 1);
@@ -119,7 +119,7 @@ TEST(JGIsland_BB_Tests, TestSameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePa
 
 TEST(JGIsland_BB_Tests, TestWhiteLongDistanceFigureInDir)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_D2_, _D1_), 1); // wh.Rd6
@@ -146,7 +146,7 @@ TEST(JGIsland_BB_Tests, TestWhiteLongDistanceFigureInDir)
 
 TEST(JGIsland_BB_Tests, TestBlackLongDistanceFigureInDir)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.BlackLongDistanceFigureInDir(_D2_, _D1_), 0); // wh.Rd6
@@ -173,7 +173,7 @@ TEST(JGIsland_BB_Tests, TestBlackLongDistanceFigureInDir)
 
 TEST(JGIsland_BB_Tests, TestIsSquareAttackedByWhite)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.IsSquareAttackedByWhite(_D1_), true);
@@ -189,7 +189,7 @@ TEST(JGIsland_BB_Tests, TestIsSquareAttackedByWhite)
 
 TEST(JGIsland_BB_Tests, TestIsSquareAttackedByBlack)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.IsSquareAttackedByBlack(_D1_), true);
@@ -206,7 +206,7 @@ TEST(JGIsland_BB_Tests, TestIsSquareAttackedByBlack)
 
 TEST(JGIsland_BB_Tests, TestIsSquareAttackedByWhiteIfTakeOffBlackKing)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1BRPP1/p1k3Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.IsSquareAttackedByWhite(_A3_), false);
@@ -218,7 +218,7 @@ TEST(JGIsland_BB_Tests, TestIsSquareAttackedByWhiteIfTakeOffBlackKing)
 
 TEST(JGIsland_BB_Tests, TestIsSquareAttackedByBlackIfTakeOffWhiteKing)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.IsSquareAttackedByBlack(_B2_), false);
@@ -227,7 +227,7 @@ TEST(JGIsland_BB_Tests, TestIsSquareAttackedByBlackIfTakeOffWhiteKing)
 
 TEST(JGIsland_BB_Tests, TestIsWhitePinned)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b1r1BN1n/b3npb1/pPR3P1/p3B2n/B3b2p/k1K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.IsWhitePinned(_E5_, _D4_), false);
@@ -241,7 +241,7 @@ TEST(JGIsland_BB_Tests, TestIsWhitePinned)
 
 TEST(JGIsland_BB_Tests, TestIsWhitePinnedIfTakeOffBlackPawn)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("8/2k5/8/r2Pp2K/2P5/1P4B1/8/8 w - e6 0 2");
 
 	EXPECT_EQ((bb.IsWhitePinnedIfTakeOffBlackPawn<1>(_D5_, _E6_, _E5_)), true);
@@ -253,7 +253,7 @@ TEST(JGIsland_BB_Tests, TestIsWhitePinnedIfTakeOffBlackPawn)
 
 TEST(JGIsland_BB_Tests, TestIsBlackPinned)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b1R1BN1n/b1r1npP1/pP2RPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.IsBlackPinned(_E5_, _D4_), 1);
@@ -265,7 +265,7 @@ TEST(JGIsland_BB_Tests, TestIsBlackPinned)
 
 TEST(JGIsland_BB_Tests, TestIsBlackPinnedIfTakeOffWhitePawn)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("8/8/8/2p5/k2pP1R1/8/5K2/8 b - e3 0 1");
 
 	EXPECT_EQ(bb.IsBlackPinnedIfTakeOffWhitePawn(_D4_, _E3_, _E4_), true);
@@ -277,7 +277,7 @@ TEST(JGIsland_BB_Tests, TestIsBlackPinnedIfTakeOffWhitePawn)
 
 TEST(JGIsland_BB_Tests, TestGetWhitePinnedPieces)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b1r1BN1n/b3npb1/pPR3P1/p3B2n/B3b2p/k1K1pp1p/3PP1R1/1b2r2b");
 
 	const auto mask = bb.GetWhitePinnedPieces();
@@ -286,7 +286,7 @@ TEST(JGIsland_BB_Tests, TestGetWhitePinnedPieces)
 
 TEST(JGIsland_BB_Tests, TestGetBlackPinnedPieces)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("b1R1BN1n/b1r1npP1/pP2RPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	const auto mask = bb.GetBlackPinnedPieces();
@@ -295,7 +295,7 @@ TEST(JGIsland_BB_Tests, TestGetBlackPinnedPieces)
 
 TEST(JGIsland_BB_Tests, TestCanWhiteKingCheckMate)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("6bk/7p/8/4K3/8/2B5/8/8");
 	EXPECT_EQ(bb.CanWhiteKingCheckMate(_E5_), true);
 
@@ -311,7 +311,7 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKingCheckMate)
 
 TEST(JGIsland_BB_Tests, TestCanWhiteKnightCheckMate)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("3N2rk/6pp/8/8/8/8/8/4K3");
 	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_D8_), true);
 
@@ -326,7 +326,7 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKnightCheckMate)
 
 TEST(JGIsland_BB_Tests, TestCanWhiteBishopCheckMate)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("3K4/5p2/5kp1/3P1p2/7P/8/8/6B1");	
 	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_G1_ NOT_PINNED), true);
 		
@@ -339,7 +339,7 @@ TEST(JGIsland_BB_Tests, TestCanWhiteBishopCheckMate)
 
 TEST(JGIsland_BB_Tests, TestCanWhiteRookCheckMate)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("3K4/5p2/5kpP/3P4/3P3P/8/1R6/8");
 	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ NOT_PINNED), true);
 
@@ -352,7 +352,7 @@ TEST(JGIsland_BB_Tests, TestCanWhiteRookCheckMate)
 
 TEST(JGIsland_BB_Tests, TestCanWhiteQueenCheckMate)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("8/8/5k2/8/7K/1B6/8/2Q5");
 	EXPECT_EQ(bb.CanWhiteQueenCheckMate(_C1_ NOT_PINNED), true);
 
@@ -362,7 +362,7 @@ TEST(JGIsland_BB_Tests, TestCanWhiteQueenCheckMate)
 
 TEST(JGIsland_BB_Tests, TestCanWhitePawnCheckMate)
 {
-	FullBitboards bb;
+	FullBitboards_HQ bb;
 	bb.fromFEN("8/6p1/3K1kp1/4p1p1/4bPp1/5R2/8/8");
 	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED), true);
 
@@ -384,7 +384,7 @@ TEST(JGIsland_BB_Tests, TestCanWhitePawnCheckMate)
 
 TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 {
-	FullBitboards bb;	
+	FullBitboards_HQ bb;	
 
 	// Immediate checkmate:
 	EXPECT_EQ(bb.IsImmediateCheckMate("1B6/2P2BKp/3k3P/4N3/1P6/8/8/8"), 1);
