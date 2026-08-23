@@ -32,35 +32,6 @@ private:
     // Expanded by 1 to accommodate both special control slots (0 and -1)
     std::array<uint64_t, 2018> unique_masks{};
 
-    // Generates a raw 64-bit between mask for any two squares at compile time
-    static constexpr uint64_t generate_raw_mask(int sq1, int sq2)
-    {
-        if (sq1 == sq2) return 0ULL;
-
-        int r1 = sq1 / 8, c1 = sq1 % 8;
-        int r2 = sq2 / 8, c2 = sq2 % 8;
-
-        int dr = r2 - r1;
-        int dc = c2 - c1;
-
-        // Verify squares share a rank, file, or diagonal
-        if (dr != 0 && dc != 0 && ZeroCmovBetween::ct_abs(dr) != ZeroCmovBetween::ct_abs(dc)) return 0ULL;
-
-        int step_r = (dr > 0) ? 1 : (dr < 0 ? -1 : 0);
-        int step_c = (dc > 0) ? 1 : (dc < 0 ? -1 : 0);
-
-        uint64_t mask = 0ULL;
-        int curr_r = r1 + step_r;
-        int curr_c = c1 + step_c;
-
-        while (curr_r != r2 || curr_c != c2) {
-            mask |= (1ULL << (curr_r * 8 + curr_c));
-            curr_r += step_r;
-            curr_c += step_c;
-        }
-        return mask;
-    }
-
 public:
     ALWAYS_INLINE uint64_t GetBetweenMask(int sq1, int sq2) const
     {
