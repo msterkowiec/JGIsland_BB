@@ -11,7 +11,7 @@ JGIsland_BB contains ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers
 <!-- -->
-using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-31kB**, so it entirely fits into L1 cache of modern CPUs (a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache\*\*).
+using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-20kB**, so it entirely fits into L1 cache of modern CPUs (a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache\*\*).
 **More than 35 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
@@ -39,7 +39,7 @@ For example CanBlackMoveInBetween first calculates branchless (sometimes cmov) t
 The C++20 code is maybe not super-clean (e.g. name conventions mixed, Clang warns about 'dangling else') but should be considered clean enough. I have a weakness for a prefix "t" for template parameter names and for some remnants of Hungarian notation (e.g. tbInclKing stands for template boolean parameter that specifies if a method includes king or not). 
 Macros are avoided, although BEGIN_FOR_EACH_POS_IN_MASK may be considered useful focusing on logic and hiding the implementation details, at the same time providing maximum performance.
 
-The main idea of this piece of code is simplicity and conciseness (buffers using only from 6kB to 31kB) - CPUs really like it. 
+The main idea of this piece of code is simplicity and conciseness (buffers using only from 6kB to 20kB) - CPUs really like it. 
 As already said, performing a small, branchless calculation should be preferred over fetching data from large buffers for maximum speed.
 
 I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
@@ -50,7 +50,7 @@ I admit with remorse that one of the last things was writing several UTs... Howe
 **UPDATE**\
 *For comparison there are also added - created in close co-operation with AI - methods of: 
 * __Fancy Magic Bitboards__ (get_raw_rook_moves_fmb and get_raw_bishop_moves_fmb), data used on hot paths is more than 800kB
-* __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is less than 110kB
+* __Dense Fancy Magic Bitboards__ (get_raw_rook_moves_dfmb and get_raw_bishop_moves_dfmb), data used on hot paths is less than **110kB**
 
 but they are not used by default. However in order to activate them it's enough to use another value of template parameter MoveGenMethod of class FullBitboards: MoveGenMethodT::FancyMagics or MoveGenMethodT::DenseFancyMagics.
 
