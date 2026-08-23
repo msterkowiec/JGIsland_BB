@@ -27,10 +27,11 @@ private:
     // 64x64 grid of 16-bit IDs (8,192 bytes = 8 KiB)
     std::array<std::array<uint16_t, 64>, 64> index_map{};
 
-    // Contiguous array of unique masks (2017 elements * 8 bytes = 16,136 bytes ~15.75 KiB)
+    // Contiguous array of unique masks
     // Element 0 is reserved for "no mask / empty"      
     // Expanded by 1 to accommodate both special control slots (0 and -1)
-    std::array<uint64_t, 2018> unique_masks{};
+    static constexpr size_t maxUniqueMasks = 412;
+    std::array<uint64_t, maxUniqueMasks> unique_masks{};
 
 public:
     ALWAYS_INLINE uint64_t GetBetweenMask(int sq1, int sq2) const
@@ -97,11 +98,25 @@ public:
                         table.index_map[sq2][sq1] = 1;
                     }
                     else {
+                        int found_id = -1;
+                        for (int id = 0; id < next_unique_id; ++id)
+                            if (table.unique_masks[id] == mask)
+                            {
+                                table.index_map[sq1][sq2] = id;
+                                table.index_map[sq2][sq1] = id;
+                                found_id = id;
+                                break;
+                            }
+
                         // Shared line with a gap: Allocate a unique mask entry
-                        table.unique_masks[next_unique_id] = mask;
-                        table.index_map[sq1][sq2] = next_unique_id;
-                        table.index_map[sq2][sq1] = next_unique_id;
-                        next_unique_id++;
+                        if (found_id == -1)
+                        {
+                            table.unique_masks[next_unique_id] = mask;
+                            table.index_map[sq1][sq2] = next_unique_id;
+                            table.index_map[sq2][sq1] = next_unique_id;
+                            next_unique_id++;
+                            assert(next_unique_id <= maxUniqueMasks);
+                        }
                     }
                 }
             }
@@ -111,7 +126,6 @@ public:
 
         return table;
     }
-
 };
 
 // Instantiate globally at compile time. 
