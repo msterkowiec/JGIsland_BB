@@ -19,7 +19,7 @@ You can freely reuse this code inside your chess engine(s) - see LICENCE file fo
 JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%.
 
 As already mentioned, one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
-That's why Magic Bitboards were not used but Hyperbola Quintessence (super small calculations using data in CPU registers and L1 cache).
+That's why Magic Bitboards were not used but Hyperbola Quintessence** (super small calculations using data in CPU registers and L1 cache).
 Castling and en passant information is passed as template parameters, so it doesn't have any physical representation (except for the possible en passant square). 
 A dispatcher method selects the proper template version. This is sort of paradigm of the library to make this information "weightless", like a ray of light.
 
