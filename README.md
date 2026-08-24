@@ -41,7 +41,9 @@ Macros are avoided, although BEGIN_FOR_EACH_POS_IN_MASK may be considered useful
 
 The main idea of this piece of code is simplicity and conciseness (buffers using only from 6kB to 20kB) - CPUs really like it. 
 As already said, performing a small, branchless calculation should be preferred over fetching data from large buffers for maximum speed.
-
+<!-- -->
+An interesting example of L1 cache-friendliness combined with performance is [betweenLookup](include/BetweenLookup.h). It uses only 11.5kB on hot path and its main method GetBetweenMask (called very frequently with forced inlining) does nothing but immediately indexes twice two small arrays (8kB + 3.5kB) with no risk of register spilling (no calculations at all). Typically this array occupies 32kB (64 x 64 x 8 bytes) but from overall 64*64 = 4096 line/diagonal bitmasks only 412 are unique bitmasks that can lie between two squares, including two special slots for zero bitmask (for adjacent squares) and full bitmask (for unaligned sqares, i.e. not on the same diagonal or line).
+<!-- -->
 I admit with remorse that one of the last things was writing several UTs... However my situation was specific: 
 1) I already had a test suite of more than 10k two-movers on [https://jgisland.pl/download/reports/testsuite.php](https://jgisland.pl/download/reports/testsuite.php?page=6&m=0&sort=2) (two last subpages) and converted it into [integration test suite](tests/integration_tests_suite.h) of this project
 2) I added a cross-check versus legacy methods inside a debug version (well, actually ReleaseWithAsserts to complete it faster) of the main product J.G.Island - Chess Moremovers 11.0 and ran it on the whole test suite (including all moremovers).
