@@ -18,7 +18,7 @@
 //#define __USE_SQUARE_BITBOARD__ // should rather be off (shifting usually faster than taking from L1 cache); requires 512B of additional lookup; performance tests didn't show significant difference
 
 
-#define __USE_BETWEEN_LOOKUP__ // it should be on, since it speeds up by ~20%; additional 11.5kB buffer used on the hot path; it's both small and super-fast - branchless, even no cmov; smaller than 32kB thanks to using a separate buffer with all bitmasks than can possibly be "between"
+#define __USE_BETWEENLOOKUP__ // it should be on, since it speeds up by ~20%; additional 11.5kB buffer used on the hot path; it's both small and super-fast - branchless, even no cmov; smaller than 32kB thanks to using a separate buffer with all bitmasks than can possibly be "between"
 
 
 #define __USE_FIRSTRANKATTACKSLOOKUP__ // if on, it speeds up about 1%; it is a slight extention of pure Hyperbola Quintessence that requires only 512B of additional lookup; for details see https://www.chessprogramming.org/First_Rank_Attacks
