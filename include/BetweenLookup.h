@@ -23,13 +23,13 @@ struct ZeroCmovBetween
 {
 private:
     // 64x64 grid of 16-bit IDs (8,192 bytes = 8 KiB)
-    std::array<std::array<uint16_t, 64>, 64> index_map{};
+    alignas(64) std::array<std::array<uint16_t, 64>, 64> index_map{};
 
     // Contiguous array of unique masks
     // Element 0 is reserved for "no mask / empty"      
     // Expanded by 1 to accommodate both special control slots (0 and -1)
     static constexpr size_t maxUniqueMasks = 412;
-    std::array<uint64_t, maxUniqueMasks> unique_masks{}; // ~3.5kB
+    alignas(64) std::array<uint64_t, maxUniqueMasks> unique_masks{}; // ~3.5kB
 
 public:
     ALWAYS_INLINE uint64_t GetBetweenMask(int sq1, int sq2) const
