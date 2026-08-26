@@ -10,6 +10,7 @@
 #include "config.h"
 #include "common.h"
 #include "data.h"
+#include "BetweenLookup.h"
 
 #include <stdint.h>
 #include <cstdint>
@@ -171,10 +172,17 @@ ALWAYS_INLINE int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
 
-// Perf.test show this kind of looping to be the fastest (keeping loop count makes loop branching more predictable for CPU)
-// Note that the value of the second parameter will always be zero after the loop - use "const" version, BEGIN_FOR_EACH_POS_IN_CONST_MASK, to prevent it:
-#define BEGIN_FOR_EACH_POS_IN_MASK(pos, mask) if (mask) { const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask);
-#define END_FOR_EACH_POS_IN_MASK(pos, mask)  mask &= mask - 1; ++loop_iter; } while (loop_iter != loop_count); }
+#ifdef __USE_STDBITLOOPING__ // this way of looping wins in integrated tests
+	#define BEGIN_FOR_EACH_POS_IN_MASK(pos, mask) while (mask) { const int pos = std::countr_zero(mask);
+	#define END_FOR_EACH_POS_IN_MASK(pos, mask)  mask &= mask - 1; } 
+#else
+	// Isolated perf.test show this kind of looping to be the fastest (keeping loop count makes loop branching more predictable for CPU)
+	// Note that the value of the second parameter will always be zero after the loop - use "const" version, BEGIN_FOR_EACH_POS_IN_CONST_MASK, to prevent it:
+	// However this version loses in integrated tests, most probably due to register spilling (maximum simplicity wins on hot path)
+	#define BEGIN_FOR_EACH_POS_IN_MASK(pos, mask) if (mask) { const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask);
+	#define END_FOR_EACH_POS_IN_MASK(pos, mask)  mask &= mask - 1; ++loop_iter; } while (loop_iter != loop_count); }
+#endif
+
 // Version that leaves mask intact (minimal overhead to make a copy of uint64_t)
 #define BEGIN_FOR_EACH_POS_IN_CONST_MASK(pos, mask) if (mask) { auto mask##Copy = mask; const int loop_count = std::popcount(mask); int loop_iter = 0; do { const int pos = std::countr_zero(mask##Copy);
 #define END_FOR_EACH_POS_IN_CONST_MASK(pos, mask)  mask##Copy &= mask##Copy - 1; ++loop_iter; } while (loop_iter != loop_count); }
@@ -279,6 +287,31 @@ ALWAYS_INLINE constexpr bool IsPosInBitmask(const int sq, const uint64_t mask)
 	return (mask & (sq_to_bb(sq))) != 0;
 }
 
+ALWAYS_INLINE constexpr bool is_edge(int sq)
+{
+	assert(IsValidPos(sq));
+
+	return Is_Edge[sq] != 0;
+}
+
+template<bool tbActive>
+ALWAYS_INLINE constexpr bool is_edge_and_not_same_edge(int sq1, int sq2)
+{
+	assert(IsValidPos(sq1));
+	assert(IsValidPos(sq2));
+
+	if constexpr (tbActive)
+	{
+		uint8_t edges1 = Is_Edge[sq1];
+		uint8_t edges2 = Is_Edge[sq2];
+
+		// Remove shared edges from sq1, then check if any edge bits remain
+		return (edges1 & ~edges2) != 0;
+	}
+	else
+		return false; // NOTE: for all existing use cases it is enough to 'return false' to make the feature inactive; MAKE SURE it is the same after any other use case added
+}
+
 ALWAYS_INLINE constexpr uint64_t GetRayInDir(const int sqr, const int dx, const int dy)
 {
 	assert(IsValidPos(sqr));
@@ -311,11 +344,16 @@ ALWAYS_INLINE constexpr uint64_t GetRay(const int posRayAfter, const int posRayB
 	assert(SameDiagonalOrLine(posRayAfter, posRayBase));
 
 	const Bitboard self_mask = 1ULL << posRayAfter;
+	
+	#if defined(__USE_BETWEENLOOKUP__) && defined(__USE_OPTIMFORGETRAY__)
+	const Bitboard maskFullLineOrDiag = betweenLookup.GetCommonDiagOrLine(posRayAfter, posRayBase);
+	#else	
 	const bool bSameDiag = (Bishop_Attacks[posRayBase] & self_mask) != 0;
 	const Bitboard maskSameLine = Rook_Attacks[posRayAfter] & Rook_Attacks[posRayBase];
 	const Bitboard maskSameDiag = Bishop_Attacks[posRayAfter] & Bishop_Attacks[posRayBase];
 	const Bitboard maskFullLineOrDiag = bSameDiag ? maskSameDiag : maskSameLine;
-
+	#endif
+	
 	const bool moves_upward = posRayAfter > posRayBase;
 
 	const Bitboard up_mask = ~((self_mask - 1) | self_mask);
