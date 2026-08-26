@@ -1072,7 +1072,7 @@ private:
 		const auto whiteLongDistancePieces = white & (queens | rooks | bishops);
 		if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos) & ((whiteLongDistancePieces & Queen_Attacks[posBlackKing]) != 0) & ((whiteLongDistancePieces & Queen_Attacks[pos]) != 0)) // cheap verification of prerequisites
 		#else
-		if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))
+		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))
 		#endif
 			if ((posLongDistanceAttacker = WhiteLongDistanceFigureInDir<1>(pos, posBlackKing)) >= 0)
 				if (!IsSquareBetween<1, 0>(posTo, posLongDistanceAttacker, posBlackKing)) // incl.ends (e.g. capture of the pinning piece is legal)
@@ -1098,7 +1098,7 @@ private:
 		const auto blackLongDistancePieces = black & (queens | rooks | bishops);
 		if (SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos) & ((blackLongDistancePieces & Queen_Attacks[posWhiteKing]) != 0) & ((blackLongDistancePieces & Queen_Attacks[pos]) != 0)) // cheap verification of prerequisites
 		#else
-		if (SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos))
+		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posWhiteKing) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos))
 		#endif
 			if ((posLongDistanceAttacker = BlackLongDistanceFigureInDir<1>(pos, posWhiteKing)) >= 0)
 				if (!IsSquareBetween<1, 0>(posTo, posLongDistanceAttacker, posWhiteKing)) // incl.ends (e.g. capture of the pinning piece is legal)
@@ -3651,7 +3651,7 @@ private:
 
 		const int posBlackKing = GetBlackKingPos();
 
-		if (int posWhiteLongDistAttacker; SameDiagAndAllBetweenEmpty(posBlackKing, rpos) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(rpos, posBlackKing)) >= 0)
+		if (int posWhiteLongDistAttacker; (!is_edge(rpos) & SameDiagAndAllBetweenEmpty(posBlackKing, rpos)) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(rpos, posBlackKing)) >= 0)
 		{
 			// Discovered check (and direct check maybe)
 			auto trgtBitboard = get_rook_moves(rpos, occ(), white);
@@ -3726,7 +3726,7 @@ private:
 
 		const int posBlackKing = GetBlackKingPos();
 
-		if (int posWhiteLongDistAttacker; SameLineAndAllBetweenEmpty(posBlackKing, bpos) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(bpos, posBlackKing)) >= 0)
+		if (int posWhiteLongDistAttacker; (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(bpos, posBlackKing) & SameLineAndAllBetweenEmpty(posBlackKing, bpos)) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(bpos, posBlackKing)) >= 0)
 		{
 			// Discovered check (and direct check maybe)
 			auto trgtBitboard = get_bishop_moves(bpos, occ(), white);
@@ -3804,7 +3804,7 @@ private:
 		{
 			const int posBlackKing = GetBlackKingPos();
 
-			if (int posWhiteLongDistAttacker; SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, kpos) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(kpos, posBlackKing)) >= 0)
+			if (int posWhiteLongDistAttacker; (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(kpos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, kpos)) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(kpos, posBlackKing)) >= 0)
 			{
 				// Discovered check (and direct check maybe)
 				auto trgtBitboard = Knight_Attacks[kpos] & (~white);
@@ -3855,7 +3855,7 @@ private:
 
 		const int posBlackKing = GetBlackKingPos();
 
-		if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, kpos))
+		if (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(kpos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, kpos))
 		{
 			const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(kpos, posBlackKing);
 			if (posWhiteLongDistAttacker >= 0)
@@ -3944,7 +3944,7 @@ private:
 
 		const int posBlackKing = GetBlackKingPos();
 		int posWhiteLongDistAttacker = -1;
-		if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, ppos))
+		if (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(ppos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, ppos))
 			posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(ppos, posBlackKing);
 
 		// Capture with direct check?
@@ -4293,7 +4293,10 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-			mask = pawns & white;
+			if constexpr(tbEnPassantPossible || !tbUseWhitePawnCheckOptim)
+				mask = pawns & white;
+			else
+				mask = pawns & white & White_Pawn_Check_Area[GetBlackKingPos()];			
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
