@@ -313,6 +313,107 @@ constexpr std::array<uint64_t, 64> init_diagonal_masks()
 	return masks;
 }
 
+constexpr std::array<uint64_t, 64> init_white_pawn_check_area()
+{
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		uint64_t mask = 0;
+		const int x = sq % 8;
+		const int y = sq / 8;
+
+		// Direct check:
+		if (y >= 3)
+		{
+			mask |= 1ULL << (sq - 16); // capture
+			if (x != 0)
+			{
+				mask |= 1ULL << (sq - 17); // move forward
+				if (x != 1)
+					mask |= 1ULL << (sq - 18); // capture
+				if (y == 4) // fifth line
+					mask |= 1ULL << (sq - 25); // double move forward
+			}
+			if (x != 7)
+			{
+				mask |= 1ULL << (sq - 15); // move forward
+				if (x != 6)
+					mask |= 1ULL << (sq - 14); // capture
+				if (y == 4) // fifth line
+					mask |= 1ULL << (sq - 23); // double move forward
+			}			
+		}
+
+		// Discovered attack or promo to long distance figure:
+		for (int dx = -1 ; dx <= 1 ; ++ dx)
+			for (int dy = -1; dy <= 1; ++dy)
+				if (dx | dy)
+				{
+					int px = x + dx;
+					int py = y + dy;
+					while (px >= 0 && py > 0 && px < 8 && py < 8)
+					{
+						if (py != 7)
+						{
+							if (dx != 0 && (px == 0 || px == 7))
+								break; // discovered check impossible
+							mask |= 1ULL << (px + py * 8);
+						}
+						else
+						{
+							mask |= 1ULL << (px + (py - 1) * 8); // promo forward
+							if (px != 0)
+								mask |= 1ULL << (px - 1 + (py - 1) * 8); // promo capture
+							if (px != 7)
+								mask |= 1ULL << (px + 1 + (py - 1) * 8); // promo capture
+						}
+						px += dx;
+						py += dy;
+					}
+				}
+
+		// Promo to knight:
+		if (y == 5)
+		{
+			mask |= 1ULL << (x + 6 * 8); // promo capture
+			if (x != 0)
+			{
+				mask |= 1ULL << (x - 1 + 6 * 8); // promo forward
+				if (x != 1)
+					mask |= 1ULL << (x - 2 + 6 * 8); // promo capture
+			}
+			if (x != 7)
+			{
+				mask |= 1ULL << (x + 1 + 6 * 8); // promo forward
+				if (x != 6)
+					mask |= 1ULL << (x + 2 + 6 * 8); // promo capture
+			}
+		}
+		else
+			if (y == 6)
+			{
+				if (x >= 2)
+				{
+					mask |= 1ULL << (x - 2 + 6 * 8); // promo forward
+					if (x >= 3)
+						mask |= 1ULL << (x - 3 + 6 * 8); // promo capture
+				}
+				if (x <= 5)
+				{
+					mask |= 1ULL << (x + 2 + 6 * 8); // promo forward
+					if (x <= 6)
+						mask |= 1ULL << (x + 3 + 6 * 8); // promo capture
+				}
+				// other squares match queen promo ...
+			}
+
+		res[sq] = mask;
+	}
+
+	return res;
+}
+
 // ------------------------------------------------------
 // Function that generates attacks on 1st line 
 constexpr uint8_t gather_rank_attacks(int square_file, uint8_t occ) 
@@ -348,6 +449,29 @@ constexpr std::array<uint8_t, 64 * 8> init_first_rank_attacks()
 	return arrFirstRankAttacks64x8;
 }
 
+// ------------------------------------------------------------------------------------
+
+// Bitmasks representing the 4 edges of a chessboard
+enum class EdgeMasks : uint8_t {
+	NONE = 0,
+	FILE_A = 1 << 0, // 1
+	FILE_H = 1 << 1, // 2
+	RANK_1 = 1 << 2, // 4
+	RANK_8 = 1 << 3  // 8
+};
+
+// Array mapping each square (0-63) to its edge mask
+constexpr uint8_t Is_Edge[64] = {
+	5, 4, 4, 4, 4, 4, 4, 6,  // Rank 1 (A1=FILE_A|RANK_1 = 1|4 = 5)
+	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 2
+	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 3
+	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 4
+	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 5
+	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 6
+	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 7
+	9, 8, 8, 8, 8, 8, 8, 10  // Rank 8
+};
+
 // ------------ Constexpr data filled in in compile time (6kB in total) ---------------
 
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Black_Pawn_Attacks = init_black_pawn_attacks();
@@ -367,3 +491,5 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> diagonal_masks = init
 alignas(64) inline constexpr std::array<std::uint64_t, 64> anti_diagonal_masks = init_diagonal_masks<1>();
 
 alignas(64) inline constexpr std::array<uint8_t, 64 * 8> arrFirstRankAttacks64x8 = init_first_rank_attacks();
+
+alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Check_Area = init_white_pawn_check_area();
