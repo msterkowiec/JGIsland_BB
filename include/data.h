@@ -461,7 +461,7 @@ enum class EdgeMasks : uint8_t {
 };
 
 // Array mapping each square (0-63) to its edge mask
-constexpr uint8_t Is_Edge[64] = {
+alignas(64) inline constexpr uint8_t Is_Edge[64] = {
 	5, 4, 4, 4, 4, 4, 4, 6,  // Rank 1 (A1=FILE_A|RANK_1 = 1|4 = 5)
 	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 2
 	1, 0, 0, 0, 0, 0, 0, 2,  // Rank 3
