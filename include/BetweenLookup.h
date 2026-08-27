@@ -47,11 +47,17 @@ private:
     alignas(64) std::array<uint64_t, maxUniqueMasks> unique_masks{}; // ~3.5kB
 
     // Masks of common line or diagonal
-    alignas(64) std::array<uint64_t, 47> unique_lines{};
+    static constexpr size_t maxUniqueDiagOrLines = 43; 
+    alignas(64) std::array<uint64_t, maxUniqueDiagOrLines> unique_lines{};
+    alignas(64) std::array<uint8_t, maxUniqueDiagOrLines> is_it_line{}; // yet another auxiliary lookup
 
 public:
     ALWAYS_INLINE uint64_t GetBetweenMask(int sq1, int sq2) const
     {
+        assert(((unsigned int) sq1) < 64);
+        assert(((unsigned int) sq2) < 64);
+        assert(sq1 != sq2);
+        
         uint16_t mask_id = index_map[sq1][sq2];
 
         if constexpr(tbReduceMemUsage)
@@ -61,6 +67,10 @@ public:
     }
     ALWAYS_INLINE constexpr uint64_t GetCommonDiagOrLine(int sq1, int sq2) const
     {
+        assert(((unsigned int) sq1) < 64);
+        assert(((unsigned int) sq2) < 64);
+        assert(sq1 != sq2);
+        
         if constexpr (tbReduceMemUsage)
         {
             uint16_t mask_id = index_map[sq1][sq2];            
@@ -72,6 +82,60 @@ public:
             return unique_lines[mask_id];
         }
     }
+    ALWAYS_INLINE constexpr bool IsSquareOnCommonDiagOrLineOf(int sq, int sq1, int sq2) const
+    {
+        assert(((unsigned int) sq) < 64);
+        assert(((unsigned int) sq1) < 64);
+        assert(((unsigned int) sq2) < 64);        
+        assert(sq1 != sq2);
+
+        return (1ULL << sq) & GetCommonDiagOrLine(sq1, sq2);
+    }
+    ALWAYS_INLINE constexpr uint64_t MatchOnCommonDiagOrLine(int sq1, int sq2, uint64_t lineMask, uint64_t diagMask) const
+    {
+        assert(((unsigned int) sq1) < 64);
+        assert(((unsigned int) sq2) < 64);        
+        assert(sq1 != sq2);
+        
+        if constexpr (tbReduceMemUsage)
+        {
+            uint16_t mask_id = index_map[sq1][sq2];
+            auto line = is_it_line[mask_id];
+            auto match = line ? lineMask : diagMask;
+            return unique_lines[mask_id >> 9] & match;
+        }
+        else
+        {
+            auto mask_id = index_map_2[sq1][sq2];
+            auto line = is_it_line[mask_id];
+            auto match = line ? lineMask : diagMask;
+            return unique_lines[mask_id] & match;
+        }
+    }
+    
+    ALWAYS_INLINE constexpr uint64_t MatchOnCommonDiagOrLineIfAllBetweenEmpty(int sq1, int sq2, uint64_t lineMask, uint64_t diagMask, uint64_t occ) const
+    {
+        assert(((unsigned int) sq1) < 64);
+        assert(((unsigned int) sq2) < 64);        
+        assert(sq1 != sq2);
+        
+        if constexpr (tbReduceMemUsage)
+        {
+            uint16_t mask_id = index_map[sq1][sq2];
+            auto line = is_it_line[mask_id];
+            auto match = line ? lineMask : diagMask;    
+            bool bAllBetweenEmpty = (unique_masks[mask_id & 511] & occ) == 0;
+            return unique_lines[mask_id >> 9] & match & (0ULL - static_cast<uint64_t>(bAllBetweenEmpty));
+        }
+        else
+        {
+            auto mask_id = index_map_2[sq1][sq2];
+            auto line = is_it_line[mask_id];
+            auto match = line ? lineMask : diagMask;
+            bool bAllBetweenEmpty = (unique_masks[index_map[sq1][sq2]] & occ) == 0;
+            return unique_lines[mask_id] & match & (0ULL - static_cast<uint64_t>(bAllBetweenEmpty));
+        }
+    }    
 
     // Implementation:
 private:
@@ -83,15 +147,8 @@ private:
     {
         constexpr auto tbShift = tbReduceMemUsage ? 9 : 0;
 
-        // 1. Initialize fallback defaults
-        // Index 46 is now explicitly set to ~0ULL (-1) for unaligned squares
-        unique_lines[46] = ~0ULL;
-
-        for (int i = 0; i < 64; ++i)
-            for (int j = 0; j < 64; ++j)
-                idxMap[i][j] |= 46 << tbShift; // group 46 (-1)
-
         int next_line_id = 0;
+        unique_lines[next_line_id++] = 0; // zero mask for unaligned squares (it is different than in the main between lookup that returns full mask (-1) for unaligned squares)        
 
         for (int sq1 = 0; sq1 < 64; ++sq1)
         {
@@ -138,17 +195,6 @@ private:
                         }
                     }
 
-                    if constexpr (tbReduceMemUsage)
-                    {
-                        idxMap[sq1][sq2] &= 511; // clear 46 << 9 filled at the startup
-                        idxMap[sq2][sq1] &= 511;
-                    }
-                    else
-                    {
-                        idxMap[sq1][sq2] = 0; // clear 46 << 9 filled at the startup
-                        idxMap[sq2][sq1] = 0;
-                    }
-
                     if (existing_id != -1) {
                         // Reuse the existing unique line ID
                         idxMap[sq1][sq2] |= existing_id << tbShift;
@@ -156,8 +202,9 @@ private:
                     }
                     else {
                         // Brand new line mask found, store it safely
-                        assert(next_line_id < 46);
+                        assert(next_line_id < maxUniqueDiagOrLines);
                         unique_lines[next_line_id] = mask;
+                        is_it_line[next_line_id] = (dr == 0 || df == 0);
                         idxMap[sq1][sq2] |= next_line_id << tbShift;
                         idxMap[sq2][sq1] |= next_line_id << tbShift;
                         next_line_id++;
@@ -165,6 +212,7 @@ private:
                 }
             }
         }
+        return;
     }
 
 public:
@@ -255,5 +303,5 @@ public:
 };
 
 // Instantiate globally at compile time. This lands straight into the read-only (.rodata) segment of the binary
-inline constexpr BetweenLookupExt<> betweenLookup = BetweenLookupExt<>::CreateBetweenLookupExt();
+inline constexpr BetweenLookupExt<tbMemUsageOptimInBetweenLookup> betweenLookup = BetweenLookupExt<tbMemUsageOptimInBetweenLookup>::CreateBetweenLookupExt();
 

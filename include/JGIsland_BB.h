@@ -351,42 +351,34 @@ private:
 	}
 	// -------------------- This group of methods can be extended by switching on __USE_BETWEENLOOKUP (aditional 16kB while originally only 6kB buffers in total) -------------------------
 	template<bool tbIncludeEnds = false>
-	ALWAYS_INLINE static constexpr std::uint64_t GetBetweenMask(const char sq1, const char sq2)
+	ALWAYS_INLINE static constexpr uint64_t GetBetweenMask(const char sq1, const char sq2)
 	{
 		assert(IsValidPos(sq1));
 		assert(IsValidPos(sq2));
 		assert(sq1 != sq2);
-		assert(SameDiagonalOrLine(sq1, sq2));
 
-		#ifdef __USE_BETWEENLOOKUP__
 		const auto res = betweenLookup.GetBetweenMask(sq1, sq2);
-		assert(res != ~0ULL);
 		if constexpr (tbIncludeEnds)
 			return res | (sq_to_bb(sq1)) | (sq_to_bb(sq2));
 		else
 			return res;		
+	}
 
-		#else
-
-		const Bitboard rook_match = Rook_Attacks[sq1] & Rook_Attacks[sq2];
-		const Bitboard bishop_match = Bishop_Attacks[sq1] & Bishop_Attacks[sq2];
-
-		const bool is_rook_line = std::popcount(rook_match) >= 6;
-
-		const Bitboard full_line = is_rook_line ? rook_match : bishop_match;
-
-		const int min_sq = std::min(sq1, sq2);
-		const int max_sq = std::max(sq1, sq2);
-
-		const Bitboard up_mask = ~((sq_to_bb(min_sq + 1)) - 1);
-		const Bitboard down_mask = (sq_to_bb(max_sq)) - 1;
-
-		const auto res = full_line & up_mask & down_mask;
-		if constexpr (tbIncludeEnds)
-			return res | (sq_to_bb(sq1)) | (sq_to_bb(sq2)); 
-		else
-			return res;			
-		#endif
+	ALWAYS_INLINE static constexpr uint64_t GetCommonDiagOrLine(int sq1, int sq2)
+	{
+		assert(IsValidPos(sq1));
+		assert(IsValidPos(sq2));
+		assert(sq1 != sq2);
+		const auto res = betweenLookup.GetCommonDiagOrLine(sq1, sq2);
+		return res;
+	}
+	ALWAYS_INLINE static constexpr bool IsSquareOnCommonDiagOrLineOf(int sq, int sq1, int sq2)
+	{
+		assert(IsValidPos(sq));
+		assert(IsValidPos(sq1));
+		assert(IsValidPos(sq2));
+		assert(sq1 != sq2);
+		return betweenLookup.IsSquareOnCommonDiagOrLineOf(sq, sq1, sq2);
 	}
 
 	template<bool tbSquaresS1S2KnownToBeOnSameDiagonalOrLine = false, bool tbExcludingEnds = true, bool tbOptim = true>
@@ -396,13 +388,8 @@ private:
 		assert(IsValidPos(s1));
 		assert(IsValidPos(s2));
 		assert(s1 != s2); // let's assume that square can be the same as s1 or s2
-		#ifndef __USE_BETWEENLOOKUP__ 
-		if constexpr (!tbSquaresS1S2KnownToBeOnSameDiagonalOrLine)
-			return GetBetweenMask<!tbExcludingEnds>(s1, s2) & (sq_to_bb(square));		
-		#endif	
 		assert(!tbSquaresS1S2KnownToBeOnSameDiagonalOrLine || SameDiagonalOrLine(s1, s2));
 
-		#ifdef __USE_BETWEENLOOKUP__ 
 		if constexpr(tbSquaresS1S2KnownToBeOnSameDiagonalOrLine)
 			return GetBetweenMask<!tbExcludingEnds>(s1, s2) & (sq_to_bb(square));
 		else
@@ -412,64 +399,15 @@ private:
 			const bool res = (mask != ~0ULL) ? match : false;
 			return res;
 		}
-		#else
-		return GetBetweenMask<!tbExcludingEnds>(s1, s2) & (sq_to_bb(square));
-		#endif
-
 	}
 
-	#ifdef __USE_BETWEENLOOKUP__
-	// First two optional helper methods:
-	ALWAYS_INLINE bool AllBetweenEmptyByLookup(const int pos1, const int pos2) const
-	{
-		assert(IsValidPos(pos1));
-		assert(IsValidPos(pos2));
-		assert(pos1 != pos2);
-
-		const auto mask = betweenLookup.GetBetweenMask(pos1, pos2);
-
-		#ifndef NDEBUG
-		const bool sameDiagOrLine = SameDiagonalOrLine(pos1, pos2);
-		assert((sameDiagOrLine && mask == GetBetweenMask(pos1, pos2)) || (!sameDiagOrLine && mask == -1)); // cross-check
-		#endif
-
-		return (mask & occ()) == 0;
-	}
-	ALWAYS_INLINE bool AllBetweenEmptyByLookupIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
-	{
-		assert(IsValidPos(pos1));
-		assert(IsValidPos(pos2));
-		assert(IsValidPos(posWhitePawnToTakeOff));
-		assert(pos1 != pos2);
-		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
-
-		const auto pawnMask = (sq_to_bb(posWhitePawnToTakeOff));
-		const_cast<FullBitboards*>(this)->white ^= pawnMask;
-		#ifdef __JGI_BB_PEDANTIC__
-		const_cast<FullBitboards*>(this)->pawns ^= pawnMask;
-		#endif
-
-		const auto res = AllBetweenEmptyByLookup(pos1, pos2);
-
-		const_cast<FullBitboards*>(this)->white ^= pawnMask;
-		#ifdef __JGI_BB_PEDANTIC__
-		const_cast<FullBitboards*>(this)->pawns ^= pawnMask;
-		#endif
-
-		return res;
-	}
-	#endif
 	ALWAYS_INLINE bool SameLineAndAllBetweenEmpty(const int pos1, const int pos2) const
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
 		assert(pos1 != pos2);
 		
-		#ifndef __USE_BETWEENLOOKUP__
-		return SameLine(pos1, pos2) && AllBetweenEmpty(pos1, pos2);
-		#else
-		return AllBetweenEmptyByLookup(pos1, pos2) & (SameLine(pos1, pos2));
-		#endif
+		return AllBetweenEmpty(pos1, pos2) & (SameLine(pos1, pos2));
 	}
 	ALWAYS_INLINE bool SameDiagAndAllBetweenEmpty(const int pos1, const int pos2) const
 	{
@@ -477,11 +415,7 @@ private:
 		assert(IsValidPos(pos2));
 		assert(pos1 != pos2);
 
-		#ifndef __USE_BETWEENLOOKUP__
-		return SameDiag(pos1, pos2) && AllBetweenEmpty(pos1, pos2);
-		#else
-		return AllBetweenEmptyByLookup(pos1, pos2) & (SameDiag(pos1, pos2));
-		#endif
+		return AllBetweenEmpty(pos1, pos2) & (SameDiag(pos1, pos2));
 	}
 	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmpty(const int pos1, const int pos2) const
 	{
@@ -489,11 +423,7 @@ private:
 		assert(IsValidPos(pos2));
 		assert(pos1 != pos2);
 
-		#ifndef __USE_BETWEENLOOKUP__
-		return SameDiagonalOrLine(pos1, pos2) && AllBetweenEmpty(pos1, pos2);
-		#else
-		return AllBetweenEmptyByLookup(pos1, pos2);
-		#endif
+		return AllBetweenEmpty(pos1, pos2);
 	}
 	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
 	{
@@ -503,11 +433,7 @@ private:
 		assert(pos1 != pos2);
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
-		#ifndef __USE_BETWEENLOOKUP__
-		return SameDiagonalOrLine(pos1, pos2) && AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff);
-		#else
-		return AllBetweenEmptyByLookupIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff);
-		#endif
+		return AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff);
 	}
 	ALWAYS_INLINE bool SameDiagAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
 	{
@@ -517,11 +443,7 @@ private:
 		assert(pos1 != pos2);
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
-		#ifndef __USE_BETWEENLOOKUP__
-		return SameDiag(pos1, pos2) && AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff);
-		#else
-		return AllBetweenEmptyByLookupIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff) & (SameDiag(pos1, pos2));
-		#endif
+		return AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff) & (SameDiag(pos1, pos2));
 	}
 	ALWAYS_INLINE bool SameLineAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
 	{
@@ -531,11 +453,7 @@ private:
 		assert(pos1 != pos2);
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
-		#ifndef __USE_BETWEENLOOKUP__
-		return SameLine(pos1, pos2) && AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff);
-		#else
-		return AllBetweenEmptyByLookupIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff) & (SameLine(pos1, pos2));
-		#endif
+		return AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff) & (SameLine(pos1, pos2));
 	}	
 	// ---------------------------------------------------------------------------------------------
 
@@ -1068,14 +986,26 @@ private:
 		int posLongDistanceAttacker;
 		const auto posBlackKing = GetBlackKingPos();
 
-		#ifdef __VERIFY_PINNING_PREREQUISITE__
-		const auto whiteLongDistancePieces = white & (queens | rooks | bishops);
-		if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos) & ((whiteLongDistancePieces & Queen_Attacks[posBlackKing]) != 0) & ((whiteLongDistancePieces & Queen_Attacks[pos]) != 0)) // cheap verification of prerequisites
+		#if defined(__VERIFY_PINNING_WITHMOVEGEN__) 
+		if constexpr (MoveGenMethod == MoveGenMethodT::DenseFancyMagics)
+		{
+			const auto occu = occ();
+			const auto maskWhiteLongDistAttackers = ((get_raw_bishop_moves(pos, occu) & white & (bishops | queens)) | (get_raw_rook_moves(pos, occu) & white & (rooks | queens))) & GetCommonDiagOrLine(pos, posBlackKing);
+			if ((maskWhiteLongDistAttackers != 0) & SameDiagonalOrLineAndAllBetweenEmpty(pos, posBlackKing))
+				return !IsSquareOnCommonDiagOrLineOf(posTo, pos, posBlackKing);
+			else
+				return false;
+		}
+		#endif
+
+		
+		#ifdef __VERIFY_PINNING_PREREQUISITE__		
+		if (white & betweenLookup.MatchOnCommonDiagOrLineIfAllBetweenEmpty(posBlackKing, pos, queens|rooks, queens|bishops, white|black)) // cheap verification of prerequisites
 		#else
 		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))
 		#endif
 			if ((posLongDistanceAttacker = WhiteLongDistanceFigureInDir<1>(pos, posBlackKing)) >= 0)
-				if (!IsSquareBetween<1, 0>(posTo, posLongDistanceAttacker, posBlackKing)) // incl.ends (e.g. capture of the pinning piece is legal)
+				if (!IsSquareOnCommonDiagOrLineOf(posTo, pos, posBlackKing))
 					return true;
 
 		return false;
@@ -1094,14 +1024,26 @@ private:
 		int posLongDistanceAttacker;
 		const int posWhiteKing = GetWhiteKingPos();
 
+		#if defined(__VERIFY_PINNING_WITHMOVEGEN__)
+		if constexpr (MoveGenMethod == MoveGenMethodT::DenseFancyMagics)
+		{
+			const auto occu = occ();
+			const auto maskBlackLongDistAttackers = ((get_raw_bishop_moves(pos, occu) & black & (bishops | queens)) | (get_raw_rook_moves(pos, occu) & black & (rooks | queens))) & GetCommonDiagOrLine(pos, posWhiteKing);
+			if ((maskBlackLongDistAttackers != 0) & SameDiagonalOrLineAndAllBetweenEmpty(pos, posWhiteKing))
+				return !IsSquareOnCommonDiagOrLineOf(posTo, pos, posWhiteKing);
+			else
+				return false;
+		}
+		#endif
+
+		
 		#ifdef __VERIFY_PINNING_PREREQUISITE__
-		const auto blackLongDistancePieces = black & (queens | rooks | bishops);
-		if (SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos) & ((blackLongDistancePieces & Queen_Attacks[posWhiteKing]) != 0) & ((blackLongDistancePieces & Queen_Attacks[pos]) != 0)) // cheap verification of prerequisites
+		if (black & betweenLookup.MatchOnCommonDiagOrLineIfAllBetweenEmpty(posWhiteKing, pos, queens | rooks, queens | bishops, white|black)) // cheap verification of prerequisites
 		#else
 		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posWhiteKing) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos))
 		#endif
 			if ((posLongDistanceAttacker = BlackLongDistanceFigureInDir<1>(pos, posWhiteKing)) >= 0)
-				if (!IsSquareBetween<1, 0>(posTo, posLongDistanceAttacker, posWhiteKing)) // incl.ends (e.g. capture of the pinning piece is legal)
+				if (!IsSquareOnCommonDiagOrLineOf(posTo, pos, posWhiteKing))
 					return true;
 
 		return false;
