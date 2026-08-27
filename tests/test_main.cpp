@@ -77,10 +77,8 @@ TEST(JGIsland_BB_Tests, TestIsSquareBetween)
 	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_F7_, _E8_, _E1_), false);
 	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_H1_, _H1_, _A8_), false);
 	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween<1>(_F3_, _H1_, _A8_), true);
-	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_F4_, _H1_, _A8_), false);
-	#ifdef __USE_BETWEENLOOKUP__ 
+	EXPECT_EQ(FullBitboards_HQ::IsSquareBetween(_F4_, _H1_, _A8_), false);	
 	EXPECT_EQ((FullBitboards_HQ::IsSquareBetween<1,0>(_H1_, _H1_, _A8_)), true);// incl.ends
-	#endif
 }
 
 TEST(JGIsland_BB_Tests, TestGetRay)
