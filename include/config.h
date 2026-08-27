@@ -19,7 +19,7 @@
 
 
 #define __USE_BETWEENLOOKUP__ // it should be on, since it speeds up by ~20%; additional 11.5kB buffer used on the hot path; it's both small and super-fast - branchless, even no cmov; smaller than 32kB thanks to using a separate buffer with all bitmasks than can possibly be "between"
-
+                              // NOTE: setting no longer supported (commenting it out has no effect - it is always ON), since it proved to speed up significantly and it's no use keeping the code messy with the option with no lookup
 
 #define __USE_FIRSTRANKATTACKSLOOKUP__ // if on, it speeds up about 1%; it is a slight extention of pure Hyperbola Quintessence that requires only 512B of additional lookup; for details see https://www.chessprogramming.org/First_Rank_Attacks
 
@@ -29,21 +29,22 @@
 
 // #define __PREEMPTIVE_BLACKPINNEDPIECES__ // It should be off (not defined), since statistically already the first Black move found is a refutation, so we should not make this preemptive check (this macro is for IsImmediateMateAfterAnyBlackResponse)
 
-// #define __VERIFY_PINNING_PREREQUISITE__ // an older attempt; although a few branchless operations, no performance gain when using it
-
 #define __USE_OPTIM_FOR_NON_CAPTURE__ // should rather be on - the observed speed-up is about 1-2%
 #define __USE_OPTIM_FOR_NON_CAPTURE_BY_KING__ // should rather be on; here the difference is that we have to pay one branch for this feature but as an additional advantage we have black king's moves sorted (captures analyzed first) - perf.tests indicate a tiny improvement
 
 
 #define __USE_OPTIM_FOR_SAMEDIAGORLINE__ // seems to cause a tiny performance speed-up, ~0.5%
 
-// Set of the most recent micro-optimizations that let speed up from almost 45 to 46 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
+// Set of the most recent micro-optimizations that speed up from almost 45 to 46 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
 #define __USE_ISEDGE_FORDISCOVEREDCHECK__ // see also tbUseIsEdgeForDiscoveredCheck below
 #define __USE_ISEDGE_FORISPINNED__ // see also tbUseIsEdgeForIsPinned
 #define __USE_WHITEPAWNCHECKOPTIM__ // see also tbUseWhitePawnCheckOptim below 
 #define __USE_OPTIMFORGETRAY__
 #define __USE_STDBITLOOPING__ // should rather be on - this way of looping wins in integrated tests
 // #define __USE_MEMUSAGEOPTIM_IN_BETWEENLOOKUP__ // should rather be off - causes a very slight but measurable slowdown (although on some newest machines a small speed-up observed...)
+
+#define __VERIFY_PINNING_PREREQUISITE__   // should rather be on - seems to speed up from 46 to 47 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
+// #define __VERIFY_PINNING_WITHMOVEGEN__ // should rather be off - no performance gain
 
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
