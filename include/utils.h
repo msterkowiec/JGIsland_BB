@@ -345,7 +345,7 @@ ALWAYS_INLINE constexpr uint64_t GetRay(const int posRayAfter, const int posRayB
 
 	const Bitboard self_mask = 1ULL << posRayAfter;
 	
-	#if defined(__USE_BETWEENLOOKUP__) && defined(__USE_OPTIMFORGETRAY__)
+	#if defined(__USE_OPTIMFORGETRAY__)
 	const Bitboard maskFullLineOrDiag = betweenLookup.GetCommonDiagOrLine(posRayAfter, posRayBase);
 	#else	
 	const bool bSameDiag = (Bishop_Attacks[posRayBase] & self_mask) != 0;
