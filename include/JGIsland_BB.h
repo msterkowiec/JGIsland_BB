@@ -318,6 +318,35 @@ private:
 
 		return bBishopLike + bRookLike + bRookLike;
 	}
+
+	ALWAYS_INLINE uint64_t WhitePawnAttacks() const
+	{
+		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
+		constexpr uint64_t NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
+
+		const uint64_t attack_left = ((white & pawns) << 7) & NOT_H_FILE;
+		const uint64_t attack_right = ((white & pawns) << 9) & NOT_A_FILE;
+		return attack_left | attack_right;
+	}
+	ALWAYS_INLINE uint64_t WhiteKnightAttacks() const
+	{
+		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
+		constexpr uint64_t NOT_AB_FILE = 0xFCFCFCFCFCFCFCFCULL;
+		constexpr uint64_t NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
+		constexpr uint64_t NOT_GH_FILE = 0x3F3F3F3F3F3F3F3FULL;
+
+		const uint64_t white_knights = white & knights;
+		uint64_t attacks = 0;
+
+		// Grouping by actual column dependencies
+		attacks |= ((white_knights & NOT_H_FILE) << 17) | ((white_knights & NOT_H_FILE) >> 15); // Right 1
+		attacks |= ((white_knights & NOT_GH_FILE) << 10) | ((white_knights & NOT_GH_FILE) >> 6);  // Right 2
+		attacks |= ((white_knights & NOT_A_FILE) << 15) | ((white_knights & NOT_A_FILE) >> 17); // Left 1
+		attacks |= ((white_knights & NOT_AB_FILE) << 6) | ((white_knights & NOT_AB_FILE) >> 10); // Left 2
+
+		return attacks;
+	}
+
 	ALWAYS_INLINE bool AllBetweenEmpty(const int pos1, const int pos2) const
 	{
 		assert(IsValidPos(pos1));
@@ -672,30 +701,39 @@ private:
 	}
 
 	// Improved implementations using move generation methods (get_raw_bishop_moves and get_raw_rook_moves)
-	template<bool tbInclKing = true, bool tbFindAll = true>
+	// NOTE: There's a trick with tbInclKing<0 - in this case king, pawn and knight attacks are not verified (only long distance attackers)
+	template<char tbInclKing = true, bool tbFindAll = true>
 	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_GenMoves(const int target_sq) const
 	{
+		constexpr bool tbLongDistanceAttackersOnly = tbInclKing < 0; // special value to verify only long distance attackers (see also comments above)
+		
 		assert(IsValidPos(target_sq));
 
-		Bitboard occ = white | black;
-		Bitboard white_pawns = white & pawns;
-		Bitboard white_knights = white & knights;
-		
+		const Bitboard occ = white | black;
 		Bitboard direct_attackers;
-		if constexpr(tbInclKing)
-			direct_attackers = (Knight_Attacks[target_sq] & white_knights) | (King_Attacks[target_sq] & white & kings) | (Black_Pawn_Attacks[target_sq] & white_pawns);
+		
+		if constexpr (!tbLongDistanceAttackersOnly) 
+		{
+			const Bitboard white_pawns = white & pawns;
+			const Bitboard white_knights = white & knights;
+
+			if constexpr (tbInclKing)
+				direct_attackers = (Knight_Attacks[target_sq] & white_knights) | (King_Attacks[target_sq] & white & kings) | (Black_Pawn_Attacks[target_sq] & white_pawns);
+			else
+				direct_attackers = (Knight_Attacks[target_sq] & white_knights) | (Black_Pawn_Attacks[target_sq] & white_pawns);
+
+			if constexpr (!tbFindAll)
+				if (direct_attackers)
+					return direct_attackers;
+		}
 		else
-			direct_attackers = (Knight_Attacks[target_sq] & white_knights) | (Black_Pawn_Attacks[target_sq] & white_pawns);
+			direct_attackers = 0;
 
-		if constexpr (!tbFindAll)
-			if (direct_attackers)
-				return direct_attackers;
+		const Bitboard direct_b_moves = get_raw_bishop_moves(target_sq, occ);
+		const Bitboard direct_r_moves = get_raw_rook_moves(target_sq, occ);
 
-		Bitboard direct_b_moves = get_raw_bishop_moves(target_sq, occ);
-		Bitboard direct_r_moves = get_raw_rook_moves(target_sq, occ);
-
-		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & white;
-		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & white;
+		const Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & white;
+		const Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & white;
 
 		direct_attackers |= direct_b_pieces | direct_r_pieces;
 		
@@ -2733,19 +2771,25 @@ private:
 			return 0;
 	}
 
-
+	#ifdef __USE_WHITEKNIGHTATTACKMASK__
 	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) const
 	{
 		const auto blackKing = black & kings;
+				
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
 		#ifdef __JGI_BB_PEDANTIC__
 		const_cast<FullBitboards*>(this)->kings ^= blackKing;
 		#endif
 
-		auto mask = King_Attacks[std::countr_zero(blackKing)] & ~black;
+		const auto posBlackKing = std::countr_zero(blackKing);
+		const auto posWhiteKing = std::countr_zero(white & kings);
+		const auto whitePawnAttacks = WhitePawnAttacks();
+		const auto whiteKnightAttacks = WhiteKnightAttacks();
+		
+		auto mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
-		{
-			if (!IsSquareAttackedByWhite(pos))
+		{			
+			if (!IsSquareAttackedByWhite_GenMoves<-1,0>(pos))  // -1 == only long distance attackers (king, pawns and knights already verified)
 			{
 				const_cast<FullBitboards*>(this)->black ^= blackKing;
 				#ifdef __JGI_BB_PEDANTIC__
@@ -2763,6 +2807,42 @@ private:
 
 		return false;
 	}
+	#else
+	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) const
+	{
+		const auto blackKing = black & kings;
+		const_cast<FullBitboards*>(this)->black ^= blackKing;
+		#ifdef __JGI_BB_PEDANTIC__
+		const_cast<FullBitboards*>(this)->kings ^= blackKing;
+		#endif
+
+		const auto posBlackKing = std::countr_zero(blackKing);
+		const auto posWhiteKing = std::countr_zero(white & kings);
+		const auto whitePawnAttacks = WhitePawnAttacks();
+		
+		auto mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks;					
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+		{
+			if (!IsSquareAttackedByWhite_GenMoves<0,0>(pos))
+			{
+				const_cast<FullBitboards*>(this)->black ^= blackKing;
+				#ifdef __JGI_BB_PEDANTIC__
+				const_cast<FullBitboards*>(this)->kings ^= blackKing;
+				#endif
+				return true;
+			}
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, mask);
+
+		const_cast<FullBitboards*>(this)->black ^= blackKing;
+		#ifdef __JGI_BB_PEDANTIC__
+		const_cast<FullBitboards*>(this)->kings ^= blackKing;
+		#endif
+
+		return false;
+	}
+	#endif
+
 	// Method assumes that either black king is not checked, or moving on this square will block check
 	template<bool tbInclKing = false>
 	ALWAYS_INLINE bool CanBlackMoveOn(const int sq) const
