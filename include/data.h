@@ -414,6 +414,78 @@ constexpr std::array<uint64_t, 64> init_white_pawn_check_area()
 	return res;
 }
 
+constexpr std::array<uint64_t, 64> init_bishops_that_can_check()
+{
+	constexpr uint64_t FILE_A = 0x0101010101010101ULL;
+	constexpr uint64_t FILE_A_NO_EDGES = 0x0001010101010100ULL;
+	constexpr uint64_t LINE_1 = 255;
+	constexpr uint64_t LINE_1_NO_EDGES = 126;
+
+	constexpr uint64_t DARK_SQUARES = 0xAA55AA55AA55AA55ULL; // a1, c1 etc.
+	constexpr uint64_t LIGHT_SQUARES = ~DARK_SQUARES; // b1, d1 etc.
+
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		const int x = sq & 7;
+		const int y = sq >> 3;
+
+		const bool isDarkSquare = DARK_SQUARES & (1ULL << sq);
+		res[sq] = isDarkSquare ? DARK_SQUARES : LIGHT_SQUARES; // direct check		
+		res[sq] |= (LINE_1_NO_EDGES << (y * 8)) | (FILE_A_NO_EDGES << x); // discovered check					  		
+	}
+
+	return res;
+}
+
+constexpr std::array<uint64_t, 64> init_knights_that_can_check()
+{
+	constexpr uint64_t FILE_A = 0x0101010101010101ULL;
+	constexpr uint64_t FILE_A_NO_EDGES = 0x0001010101010100ULL;
+	constexpr uint64_t LINE_1 = 255;
+	constexpr uint64_t LINE_1_NO_EDGES = 126;
+
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		const int x = sq & 7;
+		const int y = sq >> 3;
+
+		// discovered check	from the same line:	
+		res[sq] |= (LINE_1_NO_EDGES << (y * 8)) | (FILE_A_NO_EDGES << x); 
+		// discovered check	from the same diagonal:
+		for (int dx = -1 ; dx <= 1 ; dx += 2)
+			for (int dy = -1; dy <= 1; dy += 2)
+			{
+				int cx = x + dx;
+				int cy = y + dy;
+				while (cx >= 0 && cy >= 0 && cx < 8 && cy < 8)
+				{
+					res[sq] |= (1ULL << (cx + cy * 8));
+					cx += dx;
+					cy += dy;
+				}
+			}
+
+		// direct check:
+		for (int knpos = 0; knpos < 64; ++knpos)
+		{
+			const int kx = knpos & 7;
+			const int ky = knpos >> 3;
+			const int diffx = CTABS(kx - x);
+			const int diffy = CTABS(ky - y);
+			if (diffx + diffy <= 6)
+				if (((diffx + diffy) & 1) == 0) // even sum diffs
+					if (diffx != 2 || diffy != 2)
+						res[sq] |= (1ULL << (kx + ky * 8));
+		}
+	}
+
+	return res;
+}
+
 // ------------------------------------------------------
 // Function that generates attacks on 1st line 
 constexpr uint8_t gather_rank_attacks(int square_file, uint8_t occ) 
@@ -492,4 +564,9 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> anti_diagonal_masks =
 
 alignas(64) inline constexpr std::array<uint8_t, 64 * 8> arrFirstRankAttacks64x8 = init_first_rank_attacks();
 
+// Fast filtering pieces that can check:
 alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Check_Area = init_white_pawn_check_area();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Check = init_bishops_that_can_check();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Check = init_knights_that_can_check();
+
+
