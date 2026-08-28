@@ -415,10 +415,8 @@ constexpr std::array<uint64_t, 64> init_white_pawn_check_area()
 }
 
 constexpr std::array<uint64_t, 64> init_bishops_that_can_check()
-{
-	constexpr uint64_t FILE_A = 0x0101010101010101ULL;
+{	
 	constexpr uint64_t FILE_A_NO_EDGES = 0x0001010101010100ULL;
-	constexpr uint64_t LINE_1 = 255;
 	constexpr uint64_t LINE_1_NO_EDGES = 126;
 
 	constexpr uint64_t DARK_SQUARES = 0xAA55AA55AA55AA55ULL; // a1, c1 etc.
@@ -440,10 +438,8 @@ constexpr std::array<uint64_t, 64> init_bishops_that_can_check()
 }
 
 constexpr std::array<uint64_t, 64> init_knights_that_can_check()
-{
-	constexpr uint64_t FILE_A = 0x0101010101010101ULL;
+{	
 	constexpr uint64_t FILE_A_NO_EDGES = 0x0001010101010100ULL;
-	constexpr uint64_t LINE_1 = 255;
 	constexpr uint64_t LINE_1_NO_EDGES = 126;
 
 	std::array<uint64_t, 64> res{};
