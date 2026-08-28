@@ -45,6 +45,10 @@
 
 #define __USE_WHITEKNIGHTATTACKMASK__  // should rather be on - seems to further speed up to almost 52 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
 
+#define __USE_MOVEGENINCANWHITEQUEENCHECK__ // should be ON
+#define __USE_MOVEGENINCANWHITEROOKCHECK__  // should be ON
+#define __USE_MOVEGENINCANWHITEBISHOPCHECK__ // should rather be ON (speeds up with Dence Fancy Magic Bitboards), although causes a slight slow-down with Hyperbola Quintessence
+
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
 // (tb prefix stands for Template Boolean but in this context it means just Compile-Time Boolean)
