@@ -43,6 +43,8 @@
 #define __VERIFY_PINNING_PREREQUISITE__   // should rather be on - seems to speed up from 46 to 47 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
 // #define __VERIFY_PINNING_WITHMOVEGEN__ // should rather be off - no performance gain
 
+#define __USE_WHITEKNIGHTATTACKMASK__  // should rather be on - seems to further speed up to almost 52 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
+
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
 // (tb prefix stands for Template Boolean but in this context it means just Compile-Time Boolean)

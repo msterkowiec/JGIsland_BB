@@ -274,10 +274,7 @@ ALWAYS_INLINE constexpr bool IsSquareAlongTheLineOrDiag(const int sq, const int 
 	assert(IsValidPos(sq2));
 	assert(SameDiagonalOrLine(sq1, sq2));
 
-	const bool sameLine = SameLine(sq1, sq2);
-	const uint64_t* pBitboard = sameLine ? Rook_Attacks.data() : Bishop_Attacks.data();
-	const auto mask = (pBitboard[sq1] & pBitboard[sq2]) | (sq_to_bb(sq1)) | (sq_to_bb(sq2));
-	return (mask & (sq_to_bb(sq))) != 0;
+	return betweenLookup.IsSquareOnCommonDiagOrLineOf(sq, sq1, sq2);
 }
 
 ALWAYS_INLINE constexpr bool IsPosInBitmask(const int sq, const uint64_t mask)
