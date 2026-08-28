@@ -3800,6 +3800,7 @@ private:
 		}
 		else
 		{
+			// Direct check:
 			#ifdef __USE_MOVEGENINCANWHITEBISHOPCHECK__
 				const auto occ = this->occ();
 				auto mask = get_raw_bishop_moves(bpos, occ) & get_raw_bishop_moves(posBlackKing, occ) & ~white;
