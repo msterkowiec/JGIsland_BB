@@ -3640,11 +3640,21 @@ private:
 		#endif
 
 		const int posBlackKing = GetBlackKingPos();
+		
+		#ifdef __USE_MOVEGENINCANWHITEQUEENCHECK__
+		const auto occ = this->occ();
+		const auto movesByQueen = get_raw_bishop_moves(qpos, occ) | get_raw_rook_moves(qpos, occ);		
+		const auto movesFromKing = get_raw_bishop_moves(posBlackKing, occ) | get_raw_rook_moves(posBlackKing, occ);
+		auto mask = movesByQueen & movesFromKing & (~white);
+		#else
 		auto mask = Queen_Attacks[posBlackKing] & Queen_Attacks[qpos] & (~white);
+		#endif
 
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
+			#ifndef __USE_MOVEGENINCANWHITEQUEENCHECK__
 			if (AllBetweenEmpty(qpos, pos) & AllBetweenEmpty(pos, posBlackKing))			
+			#endif
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 				if (!pinned || IsSquareAlongTheLineOrDiag(pos, qpos, GetWhiteKingPos()))
 				#else
@@ -3709,16 +3719,23 @@ private:
 		else
 		{
 			// Direct check:
-			auto mask = Rook_Attacks[posBlackKing] & Rook_Attacks[rpos] & (~white);
-			#ifdef __USE_OPTIM_FOR_SAMEDIAGORLINE__
-			const bool sameLine = SameLine(posBlackKing, rpos);
-			const auto maskCapture = mask & black;
-			mask = sameLine ? maskCapture : mask; // cmov; only a capture can be a checkmate when on the same line with black king
+			#ifdef __USE_MOVEGENINCANWHITEROOKCHECK__
+				const auto occ = this->occ();
+				auto mask = get_raw_rook_moves(rpos, occ) & get_raw_rook_moves(posBlackKing, occ) & ~white;
+			#else
+				auto mask = Rook_Attacks[posBlackKing] & Rook_Attacks[rpos] & (~white);
+				#ifdef __USE_OPTIM_FOR_SAMEDIAGORLINE__
+				const bool sameLine = SameLine(posBlackKing, rpos);
+				const auto maskCapture = mask & black;
+				mask = sameLine ? maskCapture : mask; // cmov; only a capture can be a checkmate when on the same line with black king
+				#endif
 			#endif
 			
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
+				#ifndef __USE_MOVEGENINCANWHITEROOKCHECK__
 				if (AllBetweenEmpty(rpos, pos) & AllBetweenEmpty(pos, posBlackKing))
+				#endif
 					#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 					if (!pinned || IsSquareAlongTheLineOrDiag(pos, rpos, GetWhiteKingPos()))
 					#else
@@ -3783,17 +3800,23 @@ private:
 		}
 		else
 		{
-			// Direct check:
-			auto mask = Bishop_Attacks[posBlackKing] & Bishop_Attacks[bpos] & (~white);
-			#ifdef __USE_OPTIM_FOR_SAMEDIAGORLINE__
-			const bool sameDiag = SameDiag(posBlackKing, bpos);
-			const auto maskCapture = mask & black;
-			mask = sameDiag ? maskCapture : mask; // cmov; only a capture can be a checkmate when on the same diagonal with black king
-			#endif			
+			#ifdef __USE_MOVEGENINCANWHITEBISHOPCHECK__
+				const auto occ = this->occ();
+				auto mask = get_raw_bishop_moves(bpos, occ) & get_raw_bishop_moves(posBlackKing, occ) & ~white;
+			#else
+				auto mask = Bishop_Attacks[posBlackKing] & Bishop_Attacks[bpos] & (~white);			
+				#ifdef __USE_OPTIM_FOR_SAMEDIAGORLINE__
+				const bool sameDiag = SameDiag(posBlackKing, bpos);
+				const auto maskCapture = mask & black;
+				mask = sameDiag ? maskCapture : mask; // cmov; only a capture can be a checkmate when on the same diagonal with black king
+				#endif			
+			#endif	
 
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
+				#ifndef __USE_MOVEGENINCANWHITEBISHOPCHECK__
 				if (AllBetweenEmpty(bpos, pos) & AllBetweenEmpty(pos, posBlackKing))
+				#endif
 					#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 					if (!pinned || IsSquareAlongTheLineOrDiag(pos, bpos, GetWhiteKingPos()))
 					#else
