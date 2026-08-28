@@ -4288,6 +4288,8 @@ private:
 		}
 		else
 		{
+			const auto posBlackKing = GetBlackKingPos();
+			
 			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 			const auto whitePinnedPieces = GetWhitePinnedPieces();
 			#endif
@@ -4315,7 +4317,7 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-			mask = bishops & white;
+			mask = bishops & white & Bishops_That_Can_Check[posBlackKing];
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
@@ -4327,7 +4329,7 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-			mask = knights & white;
+			mask = knights & white & Knights_That_Can_Check[posBlackKing];
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
@@ -4341,7 +4343,7 @@ private:
 			if constexpr(tbEnPassantPossible || !tbUseWhitePawnCheckOptim)
 				mask = pawns & white;
 			else
-				mask = pawns & white & White_Pawn_Check_Area[GetBlackKingPos()];			
+				mask = pawns & white & White_Pawn_Check_Area[posBlackKing];			
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
