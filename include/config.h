@@ -49,6 +49,13 @@
 #define __USE_MOVEGENINCANWHITEROOKCHECK__  // should be ON
 #define __USE_MOVEGENINCANWHITEBISHOPCHECK__ // should rather be ON (speeds up with Dence Fancy Magic Bitboards), although causes a slight slow-down with Hyperbola Quintessence
 
+// This new set of optimizations should be ON. They let speed up test suite up to 59 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
+#define __USE_RAYLOOKUP__
+#define __USE_FASTANDLARGEDIRLOOKUP__ // uses relatively large 4kB lookup, but allows to preserve maximum simplicity of code (avoiding risk of register spilling)
+#define __USE_MOVEGENINCANBLACKCAPTURE__
+#define __USE_MOVEGENINCANBLACKMOVEON__
+#define __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
+
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
 // (tb prefix stands for Template Boolean but in this context it means just Compile-Time Boolean)
