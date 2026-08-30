@@ -11,6 +11,7 @@
 #include "common.h"
 #include "data.h"
 #include "BetweenLookup.h"
+#include "RayLookup.h"
 
 #include <stdint.h>
 #include <cstdint>
@@ -316,6 +317,10 @@ ALWAYS_INLINE constexpr uint64_t GetRayInDir(const int sqr, const int dx, const 
 	assert(CTABS(dx) <= 1);
 	assert(CTABS(dy) <= 1);
 
+	#ifdef __USE_RAYLOOKUP__
+	return rayLookup.GetRayInDir(sqr, dx, dy);
+	#else
+	
 	const bool is_diagonal = dx & dy;
 	const bool bAntiDiag = (dx + dy == 0);
 	const auto bishopDiagMask = bAntiDiag ? anti_diagonal_masks[sqr] : diagonal_masks[sqr];
@@ -331,6 +336,7 @@ ALWAYS_INLINE constexpr uint64_t GetRayInDir(const int sqr, const int dx, const 
 	const Bitboard direction_mask = moves_upward ? up_mask : down_mask;
 
 	return full_line & direction_mask;
+	#endif
 }
 
 // Ray starts from posRayAfter, while posRayBase is like a sling that only shows direction (e.g. when pinning piece is searched for with own king on posRayBase and potentially pinned piece on posRayAfter)
@@ -340,11 +346,16 @@ ALWAYS_INLINE constexpr uint64_t GetRay(const int posRayAfter, const int posRayB
 	assert(IsValidPos(posRayBase));
 	assert(SameDiagonalOrLine(posRayAfter, posRayBase));
 
+	#ifdef __USE_RAYLOOKUP__
+	return rayLookup.GetRay(posRayAfter, posRayBase);
+	#else
+	
 	const Bitboard self_mask = 1ULL << posRayAfter;
 	
 	#if defined(__USE_OPTIMFORGETRAY__)
 	const Bitboard maskFullLineOrDiag = betweenLookup.GetCommonDiagOrLine(posRayAfter, posRayBase);
 	#else	
+	
 	const bool bSameDiag = (Bishop_Attacks[posRayBase] & self_mask) != 0;
 	const Bitboard maskSameLine = Rook_Attacks[posRayAfter] & Rook_Attacks[posRayBase];
 	const Bitboard maskSameDiag = Bishop_Attacks[posRayAfter] & Bishop_Attacks[posRayBase];
@@ -359,7 +370,8 @@ ALWAYS_INLINE constexpr uint64_t GetRay(const int posRayAfter, const int posRayB
 	const Bitboard direction_mask = moves_upward ? up_mask : down_mask;
 	const Bitboard res = maskFullLineOrDiag & direction_mask;
 
-	return res;
+	return res;	
+	#endif
 }
 
 
