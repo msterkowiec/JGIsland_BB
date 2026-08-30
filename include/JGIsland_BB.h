@@ -14,6 +14,7 @@
 #include "data.h"
 #include "utils.h"
 #include "BetweenLookup.h"
+#include "RayLookup.h"
 
 #include "hyperbola.h"
 #include "fancy_magics.h"
@@ -378,7 +379,7 @@ private:
 
 		return res;
 	}
-	// -------------------- This group of methods can be extended by switching on __USE_BETWEENLOOKUP (aditional 16kB while originally only 6kB buffers in total) -------------------------
+	
 	template<bool tbIncludeEnds = false>
 	ALWAYS_INLINE static constexpr uint64_t GetBetweenMask(const char sq1, const char sq2)
 	{
@@ -484,8 +485,7 @@ private:
 
 		return AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff) & (SameLine(pos1, pos2));
 	}	
-	// ---------------------------------------------------------------------------------------------
-
+	
 	template<bool tbGetPos = false, bool tbBlack = true>
 	ALWAYS_INLINE int LongDistanceFigureInDir(const int pos, const int posBase) const
 	{
@@ -659,7 +659,53 @@ private:
 		return res;
 	}
 
-	template<bool tbInclKing = true>
+	// Fast verification if there is white potential attacker somewhere on common diag or line. 
+	// Returns non-zerp only if boh AllBetweenEmpty and the attacker matches direction (bishop-like for diagonals or rook-like for file/rank)	
+	ALWAYS_INLINE uint64_t MatchOnCommonDiagOrLineIfAllBetweenEmpty(const int sq1, const int sq2) const
+	{
+		assert(IsValidPos(sq1));
+		assert(IsValidPos(sq2));
+		assert(sq1 != sq2);
+
+		return betweenLookup.MatchOnCommonDiagOrLineIfAllBetweenEmpty(sq1, sq2, queens | rooks, queens | bishops, white | black);
+	}
+	
+	ALWAYS_INLINE int WhiteMatchOnRayIfAllBetweenEmpty(const int posBase, const int pos) const
+	{
+		assert(IsValidPos(pos));
+		assert(IsValidPos(posBase));
+		assert(pos != posBase);
+		
+		const auto mask = white & rayLookup.MatchOnRay(pos, posBase, queens | rooks, queens | bishops);
+		const bool match = (mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(pos, posBase);
+		if (match)
+		{
+			const bool upRay = pos > posBase;
+			const auto posInRay = upRay ? std::countr_zero(mask) : (63 - std::countl_zero(mask));
+			const bool bAllBetweenEmpty = AllBetweenEmpty(posInRay, pos);
+			return bAllBetweenEmpty ? posInRay : -1;
+		}
+		return -1;
+	}
+	ALWAYS_INLINE int BlackMatchOnRayIfAllBetweenEmpty(const int posBase, const int pos) const
+	{
+		assert(IsValidPos(pos));
+		assert(IsValidPos(posBase));
+		assert(pos != posBase);
+
+		const auto mask = black & rayLookup.MatchOnRay(pos, posBase, queens | rooks, queens | bishops);
+		const bool match = (mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(pos, posBase);
+		if (match)
+		{
+			const bool upRay = pos > posBase;
+			const auto posInRay = upRay ? std::countr_zero(mask) : (63 - std::countl_zero(mask));
+			const bool bAllBetweenEmpty = AllBetweenEmpty(posInRay, pos);
+			return bAllBetweenEmpty ? posInRay : -1;
+		}
+		return -1;
+	}
+
+	template<char tbInclKing = true>
 	ALWAYS_INLINE bool IsSquareAttackedByWhiteIfTakeOffBlackKing(const int sq) const
 	{
 		assert(IsValidPos(sq));
@@ -679,7 +725,7 @@ private:
 
 		return res;
 	}
-	template<bool tbInclKing = true>
+	template<char tbInclKing = true>
 	ALWAYS_INLINE bool IsSquareAttackedByBlackIfTakeOffWhiteKing(const int sq) const
 	{
 		assert(IsValidPos(sq));
@@ -770,9 +816,11 @@ private:
 	}
 
 	// bitmask of attackers is returned, even if tbOneIsEnough = false provided that tbOneIsEnough > 1 (see tbReturnBitmaskEvenIfOneIsEnough)
-	template<bool tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
+	template<char tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
 	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite(const int sq) const
 	{
+		static_assert(tbInclKing >= 0 || tbInclPinned, "Not implemented"); // special value tbInclKing < 0 for long distance attackers only is implemented only for tbInclPinned == true
+		
 		constexpr bool tbReturnBitmaskEvenIfOneIsEnough = tbOneIsEnough > 1;
 		assert(IsValidPos(sq));
 
@@ -1038,11 +1086,11 @@ private:
 
 		
 		#ifdef __VERIFY_PINNING_PREREQUISITE__		
-		if (white & betweenLookup.MatchOnCommonDiagOrLineIfAllBetweenEmpty(posBlackKing, pos, queens|rooks, queens|bishops, white|black)) // cheap verification of prerequisites
+		if ((posLongDistanceAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, pos)) >= 0)
 		#else
-		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))
-		#endif
+		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))		
 			if ((posLongDistanceAttacker = WhiteLongDistanceFigureInDir<1>(pos, posBlackKing)) >= 0)
+		#endif				
 				if (!IsSquareOnCommonDiagOrLineOf(posTo, pos, posBlackKing))
 					return true;
 
@@ -1058,8 +1106,7 @@ private:
 		assert(white & kings);
 		assert((sq_to_bb(pos)) & white);
 		assert(tbSkipAssertionForEnPassant || ((sq_to_bb(pos)) & white & pawns) == 0 || (pos & 7) == (posTo & 7) || IsBlackAt(posTo)); // do not call this method for en passant! (see IsWhitePawnPinned)
-
-		int posLongDistanceAttacker;
+		
 		const int posWhiteKing = GetWhiteKingPos();
 
 		#if defined(__VERIFY_PINNING_WITHMOVEGEN__)
@@ -1073,16 +1120,10 @@ private:
 				return false;
 		}
 		#endif
-
 		
-		#ifdef __VERIFY_PINNING_PREREQUISITE__
-		if (black & betweenLookup.MatchOnCommonDiagOrLineIfAllBetweenEmpty(posWhiteKing, pos, queens | rooks, queens | bishops, white|black)) // cheap verification of prerequisites
-		#else
-		if (!is_edge_and_not_same_edge<tbUseIsEdgeForIsPinned>(pos, posWhiteKing) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, pos))
-		#endif
-			if ((posLongDistanceAttacker = BlackLongDistanceFigureInDir<1>(pos, posWhiteKing)) >= 0)
-				if (!IsSquareOnCommonDiagOrLineOf(posTo, pos, posWhiteKing))
-					return true;
+		if (BlackMatchOnRayIfAllBetweenEmpty(posWhiteKing, pos) >= 0)
+			if (!IsSquareOnCommonDiagOrLineOf(posTo, pos, posWhiteKing))
+				return true;
 
 		return false;
 	}
@@ -1785,10 +1826,17 @@ private:
 		if constexpr (!tbOneIsEnough)
 			res = 0;
 
+		#ifdef __USE_MOVEGENINCANBLACKCAPTURE__
+		auto mask = black & (((queens | bishops) & get_raw_bishop_moves(sq, occ())) | ((queens | rooks) & get_raw_rook_moves(sq, occ())));
+		#else
 		auto mask = black & ((queens & Queen_Attacks[sq]) | (rooks & Rook_Attacks[sq]) | (bishops & Bishop_Attacks[sq]));
+		#endif
+
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
+			#ifndef __USE_MOVEGENINCANBLACKCAPTURE__
 			if (AllBetweenEmpty(pos, sq))
+			#endif
 				if (!IsBlackPinned(pos, sq))
 					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackLongDistFigure<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(pos, sq))
 						if constexpr (tbOneIsEnough)
@@ -1824,10 +1872,12 @@ private:
 
 		if constexpr (tbInclKing)
 		{
-			mask = black & kings & King_Attacks[sq];
+			const auto posBlackKing = GetBlackKingPos();
+			mask = sq_to_bb(sq) & King_Attacks[posBlackKing] & ~King_Attacks[GetWhiteKingPos()] & (((Black_Pawn_Attacks[sq] & white & pawns) | (Knight_Attacks[sq] & white & knights)) ? 0ULL : ~0ULL);
+
 			if (mask)
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByWhiteIfTakeOffBlackKing(sq))
-					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(GetBlackKingPos(), sq))
+				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(sq)) // -1 == verify only long distance attackers; all other already filtered out above
+					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posBlackKing, sq))
 						if constexpr (tbOneIsEnough)
 							return true;
 						else
@@ -2371,10 +2421,17 @@ private:
 		auto mask = black & queens & queenBitboard;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
+			#ifdef __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
+			auto matchMask = (get_raw_rook_moves(pos, occ()) | get_raw_bishop_moves(pos, occ())) & maskBetween;
+			#else
 			auto matchMask = Queen_Attacks[pos] & maskBetween;
+			#endif
+
 			BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 			{
+				#ifndef __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 				if (AllBetweenEmpty(pos, posBetween))
+				#endif
 					if (!tbVerifyPinning || !IsBlackPinned(pos, posBetween))
 						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackQueen<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 						{
@@ -2392,10 +2449,17 @@ private:
 		mask = black & rooks & rookBitboard;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
+			#ifdef __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
+			auto matchMask = get_raw_rook_moves(pos, occ()) & maskBetween;
+			#else
 			auto matchMask = Rook_Attacks[pos] & maskBetween;
+			#endif
+
 			BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 			{
+				#ifndef __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 				if (AllBetweenEmpty(pos, posBetween))
+				#endif
 					if (!tbVerifyPinning || !IsBlackPinned(pos, posBetween))
 						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackRook<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 						{
@@ -2413,10 +2477,17 @@ private:
 		mask = black & bishops & bishopBitboard;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
+			#ifdef __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
+			auto matchMask = get_raw_bishop_moves(pos, occ()) & maskBetween;
+			#else
 			auto matchMask = Bishop_Attacks[pos] & maskBetween;
+			#endif
+
 			BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 			{
+				#ifndef __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 				if (AllBetweenEmpty(pos, posBetween))
+				#endif
 					if (!tbVerifyPinning || !IsBlackPinned(pos, posBetween))
 						if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackBishop<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible, tbKnownThatItIsNotACapture>(pos, posBetween))
 						{
@@ -2455,7 +2526,7 @@ private:
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-		// King:
+		// King (for now unused code, thus - not optimized)
 		if constexpr (tbInclKing)
 		{
 			const int posBlackKing = GetBlackKingPos();
@@ -2844,7 +2915,7 @@ private:
 	#endif
 
 	// Method assumes that either black king is not checked, or moving on this square will block check
-	template<bool tbInclKing = false>
+	template<bool tbInclKing = false, bool tbSquareKnownToBeNotOccupied = false>
 	ALWAYS_INLINE bool CanBlackMoveOn(const int sq) const
 	{
 		static_assert(!tbInclKing, "TODO");
@@ -2858,16 +2929,23 @@ private:
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, mask);
 
+		#ifdef __USE_MOVEGENINCANBLACKMOVEON__
+		mask = black & (((queens | bishops) & get_raw_bishop_moves(sq, occ())) | ((queens | rooks) & get_raw_rook_moves(sq, occ())));
+		#else
 		mask = ((Queen_Attacks[sq] & queens) | (Rook_Attacks[sq] & rooks) | (Bishop_Attacks[sq] & bishops)) & black;
+		#endif
+
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
+			#ifndef __USE_MOVEGENINCANBLACKMOVEON__
 			if (AllBetweenEmpty(pos, sq))
+			#endif
 				if (!IsBlackPinned(pos, sq))
 					return true;
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-		if (IsWhiteAt(sq))
+		if (!tbSquareKnownToBeNotOccupied && IsWhiteAt(sq))
 		{
 			mask = White_Pawn_Attacks[sq] & black & pawns;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
@@ -2915,7 +2993,7 @@ private:
 				break;
 			case 2:
 				if (!IsKnightDiff(posBlackKing, posChecker))
-					if (CanBlackMoveOn((posBlackKing + posChecker) / 2))
+					if (CanBlackMoveOn<0,1>((posBlackKing + posChecker) / 2))
 						return true;
 				break;
 			default:
@@ -3764,8 +3842,9 @@ private:
 		#endif
 
 		const int posBlackKing = GetBlackKingPos();
+		const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, bpos);
 
-		if (int posWhiteLongDistAttacker; (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(bpos, posBlackKing) & SameLineAndAllBetweenEmpty(posBlackKing, bpos)) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(bpos, posBlackKing)) >= 0)
+		if (posWhiteLongDistAttacker >= 0)
 		{
 			// Discovered check (and direct check maybe)
 			auto trgtBitboard = get_bishop_moves(bpos, occ(), white);
@@ -3850,7 +3929,9 @@ private:
 		{
 			const int posBlackKing = GetBlackKingPos();
 
-			if (int posWhiteLongDistAttacker; (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(kpos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, kpos)) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(kpos, posBlackKing)) >= 0)
+			const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, kpos); 
+			if (posWhiteLongDistAttacker >= 0)
+
 			{
 				// Discovered check (and direct check maybe)
 				auto trgtBitboard = Knight_Attacks[kpos] & (~white);
@@ -3901,22 +3982,19 @@ private:
 
 		const int posBlackKing = GetBlackKingPos();
 
-		if (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(kpos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, kpos))
+		const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, kpos); 
+		if (posWhiteLongDistAttacker >= 0)
 		{
-			const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(kpos, posBlackKing);
-			if (posWhiteLongDistAttacker >= 0)
-			{
-				auto mask = King_Attacks[kpos] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
+			auto mask = King_Attacks[kpos] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
 
-				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
-				{
-					if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterKingDiscoveredCheck(kpos, pos, posWhiteLongDistAttacker))
-							return true;
-				}
-				END_FOR_EACH_POS_IN_MASK(pos, mask);
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+			{
+				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
+					if (const_cast<FullBitboards*>(this)->IsCheckMateAfterKingDiscoveredCheck(kpos, pos, posWhiteLongDistAttacker))
+						return true;
 			}
-		}
+			END_FOR_EACH_POS_IN_MASK(pos, mask);
+		}		
 
 		if ((tbShortCastlingPossible | tbLongCastlingPossible) && IsWhiteKingAt(_E1_))
 		{
@@ -3989,25 +4067,22 @@ private:
 		#endif
 
 		const int posBlackKing = GetBlackKingPos();
-		int posWhiteLongDistAttacker = -1;
-		if (!is_edge_and_not_same_edge<tbUseIsEdgeForDiscoveredCheck>(ppos, posBlackKing) & SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, ppos))
-			posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(ppos, posBlackKing);
-
+		const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, ppos);
+		
 		// Capture with direct check?
-		auto maskToCapture = White_Pawn_Attacks[ppos] & black;
+		auto maskToCapture = White_Pawn_Attacks[ppos] & black & Black_Pawn_Attacks[posBlackKing];
 		BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
 		{
-			if (White_Pawn_Attacks[posToCapture] & black & kings)
-				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-				if (!pinned || IsSquareAlongTheLineOrDiag(posToCapture, ppos, GetWhiteKingPos()))
-				#else
-				if (!IsWhitePinned(ppos, posToCapture))
-				#endif
-				{
-					const bool bDoubleCheck = posWhiteLongDistAttacker >= 0 && (ppos & 7) != (posToCapture & 7);
-					if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
-						return true;
-				}
+			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+			if (!pinned || IsSquareAlongTheLineOrDiag(posToCapture, ppos, GetWhiteKingPos()))
+			#else
+			if (!IsWhitePinned(ppos, posToCapture))
+			#endif
+			{
+				const bool bDoubleCheck = posWhiteLongDistAttacker >= 0 && (ppos & 7) != (posToCapture & 7);
+				if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
+					return true;
+			}
 		}
 		END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
 
@@ -4069,7 +4144,7 @@ private:
 				}
 
 			// promo capture:
-			auto maskToCapture = White_Pawn_Attacks[ppos] & black;
+			auto maskToCapture = White_Pawn_Attacks[ppos] & black; // TODO: &(Queen_Attacks[posBlackKing] | Knight_Attacks[posBlackKing]); but discovered check also possible (posWhiteLongDistAttacker)
 			BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
@@ -4376,14 +4451,18 @@ private:
 		
 		if (posBlackKingChecker >= 0)
 		{			
-			auto mask = King_Attacks[posBlackKing] & ~black;
+			const auto posWhiteKing = std::countr_zero(white & kings);
+			const auto whitePawnAttacks = WhitePawnAttacks();
+			const auto whiteKnightAttacks = WhiteKnightAttacks();
+
+			auto mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
 
 			#ifdef __USE_OPTIM_FOR_NON_CAPTURE_BY_KING__
 			// First let's analyze capture moves (they have higher probability of being a refutation and additionally it allows to call IsImmediateMateAfterMoveByBlackKing with param. tbKnownThatItIsNotACapture == true in the next loop
 			auto maskCaptureMoves = mask & white; 
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskCaptureMoves)
 			{
-				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(posTo))
 					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posBlackKing, posTo))
 						return false;
 			}
@@ -4393,7 +4472,7 @@ private:
 			auto maskForNonCapture = mask & ~white;
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskForNonCapture)
 			{
-				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(posTo))
 					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(posBlackKing, posTo))
 						return false;
 			}
@@ -4403,7 +4482,7 @@ private:
 			
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
 			{
-				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing(posTo))
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(posTo))
 					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posBlackKing, posTo))
 						return false;
 			}
@@ -4419,9 +4498,9 @@ private:
 				uint64_t captureMask;
 				constexpr auto tbFlags = tbOnlyIfPreventsImmediateMateAndFlags + 2 * tbWhiteCastlingFlags;
 				if (!tbEnPassantPossible || posBlackKingChecker == bpposForEnPassant)
-					captureMask = CanBlackCapture<tbEnPassantPossible, 1, tbOneIsEnough, tbFlags>(posBlackKingChecker);
+					captureMask = CanBlackCapture<tbEnPassantPossible, 0, tbOneIsEnough, tbFlags>(posBlackKingChecker);
 				else
-					captureMask = CanBlackCapture<0, 1, tbOneIsEnough, tbFlags>(posBlackKingChecker);
+					captureMask = CanBlackCapture<0, 0, tbOneIsEnough, tbFlags>(posBlackKingChecker);
 
 				if (captureMask)
 					return false; // tbOnlyIfPreventsImmediateMateAndFlags already verified, so we can return
@@ -4659,19 +4738,26 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-			mask = kings & black;
-			assert(mask);
-			mask = King_Attacks[posBlackKing] & ~black;
-			BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
-			{
-				if (!IsSquareAttackedByWhite(posTo))
+			{ 
+				// let's try to minimize the scope of the variables below
+				assert(kings & black);
+				const auto posWhiteKing = std::countr_zero(white & kings);
+				const auto whitePawnAttacks = WhitePawnAttacks();
+				const auto whiteKnightAttacks = WhiteKnightAttacks();
+
+				mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
 				{
-					if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posBlackKing, posTo))
-						return false;
-					legalMovesFound = true;
+					if (!IsSquareAttackedByWhite<-1>(posTo)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posBlackKing, posTo))
+							return false;
+						legalMovesFound = true;
+					}
 				}
+				END_FOR_EACH_POS_IN_MASK(pos, mask);
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, mask);
+
 
 			if constexpr (tbBlackCastlingFlags != 0)
 			{
