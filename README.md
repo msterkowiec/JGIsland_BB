@@ -11,7 +11,7 @@ JGIsland_BB contains ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers
 <!-- -->
-using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. Tt is, dependent on configuration (config.h), only **6kB-20kB**, so it entirely fits into L1 cache of modern CPUs (a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache\*\*).
+using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. It is, dependent on configuration (config.h), only **6kB-20kB**, so it entirely fits into L1 cache of modern CPUs (a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache\*\*).
 **More than 55 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
