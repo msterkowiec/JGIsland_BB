@@ -11,7 +11,7 @@ JGIsland_BB contains ultrafast methods of:
 1) finding immediate checkmate,
 2) solving chess two-movers
 <!-- -->
-using solely bitboard representation of chessboard and **Hyperbola Quintessence*** in order to reduce memory usage. It is, dependent on configuration (config.h), only **6kB-20kB**, so it entirely fits into L1 cache of modern CPUs (a small, branchless calculation on data in CPU registers and/or L1 cache is often much better then fetching a precalculated value from a large buffer in memory, even if in L2/L3 cache\*\*).
+using solely bitboard representation of chessboard and **Hyperbola Quintessence** or **Dense Fancy Magic Bitboards** in order to reduce memory usage to only **32kB** in order to fit entirely in L1 cache (except for Dense Fancy Magic Bitboards that occupy additional **110kB**).
 **More than 55 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
@@ -44,7 +44,7 @@ For example CanBlackMoveInBetween first calculates branchless (sometimes cmov) t
 The C++20 code is maybe not super-clean (e.g. name conventions mixed, Clang warns about 'dangling else') but should be considered clean enough. I have a weakness for a prefix "t" for template parameter names and for some remnants of Hungarian notation (e.g. tbInclKing stands for template boolean parameter that specifies if a method includes king or not). 
 Macros are avoided, although BEGIN_FOR_EACH_POS_IN_MASK may be considered useful focusing on logic and hiding the implementation details, at the same time providing maximum performance.
 
-The main idea of this piece of code is simplicity and conciseness (buffers using only from 6kB to 20kB) - CPUs really like it. 
+The main idea of this piece of code is simplicity and conciseness (buffers using only 32kB; optional 110kB for Dense Fancy Magic Bitboards).
 As already said, performing a small, branchless calculation should be preferred over fetching data from large buffers for maximum speed.
 <!-- -->
 An interesting example of L1 cache-friendliness combined with performance is [betweenLookup](include/BetweenLookup.h). It uses only 11.5kB on hot path and its main method GetBetweenMask (called very frequently with forced inlining) does nothing but immediately indexes twice two small arrays (8kB + 3.5kB) with no risk of register spilling (no calculations at all). Typically this array occupies 32kB (64 x 64 x 8 bytes) but from overall 64*64 = 4096 line/diagonal bitmasks only 412 are unique bitmasks that can lie between two squares, including two special slots for zero bitmask (for adjacent squares) and full bitmask (for unaligned sqares, i.e. not on the same diagonal or line).
