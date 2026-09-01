@@ -2408,14 +2408,14 @@ private:
 
 		auto tmpMaskBetween = maskBetween;
 		uint64_t bishopBitboard{}, rookBitboard{}, queenBitboard{}, knightBitboard{};
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween)
+		BEGIN_DOWHILE_POS_IN_MASK(pos, tmpMaskBetween)
 		{
 			knightBitboard |= Knight_Attacks[pos];
 			bishopBitboard |= Bishop_Attacks[pos];
 			rookBitboard |= Rook_Attacks[pos];
 			queenBitboard |= Queen_Attacks[pos];
 		}
-		END_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween);
+		END_DOWHILE_POS_IN_MASK(pos, tmpMaskBetween);
 
 		// Queens:
 		auto mask = black & queens & queenBitboard;
