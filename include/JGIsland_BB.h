@@ -3747,9 +3747,49 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool CanWhiteRookCheckMate(const int rpos, const bool pinned) const
+	bool CanWhiteRookMakeDiscoveredCheckMate(const int rpos, const int posWhiteLongDistAttacker, const bool pinned) const
 	#else
-	bool CanWhiteRookCheckMate(const int rpos) const
+	bool CanWhiteRookMakeDiscoveredCheckMate(const int rpos, const int posWhiteLongDistAttacker) const
+	#endif
+	{
+		// Discovered check (and direct check maybe)
+		auto trgtBitboard = get_rook_moves(rpos, occ(), white);
+
+		const auto posWhiteKing = GetWhiteKingPos();
+		#if !defined(__PREEMPTIVE_WHITEPINNEDPIECES__)
+		const bool pinned = SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, rpos) && BlackLongDistanceFigureInDir(rpos, posWhiteKing);
+		#endif
+
+		if (pinned)
+		{				
+			if (SameLine(posWhiteKing, rpos)) // the only chance for legal move when pinned
+			{
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
+				{
+					if (IsSquareAlongTheLineOrDiag(pos, rpos, posWhiteKing))
+						if (IsCheckMateAfterRookDiscoveredCheck(rpos, pos, posWhiteLongDistAttacker))
+							return true;
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
+			}
+		}
+		else
+		{
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
+			{
+				if (IsCheckMateAfterRookDiscoveredCheck(rpos, pos, posWhiteLongDistAttacker))
+					return true;
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
+		}
+
+		return false;
+	}
+
+	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+	ALWAYS_INLINE bool CanWhiteRookCheckMate(const int rpos, const bool pinned) const
+	#else
+	ALWAYS_INLINE bool CanWhiteRookCheckMate(const int rpos) const
 	#endif
 	{
 		assert(!IsSquareAttackedByBlack(GetWhiteKingPos()));
@@ -3763,36 +3803,11 @@ private:
 
 		if (int posWhiteLongDistAttacker; (!is_edge(rpos) & SameDiagAndAllBetweenEmpty(posBlackKing, rpos)) && (posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1>(rpos, posBlackKing)) >= 0)
 		{
-			// Discovered check (and direct check maybe)
-			auto trgtBitboard = get_rook_moves(rpos, occ(), white);
-
-			const auto posWhiteKing = GetWhiteKingPos();
-			#if !defined(__PREEMPTIVE_WHITEPINNEDPIECES__)
-			const bool pinned = SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, rpos) && BlackLongDistanceFigureInDir(rpos, posWhiteKing);
+			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+			return CanWhiteRookMakeDiscoveredCheckMate(rpos, posWhiteLongDistAttacker, pinned);
+			#else
+			return CanWhiteRookMakeDiscoveredCheckMate(rpos, posWhiteLongDistAttacker);
 			#endif
-
-			if (pinned)
-			{				
-				if (SameLine(posWhiteKing, rpos)) // the only chance for legal move when pinned
-				{
-					BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
-					{
-						if (IsSquareAlongTheLineOrDiag(pos, rpos, posWhiteKing))
-							if (IsCheckMateAfterRookDiscoveredCheck(rpos, pos, posWhiteLongDistAttacker))
-								return true;
-					}
-					END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
-				}
-			}
-			else
-			{
-				BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
-				{
-					if (IsCheckMateAfterRookDiscoveredCheck(rpos, pos, posWhiteLongDistAttacker))
-						return true;
-				}
-				END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
-			}
 		}
 		else
 		{
@@ -3829,9 +3844,49 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool CanWhiteBishopCheckMate(const int bpos, const bool pinned) const
+	bool CanWhiteBishopMakeDiscoveredCheckMate(const int bpos, const int posWhiteLongDistAttacker, const bool pinned) const
 	#else
-	bool CanWhiteBishopCheckMate(const int bpos) const
+	bool CanWhiteBishopMakeDiscoveredCheckMate(const int bpos, const int posWhiteLongDistAttacker) const
+	#endif
+	{
+		// Discovered check (and direct check maybe)
+		auto trgtBitboard = get_bishop_moves(bpos, occ(), white);
+
+		const auto posWhiteKing = GetWhiteKingPos();
+		#if !defined(__PREEMPTIVE_WHITEPINNEDPIECES__)
+		const bool pinned = SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, bpos) && BlackLongDistanceFigureInDir(bpos, posWhiteKing);
+		#endif
+
+		if (pinned)
+		{
+			if (SameDiag(posWhiteKing, bpos)) // the only chance for legal move when pinned
+			{
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
+				{
+					if (IsSquareAlongTheLineOrDiag(pos, bpos, posWhiteKing))
+						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterBishopDiscoveredCheck(bpos, pos, posWhiteLongDistAttacker))
+							return true;
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
+			}
+		}
+		else
+		{
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
+			{
+				if (const_cast<FullBitboards*>(this)->IsCheckMateAfterBishopDiscoveredCheck(bpos, pos, posWhiteLongDistAttacker))
+					return true;
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
+		}
+
+		return false;
+	}
+
+	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+	ALWAYS_INLINE bool CanWhiteBishopCheckMate(const int bpos, const bool pinned) const
+	#else
+	ALWAYS_INLINE bool CanWhiteBishopCheckMate(const int bpos) const
 	#endif
 	{
 		assert(!IsSquareAttackedByBlack(GetWhiteKingPos()));
@@ -3846,36 +3901,11 @@ private:
 
 		if (posWhiteLongDistAttacker >= 0)
 		{
-			// Discovered check (and direct check maybe)
-			auto trgtBitboard = get_bishop_moves(bpos, occ(), white);
-
-			const auto posWhiteKing = GetWhiteKingPos();
-			#if !defined(__PREEMPTIVE_WHITEPINNEDPIECES__)
-			const bool pinned = SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, bpos) && BlackLongDistanceFigureInDir(bpos, posWhiteKing);
+			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+			return CanWhiteBishopMakeDiscoveredCheckMate(bpos, posWhiteLongDistAttacker, pinned);
+			#else
+			return CanWhiteBishopMakeDiscoveredCheckMate(bpos, posWhiteLongDistAttacker);
 			#endif
-
-			if (pinned)
-			{
-				if (SameDiag(posWhiteKing, bpos)) // the only chance for legal move when pinned
-				{
-					BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
-					{
-						if (IsSquareAlongTheLineOrDiag(pos, bpos, posWhiteKing))
-							if (const_cast<FullBitboards*>(this)->IsCheckMateAfterBishopDiscoveredCheck(bpos, pos, posWhiteLongDistAttacker))
-								return true;
-					}
-					END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
-				}
-			}
-			else
-			{
-				BEGIN_FOR_EACH_POS_IN_MASK(pos, trgtBitboard)
-				{
-					if (const_cast<FullBitboards*>(this)->IsCheckMateAfterBishopDiscoveredCheck(bpos, pos, posWhiteLongDistAttacker))
-						return true;
-				}
-				END_FOR_EACH_POS_IN_MASK(pos, trgtBitboard);
-			}
 		}
 		else
 		{
@@ -3910,7 +3940,7 @@ private:
 
 		return false;
 	}
-	bool CanWhiteKnightCheckMate(const int kpos) const
+	ALWAYS_INLINE bool CanWhiteKnightCheckMate(const int kpos) const
 	{
 		assert(!IsSquareAttackedByBlack(GetWhiteKingPos()));
 		assert(IsValidPos(kpos));
@@ -4431,10 +4461,7 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
-			if (CanWhiteKingCheckMate<tbCastlingShortPossible, tbCastlingLongPossible>(posWhiteKing))
-				return true;
-
-			return false;
+			return CanWhiteKingCheckMate<tbCastlingShortPossible, tbCastlingLongPossible>(posWhiteKing);
 		}
 	}
 
