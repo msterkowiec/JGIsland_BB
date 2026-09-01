@@ -2973,35 +2973,46 @@ private:
 
 		return false;
 	}
+
 	template<bool tbEnPassantPossible = false>
-	bool FindOneValidMove4BlackWhenChecked(const int posChecker) const
+	bool FindOneValidMove4OtherBlackPieceWhenChecked(const int posChecker) const
 	{
+		assert(IsValidPos(posChecker));
+		assert(IsBlackKingChecked() >= 0);
+		
+		if (CanBlackCapture<tbEnPassantPossible, 0>(posChecker)) // excl king (bl. king's neighborhood already verified in a call to FindOneValidMove4BlackKingWhenChecked)
+			return true;
+
+		const int posBlackKing = GetBlackKingPos();
+		const auto dist = Distance(posBlackKing, posChecker);
+
+		switch (dist)
+		{
+			case 1:
+				break;
+			case 2:
+				if (!IsKnightDiff(posBlackKing, posChecker))
+					if (CanBlackMoveOn<0, 1>((posBlackKing + posChecker) / 2))
+						return true;
+				break;
+			default:
+				return CanBlackMoveInBetween(posBlackKing, posChecker);
+		}
+
+		return false;
+	}
+
+	template<bool tbEnPassantPossible = false>
+	ALWAYS_INLINE bool FindOneValidMove4BlackWhenChecked(const int posChecker) const
+	{
+		assert(IsValidPos(posChecker) || posChecker == DBL_CHECKED);
 		assert(IsBlackKingChecked() >= 0);
 
 		if (FindOneValidMove4BlackKingWhenChecked(posChecker))
 			return true;
 
 		if (posChecker != DBL_CHECKED)
-		{
-			if (CanBlackCapture<tbEnPassantPossible, 0>(posChecker)) // excl king (bl. king's neighborhood already verified in a call to FindOneValidMove4BlackKingWhenChecked)
-				return true;
-			const int posBlackKing = GetBlackKingPos();
-			const auto dist = Distance(posBlackKing, posChecker);
-			switch (dist)
-			{
-			case 1:
-				break;
-			case 2:
-				if (!IsKnightDiff(posBlackKing, posChecker))
-					if (CanBlackMoveOn<0,1>((posBlackKing + posChecker) / 2))
-						return true;
-				break;
-			default:
-				if (CanBlackMoveInBetween(posBlackKing, posChecker))
-					return true;
-				break;
-			}
-		}
+			return FindOneValidMove4OtherBlackPieceWhenChecked<tbEnPassantPossible>(posChecker);
 
 		return false;
 	}
