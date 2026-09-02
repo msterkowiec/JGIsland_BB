@@ -2438,16 +2438,16 @@ private:
 			count = 0;
 
 		auto tmpMaskBetween = maskBetween;
-		uint64_t bishopBitboard{}, rookBitboard{}, queenBitboard{}, knightBitboard{};
+		uint64_t bishopBitboard{}, rookBitboard{}, knightBitboard{};
 		BEGIN_DOWHILE_POS_IN_MASK(pos, tmpMaskBetween)
 		{
 			knightBitboard |= Knight_Attacks[pos];
 			bishopBitboard |= Bishop_Attacks[pos];
 			rookBitboard |= Rook_Attacks[pos];
-			queenBitboard |= Queen_Attacks[pos];
 		}
 		END_DOWHILE_POS_IN_MASK(pos, tmpMaskBetween);
-
+		auto queenBitboard = rookBitboard | bishopBitboard;
+		
 		// Queens:
 		auto mask = black & queens & queenBitboard;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
@@ -2677,16 +2677,16 @@ private:
 			count = 0;
 
 		auto tmpMaskBetween = maskBetween;
-		uint64_t bishopBitboard{}, rookBitboard{}, queenBitboard{}, knightBitboard{};
+		uint64_t bishopBitboard{}, rookBitboard{}, knightBitboard{};
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween)
 		{
 			knightBitboard |= Knight_Attacks[pos];
 			bishopBitboard |= Bishop_Attacks[pos];
 			rookBitboard |= Rook_Attacks[pos];
-			queenBitboard |= Queen_Attacks[pos];
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween);
-
+		auto queenBitboard = rookBitboard | bishopBitboard;
+		
 		// Queens:
 		auto mask = white & queens & queenBitboard;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
