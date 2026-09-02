@@ -72,7 +72,7 @@ inline constexpr bool tbUseWhitePawnCheckOptim = false;
 inline constexpr bool tbUseIsEdgeForDiscoveredCheck = true;
 #else
 inline constexpr bool tbUseIsEdgeForDiscoveredCheck = false;
-#endif;
+#endif
 
 #ifdef __USE_ISEDGE_FORISPINNED__
 inline constexpr bool tbUseIsEdgeForIsPinned = true;
