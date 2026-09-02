@@ -329,14 +329,24 @@ private:
 		const uint64_t attack_right = ((white & pawns) << 9) & NOT_A_FILE;
 		return attack_left | attack_right;
 	}
-	ALWAYS_INLINE uint64_t WhiteKnightAttacks() const
+	ALWAYS_INLINE uint64_t BlackPawnAttacks() const
+	{
+		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
+		constexpr uint64_t NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
+
+		const uint64_t attack_right = ((black & pawns) >> 7) & NOT_A_FILE;
+		const uint64_t attack_left = ((black & pawns) >> 9) & NOT_H_FILE;
+		return attack_left | attack_right;
+	}
+	template<bool tbWhite>
+	ALWAYS_INLINE uint64_t KnightAttacks() const
 	{
 		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
 		constexpr uint64_t NOT_AB_FILE = 0xFCFCFCFCFCFCFCFCULL;
 		constexpr uint64_t NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
 		constexpr uint64_t NOT_GH_FILE = 0x3F3F3F3F3F3F3F3FULL;
 
-		const uint64_t white_knights = white & knights;
+		const uint64_t white_knights = (tbWhite ? white : black) & knights;// or black_knights, if tbWhite == false
 		uint64_t attacks = 0;
 
 		// Grouping by actual column dependencies
@@ -346,6 +356,14 @@ private:
 		attacks |= ((white_knights & NOT_AB_FILE) << 6) | ((white_knights & NOT_AB_FILE) >> 10); // Left 2
 
 		return attacks;
+	}
+	ALWAYS_INLINE uint64_t WhiteKnightAttacks() const
+	{
+		return KnightAttacks<1>();
+	}
+	ALWAYS_INLINE uint64_t BlackKnightAttacks() const
+	{
+		return KnightAttacks<0>();
 	}
 
 	ALWAYS_INLINE bool AllBetweenEmpty(const int pos1, const int pos2) const
@@ -771,9 +789,7 @@ private:
 			if constexpr (!tbFindAll)
 				if (direct_attackers)
 					return direct_attackers;
-		}
-		else
-			direct_attackers = 0;
+		}		
 
 		const Bitboard direct_b_moves = get_raw_bishop_moves(target_sq, occ);
 		const Bitboard direct_r_moves = get_raw_rook_moves(target_sq, occ);
@@ -781,29 +797,38 @@ private:
 		const Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & white;
 		const Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & white;
 
-		direct_attackers |= direct_b_pieces | direct_r_pieces;
+		if constexpr (tbLongDistanceAttackersOnly)
+			direct_attackers = direct_b_pieces | direct_r_pieces;	
+		else
+			direct_attackers |= direct_b_pieces | direct_r_pieces;
 		
 		return direct_attackers;
 	}
 
-	template<bool tbInclKing = true, bool tbFindAll = true>
+	template<char tbInclKing = true, bool tbFindAll = true>
 	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack_GenMoves(const int target_sq) const
 	{
+		constexpr bool tbLongDistanceAttackersOnly = tbInclKing < 0; // special value to verify only long distance attackers (see also comments above)
+		
 		assert(IsValidPos(target_sq));
 
 		Bitboard occ = white | black;
-		Bitboard black_pawns = black & pawns;
-		Bitboard black_knights = black & knights;
-
 		Bitboard direct_attackers; 
-		if constexpr (tbInclKing)
-			direct_attackers = (Knight_Attacks[target_sq] & black_knights) | (King_Attacks[target_sq] & black & kings) | (White_Pawn_Attacks[target_sq] & black_pawns);
-		else
-			direct_attackers = (Knight_Attacks[target_sq] & black_knights) | (White_Pawn_Attacks[target_sq] & black_pawns);
-
-		if constexpr (!tbFindAll)
-			if (direct_attackers)
-				return direct_attackers;
+		
+		if constexpr (!tbLongDistanceAttackersOnly)
+		{
+			Bitboard black_pawns = black & pawns;
+			Bitboard black_knights = black & knights;
+				
+			if constexpr (tbInclKing)
+				direct_attackers = (Knight_Attacks[target_sq] & black_knights) | (King_Attacks[target_sq] & black & kings) | (White_Pawn_Attacks[target_sq] & black_pawns);
+			else
+				direct_attackers = (Knight_Attacks[target_sq] & black_knights) | (White_Pawn_Attacks[target_sq] & black_pawns);
+	
+			if constexpr (!tbFindAll)
+				if (direct_attackers)
+					return direct_attackers;
+		}
 
 		Bitboard direct_b_moves = get_raw_bishop_moves(target_sq, occ);
 		Bitboard direct_r_moves = get_raw_rook_moves(target_sq, occ);
@@ -811,7 +836,11 @@ private:
 		Bitboard direct_b_pieces = direct_b_moves & (bishops | queens) & black;
 		Bitboard direct_r_pieces = direct_r_moves & (rooks | queens) & black;
 
-		direct_attackers |= direct_b_pieces | direct_r_pieces;
+		if constexpr (tbLongDistanceAttackersOnly)
+			direct_attackers = direct_b_pieces | direct_r_pieces;
+		else
+			direct_attackers |= direct_b_pieces | direct_r_pieces;
+		
 		return direct_attackers;
 	}
 
@@ -892,9 +921,11 @@ private:
 
 	// Bitmask of attackers is returned - even if tbOneIsEnough = false provided that tbOneIsEnough > 1 (see tbReturnBitmaskEvenIfOneIsEnough)
 	// For consistency with legacy methods, the square occupied by black king is considered attacked (when tbInclKing) - that's why bitboards King_Attacks_Ext are used, instead of King_Attacks
-	template<bool tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
+	template<char tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
 	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack(const int sq) const
 	{
+		static_assert(tbInclKing >= 0 || tbInclPinned, "Not implemented"); // special value tbInclKing < 0 for long distance attackers only is implemented only for tbInclPinned == true
+		
 		constexpr bool tbReturnBitmaskEvenIfOneIsEnough = tbOneIsEnough > 1;
 		assert(IsValidPos(sq));
 
@@ -4026,11 +4057,21 @@ private:
 		const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, kpos); 
 		if (posWhiteLongDistAttacker >= 0)
 		{
+			#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
+			const auto blackPawnAttacks = BlackPawnAttacks();
+			const auto blackKnightAttacks = BlackKnightAttacks();
+			auto mask = King_Attacks[kpos] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing) & ~King_Attacks[posBlackKing] & ~blackPawnAttacks & ~blackKnightAttacks;
+			#else			
 			auto mask = King_Attacks[kpos] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
+			#endif
 
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
+				#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
+				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing<-1>(pos))
+				#else				
 				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
+				#endif
 					if (const_cast<FullBitboards*>(this)->IsCheckMateAfterKingDiscoveredCheck(kpos, pos, posWhiteLongDistAttacker))
 						return true;
 			}
@@ -4566,8 +4607,8 @@ private:
 				auto movesMask = get_bishop_moves(pos, occ, black) | get_rook_moves(pos, occ, black);
 				
 				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__
-				auto captureMovesMask = movesMask & white;
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
+				auto figureCaptureMovesMask = movesMask & white & (~pawns);
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, figureCaptureMovesMask)
 				{					
 					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
 					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
@@ -4580,7 +4621,22 @@ private:
 						legalMovesFound = true;
 					}
 				}
-				END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
+				END_FOR_EACH_POS_IN_MASK(posTo, figureCaptureMovesMask);
+				auto pawnCaptureMovesMask = movesMask & white & pawns;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, pawnCaptureMovesMask)
+				{					
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, pawnCaptureMovesMask);			
 				auto nonCaptureMovesMask = movesMask & ~white;
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
 				{					
