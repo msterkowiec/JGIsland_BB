@@ -56,6 +56,8 @@
 #define __USE_MOVEGENINCANBLACKMOVEON__
 #define __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 
+#define __USE_OPTIMINCANWHITEKINGCHECKMATE__
+
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
 // (tb prefix stands for Template Boolean but in this context it means just Compile-Time Boolean)
