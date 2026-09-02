@@ -4566,8 +4566,8 @@ private:
 				auto movesMask = get_bishop_moves(pos, occ, black) | get_rook_moves(pos, occ, black);
 				
 				#ifdef __USE_OPTIM_FOR_NON_CAPTURE__
-				auto captureMovesMask = movesMask & white;
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
+				auto figureCaptureMovesMask = movesMask & white & (~pawns);
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, figureCaptureMovesMask)
 				{					
 					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
 					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
@@ -4580,7 +4580,22 @@ private:
 						legalMovesFound = true;
 					}
 				}
-				END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
+				END_FOR_EACH_POS_IN_MASK(posTo, figureCaptureMovesMask);
+				auto pawnCaptureMovesMask = movesMask & white & pawns;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, pawnCaptureMovesMask)
+				{					
+					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
+					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
+					#else
+					if (!IsBlackPinned(pos, posTo))
+					#endif
+					{
+						if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, pawnCaptureMovesMask);			
 				auto nonCaptureMovesMask = movesMask & ~white;
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
 				{					
