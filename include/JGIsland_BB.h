@@ -5526,18 +5526,7 @@ private:
 			auto mask = white & queens;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				auto movesMask = get_bishop_moves(pos, occ(), white);
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
-				{					
-					if (!IsPosInBitmask(pos, whitePinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posWhiteKing))
-						if (IsImmediateMateAfterAnyBlackResponseAfterWhiteQueenMove<tbWhiteCastlingFlags, tbBlackCastlingFlags>(pos, posTo))
-							if constexpr (!tbFindAllSolutionsAndFillBuf)
-								return true;
-							else
-								pMoves[count++].set(pos, posTo);
-				}
-				END_FOR_EACH_POS_IN_MASK(posTo, movesMask);
-				movesMask = get_rook_moves(pos, occ(), white);
+				auto movesMask = get_bishop_moves(pos, occ(), white) | get_rook_moves(pos, occ(), white);
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 				{					
 					if (!IsPosInBitmask(pos, whitePinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posWhiteKing))
