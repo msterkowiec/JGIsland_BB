@@ -1837,12 +1837,20 @@ private:
 		
 		return res;
 	}
+	
+	// Wraps up the main method CanBlackCapture_AlwaysInline (dependent on context, one or the other version may be selected)	
+	// This quite ugly "conditional ALWAYS_INLINE" on CanBlackCapture and CanBlackMoveInBetween speeds up code about 1.5%
+	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false, char tbOnlyIfPreventsImmediateMateAndFlags = false>
+	uint64_t CanBlackCapture(const int sq) const
+	{
+		return CanBlackCapture_AlwaysInline<tbEnPassantPossible, tbInclKing, tbFindAll, tbOnlyIfPreventsImmediateMateAndFlags>(sq);
+	}
 
 	// It's assummed that bl.king is not checked or 'sq' is the only checker (no double check)
 	// If tbFindAll == true, then bitmask of pieces that can capture sq is returned
 	// NOTE!!! If tbOnlyIfPreventsImmediateMate is on, together white castling flags must be passed in tbOnlyIfPreventsImmediateMateAndFlags
 	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false, char tbOnlyIfPreventsImmediateMateAndFlags = false>
-	uint64_t CanBlackCapture(const int sq) const
+	ALWAYS_INLINE uint64_t CanBlackCapture_AlwaysInline(const int sq) const
 	{
 		constexpr bool tbOneIsEnough = !tbFindAll;
 		constexpr bool tbOnlyIfPreventsImmediateMate = (tbOnlyIfPreventsImmediateMateAndFlags & 1) != 0;
@@ -2405,11 +2413,19 @@ private:
 			return res;
 	}
 
+	// Wraps up the main method CanBlackMoveInBetween_AlwaysInline (dependent on context, one or the other version may be selected)
+	// This quite ugly "conditional ALWAYS_INLINE" on CanBlackCapture and CanBlackMoveInBetween speeds up code about 1.5%
+	template<bool tbFindAllAndFillBuf = false, char tbOnlyIfPreventsImmediateMateAndFlags = false> // if tbFindAllAndFillBuf == false, then aMoves will not be filled in
+	int CanBlackMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	{
+		return CanBlackMoveInBetween_AlwaysInline<tbFindAllAndFillBuf, tbOnlyIfPreventsImmediateMateAndFlags>(sq1, sq2, aMoves);
+	}
+
 	// !!! Method does not take into account en passant nor castling (en passant can never prevent a discovered check by a long distance black attacker)
 	// Method assumes that either bl.king is not checked, or is checked so that moving in between can prevent it
 	// NOTE!!! If tbOnlyIfPreventsImmediateMate is on, together white castling flags must be passed in tbOnlyIfPreventsImmediateMateAndFlags
 	template<bool tbFindAllAndFillBuf = false, char tbOnlyIfPreventsImmediateMateAndFlags = false> // if tbFindAllAndFillBuf == false, then aMoves will not be filled in
-	int CanBlackMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	ALWAYS_INLINE int CanBlackMoveInBetween_AlwaysInline(const int sq1, const int sq2, TMove* aMoves = nullptr) const
 	{
 		constexpr bool tbOnlyIfPreventsImmediateMate = (tbOnlyIfPreventsImmediateMateAndFlags & 1) != 0;
 		constexpr bool tbWhiteShortCastlingPossible = (tbOnlyIfPreventsImmediateMateAndFlags & 2) != 0;
@@ -3005,13 +3021,14 @@ private:
 		return false;
 	}
 
+	// The method itself is not inlined, but all the called methods are intended to be inlined, which speeds up the code about 1.5%
 	template<bool tbEnPassantPossible = false>
 	bool FindOneValidMove4OtherBlackPieceWhenChecked(const int posChecker) const
 	{
 		assert(IsValidPos(posChecker));
 		assert(IsBlackKingChecked() >= 0);
 		
-		if (CanBlackCapture<tbEnPassantPossible, 0>(posChecker)) // excl king (bl. king's neighborhood already verified in a call to FindOneValidMove4BlackKingWhenChecked)
+		if (CanBlackCapture_AlwaysInline<tbEnPassantPossible, 0>(posChecker)) // excl king (bl. king's neighborhood already verified in a call to FindOneValidMove4BlackKingWhenChecked)
 			return true;
 
 		const int posBlackKing = GetBlackKingPos();
@@ -3027,7 +3044,7 @@ private:
 						return true;
 				break;
 			default:
-				return CanBlackMoveInBetween(posBlackKing, posChecker);
+				return CanBlackMoveInBetween_AlwaysInline(posBlackKing, posChecker);
 		}
 
 		return false;
