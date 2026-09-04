@@ -33,7 +33,6 @@
 #define __USE_OPTIM_FOR_SAMEDIAGORLINE__ // seems to cause a tiny performance speed-up, ~0.5%
 
 // Set of the most recent micro-optimizations that speed up from almost 45 to 46 two-movers per millisecond on Intel i7-14700 (single thread, all sol.)
-#define __USE_ISEDGE_FORDISCOVEREDCHECK__ // see also tbUseIsEdgeForDiscoveredCheck below
 #define __USE_ISEDGE_FORISPINNED__ // see also tbUseIsEdgeForIsPinned
 #define __USE_WHITEPAWNCHECKOPTIM__ // see also tbUseWhitePawnCheckOptim below 
 #define __USE_OPTIMFORGETRAY__
@@ -66,12 +65,6 @@
 inline constexpr bool tbUseWhitePawnCheckOptim = true;
 #else
 inline constexpr bool tbUseWhitePawnCheckOptim = false;
-#endif
-
-#ifdef __USE_ISEDGE_FORDISCOVEREDCHECK__
-inline constexpr bool tbUseIsEdgeForDiscoveredCheck = true;
-#else
-inline constexpr bool tbUseIsEdgeForDiscoveredCheck = false;
 #endif
 
 #ifdef __USE_ISEDGE_FORISPINNED__
