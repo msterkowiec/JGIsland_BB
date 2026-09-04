@@ -3257,7 +3257,7 @@ private:
 
 		const_cast<FullBitboards*>(this)->white ^= moveMask;
 		const_cast<FullBitboards*>(this)->pawns ^= fromMask;
-		const_cast<FullBitboards*>(this)->rooks |= toMask;
+		const_cast<FullBitboards*>(this)->qrooks |= toMask;
 		const_cast<FullBitboards*>(this)->black ^= captureMask;
 		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_ROOK, FGR_PAWN>(captureMask);
 
