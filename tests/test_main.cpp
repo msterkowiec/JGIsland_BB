@@ -295,10 +295,10 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKingCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("6bk/7p/8/4K3/8/2B5/8/8");
-	EXPECT_EQ(bb.CanWhiteKingCheckMate(_E5_), true);
+	EXPECT_EQ(bb.CanWhiteKingCheckMate(), true);
 
 	bb.fromFEN("6bk/2p4p/6p1/4K1p1/4P3/2B5/8/8");
-	EXPECT_EQ(bb.CanWhiteKingCheckMate(_E5_), false);
+	EXPECT_EQ(bb.CanWhiteKingCheckMate(), false);
 }
 
 #ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
