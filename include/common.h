@@ -31,11 +31,10 @@ using BYTE = std::uint8_t;
 	using Bitboard = uint64_t;
 #endif
 
-#if defined(_MSC_VER)
-#define __restrict__ __restrict
-#endif
-
-// clang is not supporting __restrict__ properly:
-#if defined(__clang__)
-#define __restrict__
+#if defined(__GNUC__)
+	#define CONST_RESTRICT const __restrict__
+#elif defined(__clang__) 
+	#define CONST_RESTRICT const
+#else
+	#define CONST_RESTRICT const __restrict
 #endif
