@@ -17,29 +17,29 @@ public:
 	{
 		FillLookup();
 	}
-	constexpr ALWAYS_INLINE Bitboard GetRay(const int pos, const int posBase) const __restrict__
+	constexpr ALWAYS_INLINE Bitboard GetRay(const int pos, const int posBase) CONST_RESTRICT
 	{		
 		const auto dir = dirLookup.GetDir(posBase, pos);
 		return GetRayInDir(pos, dir);
 	}
-	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const DirLookup::Direction dir) const __restrict__
+	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const DirLookup::Direction dir) CONST_RESTRICT
 	{
 		const auto idx = idxLookup[(uint32_t)dir][pos];		
 		return maskLookup[idx];
 	}
-	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const int dx, const int dy) const __restrict__
+	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const int dx, const int dy) CONST_RESTRICT
 	{
 		const auto dir = dirLookup.DirFromDxDy(dx, dy);
 		return GetRayInDir(pos, dir);
 	}
-	constexpr ALWAYS_INLINE Bitboard MatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) const __restrict__
+	constexpr ALWAYS_INLINE Bitboard MatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) CONST_RESTRICT
 	{
 		const auto dir = dirLookup.GetDir(posBase, pos);
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
 		const auto mask = GetRayInDir(pos, dir);
 		return mask & matchMask;
 	}
-	constexpr ALWAYS_INLINE std::pair<Bitboard, Bitboard> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) const __restrict__
+	constexpr ALWAYS_INLINE std::pair<Bitboard, Bitboard> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) CONST_RESTRICT
 	{
 		std::pair<Bitboard, Bitboard> res;
 		const auto dir = dirLookup.GetDir(posBase, pos);		
