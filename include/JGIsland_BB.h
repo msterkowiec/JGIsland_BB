@@ -879,7 +879,7 @@ private:
 		}
 		
 		uint64_t mask;
-		if constexpr (tbInclKing)
+		if constexpr (tbInclKing > 0)
 			mask = ((Black_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights) | (King_Attacks[sq] & kings)) & white;
 		else
 			mask = ((Black_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights)) & white;
@@ -955,7 +955,7 @@ private:
 		}
 		
 		uint64_t mask;
-		if constexpr (tbInclKing)
+		if constexpr (tbInclKing > 0)
 			mask = ((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights) | (King_Attacks_Ext[sq] & kings)) & black;
 		else
 			mask = ((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights)) & black;
