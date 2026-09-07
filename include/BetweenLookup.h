@@ -57,7 +57,12 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);
         assert(sq1 != sq2);
-        
+
+        #ifdef __clang__ // workaround for clang problems with __restric__
+        const auto& index_map = this->index_map;
+        const auto& unique_masks = this->unique_masks;
+        #endif
+                
         uint16_t mask_id = index_map[sq1][sq2];
 
         if constexpr(tbReduceMemUsage)
@@ -70,7 +75,12 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);
         assert(sq1 != sq2);
-        
+
+        #ifdef __clang__ // workaround for clang problems with __restric__
+        const auto& index_map = this->index_map;
+        const auto& unique_masks = this->unique_masks;
+        #endif
+
         if constexpr (tbReduceMemUsage)
         {
             uint16_t mask_id = index_map[sq1][sq2];            
@@ -96,6 +106,13 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);        
         assert(sq1 != sq2);
+
+        #ifdef __clang__ // workaround for clang problems with __restric__
+        const auto& index_map = this->index_map;
+        const auto& index_map_2 = this->index_map_2;
+        const auto& unique_masks = this->unique_masks;
+        const auto& is_it_line = this->is_it_line;
+        #endif
         
         if constexpr (tbReduceMemUsage)
         {
@@ -118,7 +135,14 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);        
         assert(sq1 != sq2);
-        
+
+        #ifdef __clang__ // workaround for clang problems with __restric__
+        const auto& index_map = this->index_map;
+        const auto& index_map_2 = this->index_map_2;
+        const auto& unique_masks = this->unique_masks;
+        const auto& is_it_line = this->is_it_line;
+        #endif
+
         if constexpr (tbReduceMemUsage)
         {
             uint16_t mask_id = index_map[sq1][sq2];
