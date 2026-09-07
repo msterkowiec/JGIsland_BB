@@ -19,7 +19,19 @@
 #endif
 
 typedef unsigned char FIGURE;
-using Bitboard = uint64_t; // Bitboard used sometimes and not very consequently instead of uint64_t that is treated as a synonym for bitboard anyway...
 using BYTE = std::uint8_t;
 
+// Using type Bitboard rather than uint64_t is recommended, since it ensures alignment:
+#if defined(_MSC_VER)
+	typedef __declspec(align(8)) uint64_t Bitboard;
+#elif defined(__GNUC__) || defined(__clang__)
+	typedef uint64_t Bitboard __attribute__((aligned(8)));
+#else
+	// Fallback for any other compiler:
+	using Bitboard = uint64_t;
+#endif
+
+#if defined(_MSC_VER)
+#define __restrict__ __restrict
+#endif
 
