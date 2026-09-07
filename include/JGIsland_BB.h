@@ -1922,7 +1922,7 @@ private:
 			mask = sq_to_bb(sq) & King_Attacks[posBlackKing] & ~King_Attacks[posWhiteKing] & (((Black_Pawn_Attacks[sq] & white & pawns) | (Knight_Attacks[sq] & white & knights)) ? 0ULL : ~0ULL);
 
 			if (mask)
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(sq)) // -1 == verify only long distance attackers; all other already filtered out above
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(sq)) // -1 == verify only long distance attackers; all other already filtered out above
 					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(sq))
 						if constexpr (tbOneIsEnough)
 							return true;
@@ -2373,7 +2373,7 @@ private:
 		{
 			mask = white & kings & King_Attacks[sq];
 			if (mask)
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(sq))
+				if (!IsSquareAttackedByBlackIfTakeOffWhiteKing(sq))
 					if (!tbOnlyCheckingMoves || WillWhiteKingMoveBeCheck<tbOnlyMatingMoves>(sq))
 						if constexpr (tbOneIsEnough)
 							return true;
@@ -2488,7 +2488,7 @@ private:
 			auto matchMask = King_Attacks[posBlackKing] & maskBetween;
 			BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 			{
-				if (!tbVerifyPinning || !const_cast<FullBitboards*>(this)->IsSquareAttackedByWhiteIfTakeOffBlackKing(posBetween))
+				if (!tbVerifyPinning || !sSquareAttackedByWhiteIfTakeOffBlackKing(posBetween))
 					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posBetween))
 					{
 						if constexpr (tbOneIsEnough)
@@ -2709,7 +2709,7 @@ private:
 				auto matchMask = King_Attacks[posWhiteKing] & maskBetween;
 				BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 				{
-					if (!tbVerifyPinning || !const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(posBetween))
+					if (!tbVerifyPinning || !IsSquareAttackedByBlackIfTakeOffWhiteKing(posBetween))
 						if (!tbOnlyCheckingMoves || WillWhiteKingMoveBeCheck<tbOnlyMatingMoves>(posBetween))
 						{
 							if constexpr (tbOneIsEnough)
