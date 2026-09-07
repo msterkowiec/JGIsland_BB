@@ -25,7 +25,7 @@ public:
 	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const DirLookup::Direction dir) const __restrict__
 	{
         #ifdef __clang__ // workaround for clang problems with __restrict__
-        const auto* __restrict__ idxLookup = this->idxLookup[0].data();
+        const auto* __restrict__ idxLookup = this->idxLookup.data()->data();
 		const auto idx = idxLookup[((uint32_t)dir) * 64 + pos];
 		const Bitboard* __restrict__ maskLookup = this->maskLookup.data();
 		#else		
