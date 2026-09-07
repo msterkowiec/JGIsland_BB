@@ -81,22 +81,22 @@ private:
 	int posWhiteKing; 
 	int posBlackKing; // NOTE: these two fields can be reduced to short or char if needed in order to fit more data within 64 bytes of FullBitboards
 
-	[[nodiscard]] ALWAYS_INLINE uint64_t rooks() const
+	[[nodiscard]] ALWAYS_INLINE uint64_t rooks() const __restrict__
 	{ 
 		return qrooks & ~qbishops; 
 	} 
-	[[nodiscard]] ALWAYS_INLINE uint64_t bishops() const
+	[[nodiscard]] ALWAYS_INLINE uint64_t bishops() const __restrict__
 	{ 
 		return qbishops & ~qrooks; 
 	}
-	[[nodiscard]] ALWAYS_INLINE uint64_t queens() const
+	[[nodiscard]] ALWAYS_INLINE uint64_t queens() const __restrict__
 	{
 		return qbishops & qrooks;
 	}
 
-	bool operator == (const FullBitboards&) const = default;
+	bool operator == (const FullBitboards&) const __restrict__ = default;
 
-	[[nodiscard]] ALWAYS_INLINE uint64_t occ() const noexcept {
+	[[nodiscard]] ALWAYS_INLINE uint64_t occ() const __restrict__ noexcept {
 		return white | black;
 	}
 	void clear()
@@ -306,7 +306,7 @@ private:
 	}
 
 	template<bool tbSkipKing = false>
-	ALWAYS_INLINE FIGURE GetFigureAt(const int pos) const
+	ALWAYS_INLINE FIGURE GetFigureAt(const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		const auto mask = sq_to_bb(pos);
@@ -317,7 +317,7 @@ private:
 		else
 			return ((kings & mask) != 0) * FGR_KING + ((pawns & mask) != 0) * FGR_PAWN + ((qbishops & mask) != 0) * FGR_BISHOP + ((qrooks & mask) != 0) * FGR_ROOK + ((knights & mask) != 0) * FGR_KNIGHT;
 	}
-	ALWAYS_INLINE FIGURE GetLongDistanceFigureAt(const int pos) const
+	ALWAYS_INLINE FIGURE GetLongDistanceFigureAt(const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		const auto mask = sq_to_bb(pos);
@@ -329,7 +329,7 @@ private:
 		return bBishopLike * FGR_BISHOP + bRookLike * FGR_ROOK; // bit shifting twice
 	}
 	// A version that returns 1 for bishop, 2 for rook and 3 for queen (slightly optimized, since it avoids bit shifting at all)
-	ALWAYS_INLINE int GetLongDistanceFigureAtExt(const int pos) const
+	ALWAYS_INLINE int GetLongDistanceFigureAtExt(const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		const auto mask = sq_to_bb(pos);
@@ -341,7 +341,7 @@ private:
 		return bBishopLike + bRookLike + bRookLike;
 	}
 
-	ALWAYS_INLINE uint64_t WhitePawnAttacks() const
+	ALWAYS_INLINE uint64_t WhitePawnAttacks() const __restrict__
 	{
 		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
 		constexpr uint64_t NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
@@ -350,7 +350,7 @@ private:
 		const uint64_t attack_right = ((white & pawns) << 9) & NOT_A_FILE;
 		return attack_left | attack_right;
 	}
-	ALWAYS_INLINE uint64_t BlackPawnAttacks() const
+	ALWAYS_INLINE uint64_t BlackPawnAttacks() const __restrict__
 	{
 		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
 		constexpr uint64_t NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
@@ -360,7 +360,7 @@ private:
 		return attack_left | attack_right;
 	}
 	template<bool tbWhite>
-	ALWAYS_INLINE uint64_t KnightAttacks() const
+	ALWAYS_INLINE uint64_t KnightAttacks() const __restrict__
 	{
 		constexpr uint64_t NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
 		constexpr uint64_t NOT_AB_FILE = 0xFCFCFCFCFCFCFCFCULL;
@@ -378,16 +378,16 @@ private:
 
 		return attacks;
 	}
-	ALWAYS_INLINE uint64_t WhiteKnightAttacks() const
+	ALWAYS_INLINE uint64_t WhiteKnightAttacks() const __restrict__
 	{
 		return KnightAttacks<1>();
 	}
-	ALWAYS_INLINE uint64_t BlackKnightAttacks() const
+	ALWAYS_INLINE uint64_t BlackKnightAttacks() const __restrict__
 	{
 		return KnightAttacks<0>();
 	}
 
-	ALWAYS_INLINE bool AllBetweenEmpty(const int pos1, const int pos2) const
+	ALWAYS_INLINE bool AllBetweenEmpty(const int pos1, const int pos2) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -395,7 +395,7 @@ private:
 
 		return (GetBetweenMask(pos1, pos2) & (white | black)) == 0;
 	}
-	ALWAYS_INLINE bool AllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
+	ALWAYS_INLINE bool AllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -470,7 +470,7 @@ private:
 		}
 	}
 
-	ALWAYS_INLINE bool SameLineAndAllBetweenEmpty(const int pos1, const int pos2) const
+	ALWAYS_INLINE bool SameLineAndAllBetweenEmpty(const int pos1, const int pos2) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -478,7 +478,7 @@ private:
 		
 		return AllBetweenEmpty(pos1, pos2) & (SameLine(pos1, pos2));
 	}
-	ALWAYS_INLINE bool SameDiagAndAllBetweenEmpty(const int pos1, const int pos2) const
+	ALWAYS_INLINE bool SameDiagAndAllBetweenEmpty(const int pos1, const int pos2) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -486,7 +486,7 @@ private:
 
 		return AllBetweenEmpty(pos1, pos2) & (SameDiag(pos1, pos2));
 	}
-	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmpty(const int pos1, const int pos2) const
+	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmpty(const int pos1, const int pos2) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -494,7 +494,7 @@ private:
 
 		return AllBetweenEmpty(pos1, pos2);
 	}
-	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
+	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -504,7 +504,7 @@ private:
 
 		return AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff);
 	}
-	ALWAYS_INLINE bool SameDiagAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
+	ALWAYS_INLINE bool SameDiagAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -514,7 +514,7 @@ private:
 
 		return AllBetweenEmptyIfTakeOffWhitePawn(pos1, pos2, posWhitePawnToTakeOff) & (SameDiag(pos1, pos2));
 	}
-	ALWAYS_INLINE bool SameLineAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const
+	ALWAYS_INLINE bool SameLineAndAllBetweenEmptyIfTakeOffWhitePawn(const int pos1, const int pos2, const int posWhitePawnToTakeOff) const __restrict__
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -526,7 +526,7 @@ private:
 	}	
 	
 	template<bool tbGetPos = false, bool tbBlack = true>
-	ALWAYS_INLINE int LongDistanceFigureInDir(const int pos, const int posBase) const
+	ALWAYS_INLINE int LongDistanceFigureInDir(const int pos, const int posBase) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posBase));
@@ -554,7 +554,7 @@ private:
 	}
 
 	template<bool tbGetPos = false, bool tbBlack = true>
-	ALWAYS_INLINE int LongDistanceFigureInDir(const int pos, const int dx, const int dy) const
+	ALWAYS_INLINE int LongDistanceFigureInDir(const int pos, const int dx, const int dy) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(abs(dx) <= 1 && abs(dy) <= 1 && (dx | dy));
@@ -579,22 +579,22 @@ private:
 			return false;
 	}
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int WhiteLongDistanceFigureInDir(const int pos, const int posBase) const
+	ALWAYS_INLINE int WhiteLongDistanceFigureInDir(const int pos, const int posBase) const __restrict__
 	{
 		return LongDistanceFigureInDir<tbGetPos, 0>(pos, posBase);
 	}
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int WhiteLongDistanceFigureInDir(const int pos, const int dx, const int dy) const
+	ALWAYS_INLINE int WhiteLongDistanceFigureInDir(const int pos, const int dx, const int dy) const __restrict__
 	{
 		return LongDistanceFigureInDir<tbGetPos, 0>(pos, dx, dy);
 	}
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int BlackLongDistanceFigureInDir(const int pos, const int posBase) const
+	ALWAYS_INLINE int BlackLongDistanceFigureInDir(const int pos, const int posBase) const __restrict__
 	{
 		return LongDistanceFigureInDir<tbGetPos, 1>(pos, posBase);
 	}
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int BlackLongDistanceFigureInDir(const int pos, const int dx, const int dy) const
+	ALWAYS_INLINE int BlackLongDistanceFigureInDir(const int pos, const int dx, const int dy) const __restrict__
 	{
 		return LongDistanceFigureInDir<tbGetPos, 1>(pos, dx, dy);
 	}
@@ -700,7 +700,7 @@ private:
 
 	// Fast verification if there is white potential attacker somewhere on common diag or line. 
 	// Returns non-zerp only if boh AllBetweenEmpty and the attacker matches direction (bishop-like for diagonals or rook-like for file/rank)	
-	ALWAYS_INLINE uint64_t MatchOnCommonDiagOrLineIfAllBetweenEmpty(const int sq1, const int sq2) const
+	ALWAYS_INLINE uint64_t MatchOnCommonDiagOrLineIfAllBetweenEmpty(const int sq1, const int sq2) const __restrict__
 	{
 		assert(IsValidPos(sq1));
 		assert(IsValidPos(sq2));
@@ -709,7 +709,7 @@ private:
 		return betweenLookup.MatchOnCommonDiagOrLineIfAllBetweenEmpty(sq1, sq2, qrooks, qbishops, white | black);
 	}
 	
-	ALWAYS_INLINE int WhiteMatchOnRayIfAllBetweenEmpty(const int posBase, const int pos) const
+	ALWAYS_INLINE int WhiteMatchOnRayIfAllBetweenEmpty(const int posBase, const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posBase));
@@ -726,7 +726,7 @@ private:
 		}
 		return -1;
 	}
-	ALWAYS_INLINE int BlackMatchOnRayIfAllBetweenEmpty(const int posBase, const int pos) const
+	ALWAYS_INLINE int BlackMatchOnRayIfAllBetweenEmpty(const int posBase, const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posBase));
@@ -745,7 +745,7 @@ private:
 	}
 
 	template<char tbInclKing = true>
-	ALWAYS_INLINE bool IsSquareAttackedByWhiteIfTakeOffBlackKing(const int sq) const
+	ALWAYS_INLINE bool IsSquareAttackedByWhiteIfTakeOffBlackKing(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 
@@ -765,7 +765,7 @@ private:
 		return res;
 	}
 	template<char tbInclKing = true>
-	ALWAYS_INLINE bool IsSquareAttackedByBlackIfTakeOffWhiteKing(const int sq) const
+	ALWAYS_INLINE bool IsSquareAttackedByBlackIfTakeOffWhiteKing(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 
@@ -788,7 +788,7 @@ private:
 	// Improved implementations using move generation methods (get_raw_bishop_moves and get_raw_rook_moves)
 	// NOTE: There's a trick with tbInclKing<0 - in this case king, pawn and knight attacks are not verified (only long distance attackers)
 	template<char tbInclKing = true, bool tbFindAll = true>
-	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_GenMoves(const int target_sq) const
+	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite_GenMoves(const int target_sq) const __restrict__
 	{
 		constexpr bool tbLongDistanceAttackersOnly = tbInclKing < 0; // special value to verify only long distance attackers (see also comments above)
 		
@@ -824,7 +824,7 @@ private:
 	}
 
 	template<char tbInclKing = true, bool tbFindAll = true>
-	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack_GenMoves(const int target_sq) const
+	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack_GenMoves(const int target_sq) const __restrict__
 	{
 		constexpr bool tbLongDistanceAttackersOnly = tbInclKing < 0; // special value to verify only long distance attackers (see also comments above)
 		
@@ -861,7 +861,7 @@ private:
 
 	// bitmask of attackers is returned, even if tbOneIsEnough = false provided that tbOneIsEnough > 1 (see tbReturnBitmaskEvenIfOneIsEnough)
 	template<char tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
-	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite(const int sq) const
+	ALWAYS_INLINE uint64_t IsSquareAttackedByWhite(const int sq) const __restrict__
 	{
 		static_assert(tbInclKing >= 0 || tbInclPinned, "Not implemented"); // special value tbInclKing < 0 for long distance attackers only is implemented only for tbInclPinned == true
 		
@@ -937,7 +937,7 @@ private:
 	// Bitmask of attackers is returned - even if tbOneIsEnough = false provided that tbOneIsEnough > 1 (see tbReturnBitmaskEvenIfOneIsEnough)
 	// For consistency with legacy methods, the square occupied by black king is considered attacked (when tbInclKing) - that's why bitboards King_Attacks_Ext are used, instead of King_Attacks
 	template<char tbInclKing = true, bool tbInclPinned = true, char tbOneIsEnough = true>
-	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack(const int sq) const
+	ALWAYS_INLINE uint64_t IsSquareAttackedByBlack(const int sq) const __restrict__
 	{
 		static_assert(tbInclKing >= 0 || tbInclPinned, "Not implemented"); // special value tbInclKing < 0 for long distance attackers only is implemented only for tbInclPinned == true
 		
@@ -1011,67 +1011,67 @@ private:
 		return res;
 	}
 
-	ALWAYS_INLINE bool IsEmptyAt(const int sq) const
+	ALWAYS_INLINE bool IsEmptyAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((white | black) & (sq_to_bb(sq))) == 0;
 	}
-	ALWAYS_INLINE bool IsBlackAt(const int sq) const
+	ALWAYS_INLINE bool IsBlackAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & black) != 0;
 	}
-	ALWAYS_INLINE bool IsWhiteAt(const int sq) const
+	ALWAYS_INLINE bool IsWhiteAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white) != 0;
 	}
-	ALWAYS_INLINE bool IsWhitePawnAt(const int sq) const
+	ALWAYS_INLINE bool IsWhitePawnAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white & pawns) != 0;
 	}
-	ALWAYS_INLINE bool IsBlackPawnAt(const int sq) const
+	ALWAYS_INLINE bool IsBlackPawnAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & black & pawns) != 0;
 	}
-	ALWAYS_INLINE bool IsKingAt(const int sq) const
+	ALWAYS_INLINE bool IsKingAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & kings) != 0;
 	}
-	ALWAYS_INLINE bool IsWhiteKingAt(const int sq) const
+	ALWAYS_INLINE bool IsWhiteKingAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white & kings) != 0;
 	}
-	ALWAYS_INLINE bool IsWhiteRookAt(const int sq) const
+	ALWAYS_INLINE bool IsWhiteRookAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white & rooks()) != 0;
 	}
-	ALWAYS_INLINE bool IsWhiteBishopAt(const int sq) const
+	ALWAYS_INLINE bool IsWhiteBishopAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white & bishops()) != 0;
 	}
-	ALWAYS_INLINE bool IsWhiteKnightAt(const int sq) const
+	ALWAYS_INLINE bool IsWhiteKnightAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white & knights) != 0;
 	}
-	ALWAYS_INLINE bool IsBlackRookAt(const int sq) const
+	ALWAYS_INLINE bool IsBlackRookAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & black & rooks()) != 0;
 	}
-	ALWAYS_INLINE bool IsWhiteQueenAt(const int sq) const
+	ALWAYS_INLINE bool IsWhiteQueenAt(const int sq) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		return ((sq_to_bb(sq)) & white & queens()) != 0;
 	}
-	ALWAYS_INLINE bool IsBlackAbsolutelyPinned(const int pos) const
+	ALWAYS_INLINE bool IsBlackAbsolutelyPinned(const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(black & kings);
@@ -1083,7 +1083,7 @@ private:
 
 		return false;
 	}
-	ALWAYS_INLINE bool IsWhiteAbsolutelyPinned(const int pos) const
+	ALWAYS_INLINE bool IsWhiteAbsolutelyPinned(const int pos) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(white & kings);
@@ -1097,7 +1097,7 @@ private:
 	}
 
 	// En passant is not verified here (use IsBlackPawnPinned in such case)
-	ALWAYS_INLINE bool IsBlackPinned(const int pos, const int posTo) const
+	ALWAYS_INLINE bool IsBlackPinned(const int pos, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posTo));
@@ -1133,7 +1133,7 @@ private:
 	}
 	// En passant is not verified here (use IsWhitePawnPinned in such case or better IsWhitePinnedIfTakeOffBlackPawn)
 	template<bool tbSkipAssertionForEnPassant = false>
-	ALWAYS_INLINE bool IsWhitePinned(const int pos, const int posTo) const
+	ALWAYS_INLINE bool IsWhitePinned(const int pos, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posTo));
@@ -1161,7 +1161,7 @@ private:
 		return false;
 	}
 	// Mainly for en passant:
-	bool IsWhitePawnPinned(const int pos, const int posTo) const
+	bool IsWhitePawnPinned(const int pos, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posTo));
@@ -1175,7 +1175,7 @@ private:
 			return IsWhitePinned(pos, posTo);
 	}
 
-	ALWAYS_INLINE bool IsBlackPinnedIfTakeOffWhitePawn(const int pos, const int posTo, const int posWhitePawnToTakeOff) const
+	ALWAYS_INLINE bool IsBlackPinnedIfTakeOffWhitePawn(const int pos, const int posTo, const int posWhitePawnToTakeOff) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posTo));
@@ -1202,7 +1202,7 @@ private:
 		return res;
 	}
 	template<bool tbSkipAssertionForEnPassant = false>
-	ALWAYS_INLINE bool IsWhitePinnedIfTakeOffBlackPawn(const int pos, const int posTo, const int posBlackPawnToTakeOff) const
+	ALWAYS_INLINE bool IsWhitePinnedIfTakeOffBlackPawn(const int pos, const int posTo, const int posBlackPawnToTakeOff) const __restrict__
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posTo));
@@ -1230,7 +1230,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackLongDistFigure(const int from, const int to) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackLongDistFigure(const int from, const int to) const __restrict__
 	{
 		const auto f = GetLongDistanceFigureAtExt(from);
 		switch (f)
@@ -1247,14 +1247,14 @@ private:
 		return false;
 	}
 
-	ALWAYS_INLINE bool IsDirectCheckByBlackQueen(const int toPos) const
+	ALWAYS_INLINE bool IsDirectCheckByBlackQueen(const int toPos) const __restrict__
 	{
 		assert(IsValidPos(toPos));
 		
 		const auto res = SameDiagonalOrLineAndAllBetweenEmpty(toPos, posWhiteKing);
 		return res;
 	}
-	ALWAYS_INLINE int IsCheckByBlackRook(const int fromPos, const int toPos) const
+	ALWAYS_INLINE int IsCheckByBlackRook(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1267,7 +1267,7 @@ private:
 		else
 			return bDirectCheck ? toPos : -1;
 	}
-	ALWAYS_INLINE int IsCheckByBlackBishop(const int fromPos, const int toPos) const
+	ALWAYS_INLINE int IsCheckByBlackBishop(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1280,7 +1280,7 @@ private:
 		else
 			return bDirectCheck ? toPos : -1;
 	}
-	ALWAYS_INLINE int IsCheckByBlackKnight(const int fromPos, const int toPos) const
+	ALWAYS_INLINE int IsCheckByBlackKnight(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1295,7 +1295,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackQueen(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackQueen(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1351,7 +1351,7 @@ private:
 		return res;
 	}
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackRook(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackRook(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1404,7 +1404,7 @@ private:
 		return res;
 	}
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackBishop(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackBishop(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1457,7 +1457,7 @@ private:
 		return res;
 	}
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKnight(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKnight(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1512,7 +1512,7 @@ private:
 
 	// NOTE: It verifies if it is a promo move and in such case up to 4 attempts are made to prevent checkmate
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterCaptureByBlackPawn(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterCaptureByBlackPawn(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1542,7 +1542,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterCaptureWithPromo(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterCaptureWithPromo(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1582,7 +1582,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterPromoMoveForwardByBlackPawn(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterPromoMoveForwardByBlackPawn(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1619,7 +1619,7 @@ private:
 		return res;
 	}
 
-	ALWAYS_INLINE int GetWhiteKingCheckerAfterBlackPawnMoveForward(const int fromPos, const int toPos) const
+	ALWAYS_INLINE int GetWhiteKingCheckerAfterBlackPawnMoveForward(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1634,7 +1634,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbVerifyIfPromo = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveForwardByBlackPawn(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveForwardByBlackPawn(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1668,7 +1668,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterLongMoveByBlackPawn(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterLongMoveByBlackPawn(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1696,7 +1696,7 @@ private:
 	}
 
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterBlackEnPassant(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterBlackEnPassant(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -1724,7 +1724,7 @@ private:
 		return res;
 	}
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterBlackCastlingShort() const
+	ALWAYS_INLINE bool IsImmediateMateAfterBlackCastlingShort() const __restrict__
 	{
 		constexpr auto fromMask = (1ULL << _E8_);
 		constexpr auto toMask = (1ULL << _G8_);
@@ -1755,7 +1755,7 @@ private:
 		return res;
 	}
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
-	ALWAYS_INLINE bool IsImmediateMateAfterBlackCastlingLong() const
+	ALWAYS_INLINE bool IsImmediateMateAfterBlackCastlingLong() const __restrict__
 	{
 		constexpr auto fromMask = (1ULL << _E8_);
 		constexpr auto toMask = (1ULL << _C8_);
@@ -1788,7 +1788,7 @@ private:
 
 	// Alias: FindMoveThatMatesAfterMoveByBlackKing
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
-	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKing(const int toPos) const
+	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKing(const int toPos) const __restrict__
 	{
 		const int fromPos = posBlackKing;
 		assert(IsValidPos(fromPos));
@@ -1849,7 +1849,7 @@ private:
 	// Wraps up the main method CanBlackCapture_AlwaysInline (dependent on context, one or the other version may be selected)	
 	// This quite ugly "conditional ALWAYS_INLINE" on CanBlackCapture and CanBlackMoveInBetween speeds up code about 1.5%
 	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false, char tbOnlyIfPreventsImmediateMateAndFlags = false>
-	uint64_t CanBlackCapture(const int sq) const
+	uint64_t CanBlackCapture(const int sq) const __restrict__
 	{
 		return CanBlackCapture_AlwaysInline<tbEnPassantPossible, tbInclKing, tbFindAll, tbOnlyIfPreventsImmediateMateAndFlags>(sq);
 	}
@@ -1858,7 +1858,7 @@ private:
 	// If tbFindAll == true, then bitmask of pieces that can capture sq is returned
 	// NOTE!!! If tbOnlyIfPreventsImmediateMate is on, together white castling flags must be passed in tbOnlyIfPreventsImmediateMateAndFlags
 	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false, char tbOnlyIfPreventsImmediateMateAndFlags = false>
-	ALWAYS_INLINE uint64_t CanBlackCapture_AlwaysInline(const int sq) const
+	ALWAYS_INLINE uint64_t CanBlackCapture_AlwaysInline(const int sq) const __restrict__
 	{
 		constexpr bool tbOneIsEnough = !tbFindAll;
 		constexpr bool tbOnlyIfPreventsImmediateMate = (tbOnlyIfPreventsImmediateMateAndFlags & 1) != 0;
@@ -1959,18 +1959,18 @@ private:
 	}
 
 	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false>
-	ALWAYS_INLINE uint64_t CanWhiteCaptureWithCheck(const int sq) const
+	ALWAYS_INLINE uint64_t CanWhiteCaptureWithCheck(const int sq) const __restrict__
 	{
 		return CanWhiteCapture<tbEnPassantPossible, tbInclKing, tbFindAll, true>(sq);
 	}
 	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false>
-	ALWAYS_INLINE uint64_t CanWhiteCaptureWithCheckMate(const int sq) const
+	ALWAYS_INLINE uint64_t CanWhiteCaptureWithCheckMate(const int sq) const __restrict__
 	{
 		return CanWhiteCapture<tbEnPassantPossible, tbInclKing, tbFindAll, 2>(sq);
 	}
 
 	template<bool tbCheckMateOnly>
-	ALWAYS_INLINE bool WillWhiteQueenMoveBeCheck(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool WillWhiteQueenMoveBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -1987,7 +1987,7 @@ private:
 	}
 
 	template<bool tbCheckMateOnly>
-	ALWAYS_INLINE bool WillWhiteRookMoveBeCheck(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool WillWhiteRookMoveBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -2013,7 +2013,7 @@ private:
 	}
 
 	template<bool tbCheckMateOnly>
-	ALWAYS_INLINE bool WillWhiteBishopMoveBeCheck(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool WillWhiteBishopMoveBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -2039,7 +2039,7 @@ private:
 	}
 
 	template<bool tbCheckMateOnly = false>
-	ALWAYS_INLINE bool WillLongDistanceWhiteFigureMoveBeCheck(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool WillLongDistanceWhiteFigureMoveBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -2067,7 +2067,7 @@ private:
 
 
 	template<bool tbCheckMateOnly = false>
-	ALWAYS_INLINE bool WillWhiteKnightMoveBeCheck(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool WillWhiteKnightMoveBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -2091,7 +2091,7 @@ private:
 
 	// En passant not handled by this method
 	template<bool tbCheckMateOnly = false, FIGURE fPromo = 0> // when fPromo == 0 (FGR_EMPTY), and the move is a promo, both promotions to queen and knight are verified
-	ALWAYS_INLINE bool WillMoveByWhitePawnBeCheck(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool WillMoveByWhitePawnBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		static_assert(fPromo == 0 || fPromo == FGR_QUEEN || fPromo == FGR_ROOK || fPromo == FGR_BISHOP || fPromo == FGR_KNIGHT, "");
 		assert(IsValidPos(posFrom));
@@ -2220,7 +2220,7 @@ private:
 		return false;
 	}
 
-	ALWAYS_INLINE bool CanWhiteKingMoveBeCheck() const
+	ALWAYS_INLINE bool CanWhiteKingMoveBeCheck() const __restrict__
 	{
 		const auto res = SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, posBlackKing) && WhiteLongDistanceFigureInDir(posWhiteKing, posBlackKing);
 
@@ -2228,7 +2228,7 @@ private:
 	}
 
 	template<bool tbCheckMateOnly = false>
-	ALWAYS_INLINE bool WillWhiteKingMoveBeCheck(const int posTo) const
+	ALWAYS_INLINE bool WillWhiteKingMoveBeCheck(const int posTo) const __restrict__
 	{
 		const int posFrom = posWhiteKing;
 		assert(IsValidPos(posFrom));
@@ -2253,7 +2253,7 @@ private:
 
 	
 	template<bool tbCheckMateOnly = false>
-	bool WillWhiteEnPassantBeCheck(const int posFrom, const int posTo) const
+	bool WillWhiteEnPassantBeCheck(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -2319,7 +2319,7 @@ private:
 	// If tbFindAll == true, then bitmask of pieces that can capture sq is returned
 	// If tbOnlyCheckingMoves > 1, then immediate checkmate will be searched for
 	template<bool tbEnPassantPossible = false, bool tbInclKing = true, bool tbFindAll = false, char tbOnlyCheckingMoves = false>
-	uint64_t CanWhiteCapture(const int sq) const
+	uint64_t CanWhiteCapture(const int sq) const __restrict__
 	{
 		constexpr bool tbOneIsEnough = !tbFindAll;
 		constexpr bool tbOnlyMatingMoves = tbOnlyCheckingMoves > 1;
@@ -2412,7 +2412,7 @@ private:
 	// Wraps up the main method CanBlackMoveInBetween_AlwaysInline (dependent on context, one or the other version may be selected)
 	// This quite ugly "conditional ALWAYS_INLINE" on CanBlackCapture and CanBlackMoveInBetween speeds up code about 1.5%
 	template<bool tbFindAllAndFillBuf = false, char tbOnlyIfPreventsImmediateMateAndFlags = false> // if tbFindAllAndFillBuf == false, then aMoves will not be filled in
-	int CanBlackMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	int CanBlackMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const __restrict__
 	{
 		return CanBlackMoveInBetween_AlwaysInline<tbFindAllAndFillBuf, tbOnlyIfPreventsImmediateMateAndFlags>(sq1, sq2, aMoves);
 	}
@@ -2421,7 +2421,7 @@ private:
 	// Method assumes that either bl.king is not checked, or is checked so that moving in between can prevent it
 	// NOTE!!! If tbOnlyIfPreventsImmediateMate is on, together white castling flags must be passed in tbOnlyIfPreventsImmediateMateAndFlags
 	template<bool tbFindAllAndFillBuf = false, char tbOnlyIfPreventsImmediateMateAndFlags = false> // if tbFindAllAndFillBuf == false, then aMoves will not be filled in
-	ALWAYS_INLINE int CanBlackMoveInBetween_AlwaysInline(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	ALWAYS_INLINE int CanBlackMoveInBetween_AlwaysInline(const int sq1, const int sq2, TMove* aMoves = nullptr) const __restrict__
 	{
 		constexpr bool tbOnlyIfPreventsImmediateMate = (tbOnlyIfPreventsImmediateMateAndFlags & 1) != 0;
 		constexpr bool tbWhiteShortCastlingPossible = (tbOnlyIfPreventsImmediateMateAndFlags & 2) != 0;
@@ -2565,13 +2565,13 @@ private:
 	}
 
 	template<bool tbFindAllAndFillBuf = false>
-	ALWAYS_INLINE int CanWhiteMoveInBetweenWithCheck(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	ALWAYS_INLINE int CanWhiteMoveInBetweenWithCheck(const int sq1, const int sq2, TMove* aMoves = nullptr) const __restrict__
 	{
 		return CanWhiteMoveInBetween<tbFindAllAndFillBuf, 1>(sq1, sq2, aMoves);
 	}
 
 	template<bool tbFindAllAndFillBuf = false>
-	ALWAYS_INLINE int CanWhiteMoveInBetweenWithCheckMate(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	ALWAYS_INLINE int CanWhiteMoveInBetweenWithCheckMate(const int sq1, const int sq2, TMove* aMoves = nullptr) const __restrict__
 	{
 		return CanWhiteMoveInBetween<tbFindAllAndFillBuf, 2>(sq1, sq2, aMoves);
 	}
@@ -2579,7 +2579,7 @@ private:
 	// !!! Method does not take into account en passant nor castling (en passant can never prevent a discovered check by a long distance attacker)
 	// Method assumes that either wh.king is not checked, or is checked so that moving in between can prevent it
 	template<bool tbFindAllAndFillBuf = false, char tbOnlyCheckingMoves = false> //  !!! if tbFindAllAndFillBuf == false, aMoves will NOE be filled in
-	int CanWhiteMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const
+	int CanWhiteMoveInBetween(const int sq1, const int sq2, TMove* aMoves = nullptr) const __restrict__
 	{
 		assert(IsValidPos(sq1));
 		assert(IsValidPos(sq2));
@@ -2797,7 +2797,7 @@ private:
 	}
 
 	#ifdef __USE_WHITEKNIGHTATTACKMASK__
-	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) const
+	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) const __restrict__
 	{
 		const auto blackKing = black & kings;
 				
@@ -2831,7 +2831,7 @@ private:
 		return false;
 	}
 	#else
-	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) const
+	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) const __restrict__
 	{
 		const auto blackKing = black & kings;
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
@@ -2866,7 +2866,7 @@ private:
 
 	// Method assumes that either black king is not checked, or moving on this square will block check
 	template<bool tbInclKing = false, bool tbSquareKnownToBeNotOccupied = false>
-	ALWAYS_INLINE bool CanBlackMoveOn(const int sq) const
+	ALWAYS_INLINE bool CanBlackMoveOn(const int sq) const __restrict__
 	{
 		static_assert(!tbInclKing, "TODO");
 		assert(!IsBlackAt(sq));
@@ -2926,7 +2926,7 @@ private:
 
 	// The method itself is not inlined, but all the called methods are intended to be inlined, which speeds up the code about 1.5%
 	template<bool tbEnPassantPossible = false>
-	bool FindOneValidMove4OtherBlackPieceWhenChecked(const int posChecker) const
+	bool FindOneValidMove4OtherBlackPieceWhenChecked(const int posChecker) const __restrict__
 	{
 		assert(IsValidPos(posChecker));
 		assert(IsBlackKingChecked() >= 0);
@@ -2953,7 +2953,7 @@ private:
 	}
 
 	template<bool tbEnPassantPossible = false>
-	ALWAYS_INLINE bool FindOneValidMove4BlackWhenChecked(const int posChecker) const
+	ALWAYS_INLINE bool FindOneValidMove4BlackWhenChecked(const int posChecker) const __restrict__
 	{
 		assert(IsValidPos(posChecker) || posChecker == DBL_CHECKED);
 		assert(IsBlackKingChecked() >= 0);
@@ -2966,7 +2966,7 @@ private:
 
 		return false;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterQueenCheck(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsCheckMateAfterQueenCheck(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -2994,7 +2994,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterRookDirectCheck(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsCheckMateAfterRookDirectCheck(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3021,7 +3021,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterBishopDirectCheck(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsCheckMateAfterBishopDirectCheck(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3062,7 +3062,7 @@ private:
 			knights &= ~maskBitsToClear;
 		return;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterKnightDirectCheck(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsCheckMateAfterKnightDirectCheck(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3090,7 +3090,7 @@ private:
 		return res;
 	}
 	template<bool tbBlackEnPassantPossible = false>
-	ALWAYS_INLINE bool IsCheckMateAfterPawnDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const
+	ALWAYS_INLINE bool IsCheckMateAfterPawnDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3119,7 +3119,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterEnPassantDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const
+	ALWAYS_INLINE bool IsCheckMateAfterEnPassantDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3148,7 +3148,7 @@ private:
 		return res;
 	}
 	// posWhiteLongDistAttackerInEnPassant can be DBL_CHECKED, e.g. 8/6N1/3k1P2/1K1Pp3/7p/2p3B1/3R4/8 d5:e6++
-	ALWAYS_INLINE bool IsCheckMateAfterEnPassantDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttackerInEnPassant) const
+	ALWAYS_INLINE bool IsCheckMateAfterEnPassantDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttackerInEnPassant) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3176,7 +3176,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToKnightDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToKnightDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3206,7 +3206,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToQueenDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToQueenDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3237,7 +3237,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToRookDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToRookDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3267,7 +3267,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToBishopDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToBishopDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3329,7 +3329,7 @@ private:
 		}
 	}
 	// There are also IsCheckMateAfterKnightDirectCheck and IsCheckMateAfterKnightDiscoveredCheck. This version is a dispacher that should be used when it is unknown.
-	ALWAYS_INLINE bool IsCheckMateAfterKnightCheck(const int fromPos, const int toPos) const
+	ALWAYS_INLINE bool IsCheckMateAfterKnightCheck(const int fromPos, const int toPos) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3344,7 +3344,7 @@ private:
 		}
 	}
 
-	ALWAYS_INLINE bool IsCheckMateAfterRookDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterRookDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3377,7 +3377,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterBishopDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterBishopDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3410,7 +3410,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterKnightDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterKnightDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3443,7 +3443,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterKingDiscoveredCheck(const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterKingDiscoveredCheck(const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		const auto fromPos = posWhiteKing;
 		assert(IsValidPos(fromPos));
@@ -3476,7 +3476,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToQueenDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToQueenDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3510,7 +3510,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToRookDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToRookDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3543,7 +3543,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToBishopDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToBishopDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3576,7 +3576,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPromoToKnightDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterPromoToKnightDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3609,7 +3609,7 @@ private:
 
 		return res;
 	}
-	ALWAYS_INLINE bool IsCheckMateAfterPawnDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const
+	ALWAYS_INLINE bool IsCheckMateAfterPawnDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) const __restrict__
 	{
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
@@ -3642,7 +3642,7 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool IsPinnedFlagOK(const char sq, const bool pinned) const
+	bool IsPinnedFlagOK(const char sq, const bool pinned) const __restrict__
 	{
 		assert(IsValidPos(sq));
 		assert(!IsEmptyAt(sq));
@@ -3661,9 +3661,9 @@ private:
 	#endif
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	ALWAYS_INLINE bool CanWhiteQueenCheckMate(const int qpos, const bool pinned) const
+	ALWAYS_INLINE bool CanWhiteQueenCheckMate(const int qpos, const bool pinned) const __restrict__
 	#else
-	ALWAYS_INLINE bool CanWhiteQueenCheckMate(const int qpos) const
+	ALWAYS_INLINE bool CanWhiteQueenCheckMate(const int qpos) const __restrict__
 	#endif
 	{
 		assert(!IsSquareAttackedByBlack(posWhiteKing));
@@ -3701,9 +3701,9 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool CanWhiteRookMakeDiscoveredCheckMate(const int rpos, const int posWhiteLongDistAttacker, const bool pinned) const
+	bool CanWhiteRookMakeDiscoveredCheckMate(const int rpos, const int posWhiteLongDistAttacker, const bool pinned) const __restrict__
 	#else
-	bool CanWhiteRookMakeDiscoveredCheckMate(const int rpos, const int posWhiteLongDistAttacker) const
+	bool CanWhiteRookMakeDiscoveredCheckMate(const int rpos, const int posWhiteLongDistAttacker) const __restrict__
 	#endif
 	{
 		// Discovered check (and direct check maybe)
@@ -3740,9 +3740,9 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	ALWAYS_INLINE bool CanWhiteRookCheckMate(const int rpos, const bool pinned) const
+	ALWAYS_INLINE bool CanWhiteRookCheckMate(const int rpos, const bool pinned) const __restrict__
 	#else
-	ALWAYS_INLINE bool CanWhiteRookCheckMate(const int rpos) const
+	ALWAYS_INLINE bool CanWhiteRookCheckMate(const int rpos) const __restrict__
 	#endif
 	{
 		assert(!IsSquareAttackedByBlack(posWhiteKing));
@@ -3795,9 +3795,9 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool CanWhiteBishopMakeDiscoveredCheckMate(const int bpos, const int posWhiteLongDistAttacker, const bool pinned) const
+	bool CanWhiteBishopMakeDiscoveredCheckMate(const int bpos, const int posWhiteLongDistAttacker, const bool pinned) const __restrict__
 	#else
-	bool CanWhiteBishopMakeDiscoveredCheckMate(const int bpos, const int posWhiteLongDistAttacker) const
+	bool CanWhiteBishopMakeDiscoveredCheckMate(const int bpos, const int posWhiteLongDistAttacker) const __restrict__
 	#endif
 	{
 		// Discovered check (and direct check maybe)
@@ -3834,9 +3834,9 @@ private:
 	}
 
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	ALWAYS_INLINE bool CanWhiteBishopCheckMate(const int bpos, const bool pinned) const
+	ALWAYS_INLINE bool CanWhiteBishopCheckMate(const int bpos, const bool pinned) const __restrict__
 	#else
-	ALWAYS_INLINE bool CanWhiteBishopCheckMate(const int bpos) const
+	ALWAYS_INLINE bool CanWhiteBishopCheckMate(const int bpos) const __restrict__
 	#endif
 	{
 		assert(!IsSquareAttackedByBlack(posWhiteKing));
@@ -3889,7 +3889,7 @@ private:
 
 		return false;
 	}
-	ALWAYS_INLINE bool CanWhiteKnightCheckMate(const int kpos) const
+	ALWAYS_INLINE bool CanWhiteKnightCheckMate(const int kpos) const __restrict__
 	{
 		assert(!IsSquareAttackedByBlack(posWhiteKing));
 		assert(IsValidPos(kpos));
@@ -3951,7 +3951,7 @@ private:
 
 	// Templ.params should be true if a pair king+rook didn't move yet
 	template<bool tbShortCastlingPossible = false, bool tbLongCastlingPossible = false>
-	bool CanWhiteKingCheckMate() const
+	bool CanWhiteKingCheckMate() const __restrict__
 	{
 		const int kpos = posWhiteKing;
 		assert(IsValidPos(kpos));
@@ -4042,9 +4042,9 @@ private:
 	// (it is then assumed that bposToCaptureWithEnPassant is the only checker of white king - a double move by pawn cannot be a double check)
 	template<bool tbEnPassantPossible = false>
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant, const bool pinned) const
+	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant, const bool pinned) const __restrict__
 	#else
-	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant) const
+	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant) const __restrict__
 	#endif
 	{
 		assert(!IsSquareAttackedByBlack(posWhiteKing)); // CanWhiteCheckMateWhenChecked can only be called in case wh.king is under check
@@ -4266,7 +4266,7 @@ private:
 
 	// posChecker can be DBL_CHECKED
 	template<bool tbEnPassantPossible>
-	bool CanWhiteCheckMateWhenChecked(const int posChecker) const
+	bool CanWhiteCheckMateWhenChecked(const int posChecker) const __restrict__
 	{
 		assert(posChecker >= 0 && posChecker <= DBL_CHECKED);
 
@@ -4288,7 +4288,7 @@ private:
 	}
 
 	// returns DBL_CHECKED (64) on double check; -1 when not checked or checking piece pos.
-	ALWAYS_INLINE int IsBlackKingChecked() const
+	ALWAYS_INLINE int IsBlackKingChecked() const __restrict__
 	{
 		assert(IsValidPos(posBlackKing));
 		assert(black & kings & (1ULL << posBlackKing));
@@ -4301,7 +4301,7 @@ private:
 	}
 
 	// returns DBL_CHECKED (64) on double check; -1 when not checked or checking piece pos.
-	ALWAYS_INLINE int IsWhiteKingChecked() const
+	ALWAYS_INLINE int IsWhiteKingChecked() const __restrict__
 	{
 		const auto res = IsSquareAttackedByBlack<EXCL_KING, INCL_PINNED, FIND_ALL>(posWhiteKing);
 		if (res)
@@ -4311,7 +4311,7 @@ private:
 	}
 
 	// Alias; returns DBL_CHECKED (64) on double check; -1 when not checked or checking piece pos.
-	ALWAYS_INLINE int GeWhiteKingCheckerPos() const
+	ALWAYS_INLINE int GeWhiteKingCheckerPos() const __restrict__
 	{
 		return IsWhiteKingChecked();
 	}
@@ -4321,7 +4321,7 @@ private:
 	// 1 - under check; in such case param. posWhiteKingChecker can be filled in (pos or DBL_CHECKED), or left with -1 for the method to find out
 	// -1 - unknown, check yourself
 	template<char tbWhiteKingUnderCheck = -1, bool tbEnPassantPossible = false, bool tbCastlingShortPossible = true, bool tbCastlingLongPossible = true>
-	bool FindMoveThatMates(int posWhiteKingChecker = -1, const int bposToCaptureWithEnPassant = -1) const
+	bool FindMoveThatMates(int posWhiteKingChecker = -1, const int bposToCaptureWithEnPassant = -1) const __restrict__
 	{
 		assert(std::popcount(black & kings) == 1);
 		assert(std::popcount(white & kings) == 1);
@@ -4411,7 +4411,7 @@ private:
 	// Here starts the part of code strictly for FindMoveThatMatesInTwoMoves
 
 	template<bool tbEnPassantPossible = false, char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	bool IsImmediateMateAfterAnyBlackResponse(const int bpposForEnPassant = -1) const
+	bool IsImmediateMateAfterAnyBlackResponse(const int bpposForEnPassant = -1) const __restrict__
 	{
 		constexpr bool tbWhiteCastlingShortPossible = tbWhiteCastlingFlags & 1;
 		constexpr bool tbWhiteCastlingLongPossible = (tbWhiteCastlingFlags & 2) != 0;
@@ -4822,7 +4822,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteQueenMove(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteQueenMove(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -4854,7 +4854,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteRookMove(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteRookMove(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -4884,7 +4884,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteBishopMove(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteBishopMove(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -4914,7 +4914,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteKnightMove(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteKnightMove(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -4945,7 +4945,7 @@ private:
 
 
 	template<char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteKingMove(const int posTo) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteKingMove(const int posTo) const __restrict__
 	{
 		const auto posFrom = posWhiteKing;
 		assert(IsValidPos(posFrom));
@@ -4976,7 +4976,7 @@ private:
 	}
 
 	template<char tbBlackCastlingFlags = 3>
-	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteCastlingShort() const
+	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteCastlingShort() const __restrict__
 	{
 		constexpr auto fromMask = 1ULL << _E1_;
 		constexpr auto toMask = 1ULL << _G1_;
@@ -5005,7 +5005,7 @@ private:
 	}
 
 	template<char tbBlackCastlingFlags = 3>
-	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteCastlingLong() const
+	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteCastlingLong() const __restrict__
 	{
 		constexpr auto fromMask = 1ULL << _E1_;
 		constexpr auto toMask = 1ULL << _C1_;
@@ -5033,7 +5033,7 @@ private:
 		return res;
 	}
 
-	ALWAYS_INLINE bool IsWhitePromoMove(const int posFrom) const
+	ALWAYS_INLINE bool IsWhitePromoMove(const int posFrom) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 
@@ -5041,7 +5041,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags, char tbBlackCastlingFlags>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhitePromoMove(const int posFrom, const int posTo, const int promo = FGR_EMPTY) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhitePromoMove(const int posFrom, const int posTo, const int promo = FGR_EMPTY) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -5123,7 +5123,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags, char tbBlackCastlingFlags>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteEnPassant(const int posFrom, const int posTo) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhiteEnPassant(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -5153,7 +5153,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhitePawnMove(const int posFrom, const int posTo, const int promo = FGR_EMPTY) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackResponseAfterWhitePawnMove(const int posFrom, const int posTo, const int promo = FGR_EMPTY) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -5193,7 +5193,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteMove(const TMove& move) const
+	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteMove(const TMove& move) const __restrict__
 	{
 		assert(white & (1ULL << move.nFrom));
 		assert((~white) & (1ULL << move.nTo));
@@ -5221,7 +5221,7 @@ private:
 	}
 
 	template<char tbWhiteCastlingFlags, char tbBlackCastlingFlags>
-	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteMove(const int posFrom, const int posTo) const
+	bool IsImmediateMateAfterAnyBlackResponseAfterWhiteMove(const int posFrom, const int posTo) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posTo));
@@ -5251,7 +5251,7 @@ private:
 		return false;
 	}
 
-	ALWAYS_INLINE bool IsWhiteCaptureEnPassant(const int posFrom, const int posCaptured) const
+	ALWAYS_INLINE bool IsWhiteCaptureEnPassant(const int posFrom, const int posCaptured) const __restrict__
 	{
 		assert(IsValidPos(posFrom));
 		assert(IsValidPos(posCaptured));
@@ -5263,7 +5263,7 @@ private:
 		return res;
 	}
 	
-	uint64_t GetWhitePinnedPieces() const
+	uint64_t GetWhitePinnedPieces() const __restrict__
 	{
 		Bitboard pinned = 0ULL;
 
@@ -5286,7 +5286,7 @@ private:
 		return pinned;
 	}
 
-	uint64_t GetBlackPinnedPieces() const
+	uint64_t GetBlackPinnedPieces() const __restrict__
 	{
 		Bitboard pinned = 0ULL;
 
@@ -5315,7 +5315,7 @@ private:
 	// * set bit 1 if castling short is possible (wh.king is on e1 and did not move yet and wh.R is on h1 and did not move yet)
 	// * set bit 2 if castling long is possible (wh.king is on e1 and did not move yet and wh.R is on a1 and did not move yet)
 	template<char tbWhiteKingUnderCheck = -1, bool tbEnPassantPossible = false, char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3, bool tbFindAllSolutionsAndFillBuf = false>
-	int FindMoveThatMatesInTwoMoves(int posWhiteKingChecker = -1, const int bposToCaptureWithEnPassant = -1, TMove* pMoves = nullptr) const
+	int FindMoveThatMatesInTwoMoves(int posWhiteKingChecker = -1, const int bposToCaptureWithEnPassant = -1, TMove* pMoves = nullptr) const __restrict__
 	{
 		int count;
 		if constexpr (tbFindAllSolutionsAndFillBuf)
@@ -5570,7 +5570,7 @@ private:
 	}
 
 	template<bool FindAllSolutionsAndFillBuf = false>
-	ALWAYS_INLINE int SolveTwoMoverDispatcher(const int whiteKingChecker, const int enPassantSquare, const int castlingFlags, TMove* pMoves) const
+	ALWAYS_INLINE int SolveTwoMoverDispatcher(const int whiteKingChecker, const int enPassantSquare, const int castlingFlags, TMove* pMoves) const __restrict__
 	{
 		const bool bEnPassantPossible = enPassantSquare >= 0;
 
@@ -5760,7 +5760,7 @@ private:
 	}
 
 	// Returns move (0,0) on error
-	TMove StringToMove(const char* szMove) const
+	TMove StringToMove(const char* szMove) const __restrict__
 	{
 		TMove move;
 
@@ -5882,7 +5882,7 @@ private:
 
 public:
 	// Returns empty vector on error:
-	std::vector<TMove> StringToMoves(const std::string& moves) const
+	std::vector<TMove> StringToMoves(const std::string& moves) const __restrict__
 	{
 		std::vector<TMove> res;
 		res.reserve(moves.size() / 4 + 1);
