@@ -51,7 +51,7 @@ public:
 
 private:
 	alignas(64) std::array<std::array<uint16_t, 64>, 9> idxLookup{}; // first indexing by DirLookup::Direction [0...7,8] (8==DIR_NONE is for unaligned), then by by square [0...63] - this way we avoid multiplication by 9
-	alignas(64) std::array<Bitboard, 369> maskLookup{};
+	alignas(64) std::array<uint64_t, 369> maskLookup{};
 
 	static constexpr int ct_abs(int x)
 	{
