@@ -18,37 +18,40 @@ public:
 		FillLookup();
 	}
 	constexpr ALWAYS_INLINE Bitboard GetRay(const int pos, const int posBase) const __restrict__
-	{
+	{		
 		const auto dir = dirLookup.GetDir(posBase, pos);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
-		return maskLookup[idx];
+		return GetRayInDir(pos, dir);
 	}
 	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const DirLookup::Direction dir) const __restrict__
 	{
+        #ifdef __clang__ // workaround for clang problems with __restrict__
+        const auto* __restrict__ idxLookup = this->idxLookup[0].data();
+		const auto idx = idxLookup[((uint32_t)dir) * 64 + pos];
+		const Bitboard* __restrict__ maskLookup = this->maskLookup.data();
+		#else		
 		const auto idx = idxLookup[(uint32_t)dir][pos];
+		#endif
+				
 		return maskLookup[idx];
 	}
 	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const int dx, const int dy) const __restrict__
 	{
 		const auto dir = dirLookup.DirFromDxDy(dx, dy);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
-		return maskLookup[idx];
+		return GetRayInDir(pos, dir);
 	}
 	constexpr ALWAYS_INLINE Bitboard MatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) const __restrict__
 	{
 		const auto dir = dirLookup.GetDir(posBase, pos);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
-		const auto mask = maskLookup[idx];
+		const auto mask = GetRayInDir(pos, dir);
 		return mask & matchMask;
 	}
 	constexpr ALWAYS_INLINE std::pair<Bitboard, Bitboard> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) const __restrict__
 	{
 		std::pair<Bitboard, Bitboard> res;
-		const auto dir = dirLookup.GetDir(posBase, pos);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
+		const auto dir = dirLookup.GetDir(posBase, pos);		
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
-		res.first = maskLookup[idx];
+		res.first = GetRayInDir(pos, dir);
 		res.second = res.first & matchMask;
 		return res;
 	}
