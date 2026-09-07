@@ -117,7 +117,7 @@ TEST(JGIsland_BB_Tests, TestSameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePa
 
 TEST(JGIsland_BB_Tests, TestWhiteLongDistanceFigureInDir)
 {
-	FullBitboards_HQ bb;
+	FullBitboards_HQ obj; FullBitboards_HQ& bb = obj; // workaround for clang
 	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
 	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_D2_, _D1_), 1); // wh.Rd6
