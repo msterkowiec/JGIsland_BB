@@ -78,7 +78,8 @@ public:
 
         #ifdef __clang__ // workaround for clang problems with __restric__
         const auto& index_map = this->index_map;
-        const auto& unique_masks = this->unique_masks;
+        const auto& index_map_2 = this->index_map_2;
+        const auto& unique_lines = this->unique_lines;
         #endif
 
         if constexpr (tbReduceMemUsage)
@@ -110,7 +111,7 @@ public:
         #ifdef __clang__ // workaround for clang problems with __restric__
         const auto& index_map = this->index_map;
         const auto& index_map_2 = this->index_map_2;
-        const auto& unique_masks = this->unique_masks;
+        const auto& unique_lines = this->unique_lines;
         const auto& is_it_line = this->is_it_line;
         #endif
         
@@ -139,6 +140,7 @@ public:
         #ifdef __clang__ // workaround for clang problems with __restric__
         const auto& index_map = this->index_map;
         const auto& index_map_2 = this->index_map_2;
+        const auto& unique_lines = this->unique_lines;
         const auto& unique_masks = this->unique_masks;
         const auto& is_it_line = this->is_it_line;
         #endif
