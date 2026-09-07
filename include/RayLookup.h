@@ -39,9 +39,9 @@ public:
 		const auto mask = GetRayInDir(pos, dir);
 		return mask & matchMask;
 	}
-	constexpr ALWAYS_INLINE std::pair<Bitboard, Bitboard> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) CONST_RESTRICT
+	constexpr ALWAYS_INLINE std::pair<uint64_t, uint64_t> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) CONST_RESTRICT
 	{
-		std::pair<Bitboard, Bitboard> res;
+		std::pair<uint64_t, uint64_t> res;
 		const auto dir = dirLookup.GetDir(posBase, pos);		
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
 		res.first = GetRayInDir(pos, dir);
