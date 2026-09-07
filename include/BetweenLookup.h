@@ -44,11 +44,11 @@ private:
     // Element 0 is reserved for "no mask / empty"      
     // Expanded by 1 to accommodate both special control slots (0 and -1)
     static constexpr size_t maxUniqueMasks = 412;
-    alignas(64) std::array<Bitboard, maxUniqueMasks> unique_masks{}; // ~3.5kB
+    alignas(64) std::array<uint64_t, maxUniqueMasks> unique_masks{}; // ~3.5kB
 
     // Masks of common line or diagonal
     static constexpr size_t maxUniqueDiagOrLines = 43; 
-    alignas(64) std::array<Bitboard, maxUniqueDiagOrLines> unique_lines{};
+    alignas(64) std::array<uint64_t, maxUniqueDiagOrLines> unique_lines{};
     alignas(64) std::array<uint8_t, maxUniqueDiagOrLines> is_it_line{}; // yet another auxiliary lookup
 
 public:

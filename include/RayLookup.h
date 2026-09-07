@@ -39,9 +39,9 @@ public:
 		const auto mask = GetRayInDir(pos, dir);
 		return mask & matchMask;
 	}
-	constexpr ALWAYS_INLINE std::pair<Bitboard, Bitboard> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) CONST_RESTRICT
+	constexpr ALWAYS_INLINE std::pair<uint64_t, uint64_t> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) CONST_RESTRICT
 	{
-		std::pair<Bitboard, Bitboard> res;
+		std::pair<uint64_t, uint64_t> res;
 		const auto dir = dirLookup.GetDir(posBase, pos);		
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
 		res.first = GetRayInDir(pos, dir);
@@ -51,7 +51,7 @@ public:
 
 private:
 	alignas(64) std::array<std::array<uint16_t, 64>, 9> idxLookup{}; // first indexing by DirLookup::Direction [0...7,8] (8==DIR_NONE is for unaligned), then by by square [0...63] - this way we avoid multiplication by 9
-	alignas(64) std::array<Bitboard, 369> maskLookup{};
+	alignas(64) std::array<uint64_t, 369> maskLookup{};
 
 	static constexpr int ct_abs(int x)
 	{
