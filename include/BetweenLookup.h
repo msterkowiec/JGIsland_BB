@@ -161,7 +161,7 @@ public:
             const auto* __restrict__ index_map = (const uint16_t* __restrict__) &(this->index_map);
             const Bitboard* __restrict__ unique_lines = (const Bitboard* __restrict__) &(this->unique_lines);
             const Bitboard* __restrict__ unique_masks = (const Bitboard* __restrict__) &(this->unique_masks);
-            const auto* __restrict__ is_it_line = (const uint8_t* __restrict__) & (this->is_it_line)
+            const auto* __restrict__ is_it_line = (const uint8_t* __restrict__) & (this->is_it_line);
             uint16_t mask_id = index_map[sq1 * 64 + sq2];
             #else                
             uint16_t mask_id = index_map[sq1][sq2];
