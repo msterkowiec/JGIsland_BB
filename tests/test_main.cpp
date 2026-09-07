@@ -117,29 +117,29 @@ TEST(JGIsland_BB_Tests, TestSameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePa
 
 TEST(JGIsland_BB_Tests, TestWhiteLongDistanceFigureInDir)
 {
-	FullBitboards_HQ obj; FullBitboards_HQ* bb = &obj; // workaround for clang
-	bb->fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
+	FullBitboards_HQ bb;
+	bb.fromFEN("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b");
 
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_D2_, _D1_), 1); // wh.Rd6
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_D2_, _D1_), _D6_);
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_D2_, 0, 1), 1);
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_D2_, 0, 1), _D6_);
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_G4_, _H3_), 0); // wh.Re6 but not matching the direction
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_G4_, _H3_), -1);
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_G4_, -1, 1), -1);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_D2_, _D1_), 1); // wh.Rd6
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_D2_, _D1_), _D6_);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_D2_, 0, 1), 1);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_D2_, 0, 1), _D6_);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_G4_, _H3_), 0); // wh.Re6 but not matching the direction
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_G4_, _H3_), -1);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_G4_, -1, 1), -1);
 
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_B6_, _B8_), 0); // bl.Bb1
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_B6_, _B8_), -1);
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_B6_, 0, -1), 0);
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_B6_, 0, -1), -1);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_B6_, _B8_), 0); // bl.Bb1
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_B6_, _B8_), -1);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_B6_, 0, -1), 0);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_B6_, 0, -1), -1);
 
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_A4_, 1, 1), 1); // wh.Be8
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_A4_, 1, 1), _E8_); 
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_A4_, 1, 1), 1); // wh.Be8
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_A4_, 1, 1), _E8_); 
 	
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_E4_, -1, 1), 0); // bl.Ba8
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir(_E4_, _F3_), 0); 
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_E4_, -1, 1), -1); 
-	EXPECT_EQ(bb->WhiteLongDistanceFigureInDir<1>(_E4_, _F3_), -1);
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_E4_, -1, 1), 0); // bl.Ba8
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir(_E4_, _F3_), 0); 
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_E4_, -1, 1), -1); 
+	EXPECT_EQ(bb.WhiteLongDistanceFigureInDir<1>(_E4_, _F3_), -1);
 }
 
 TEST(JGIsland_BB_Tests, TestBlackLongDistanceFigureInDir)
