@@ -18,43 +18,38 @@ public:
 		FillLookup();
 	}
 	constexpr ALWAYS_INLINE Bitboard GetRay(const int pos, const int posBase) const __restrict__
-	{
+	{		
 		const auto dir = dirLookup.GetDir(posBase, pos);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
-		return maskLookup[idx];
+		return GetRayInDir(pos, dir);
 	}
 	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const DirLookup::Direction dir) const __restrict__
 	{
-		const auto idx = idxLookup[(uint32_t)dir][pos];
+		const auto idx = idxLookup[(uint32_t)dir][pos];		
 		return maskLookup[idx];
 	}
 	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const int dx, const int dy) const __restrict__
 	{
 		const auto dir = dirLookup.DirFromDxDy(dx, dy);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
-		return maskLookup[idx];
+		return GetRayInDir(pos, dir);
 	}
 	constexpr ALWAYS_INLINE Bitboard MatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) const __restrict__
 	{
 		const auto dir = dirLookup.GetDir(posBase, pos);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
-		const auto mask = maskLookup[idx];
+		const auto mask = GetRayInDir(pos, dir);
 		return mask & matchMask;
 	}
 	constexpr ALWAYS_INLINE std::pair<Bitboard, Bitboard> GetRayAndMatchOnRay(const int pos, const int posBase, const Bitboard rookLikes, const Bitboard bishopLikes) const __restrict__
 	{
 		std::pair<Bitboard, Bitboard> res;
-		const auto dir = dirLookup.GetDir(posBase, pos);
-		const auto idx = idxLookup[(uint32_t)dir][pos];
+		const auto dir = dirLookup.GetDir(posBase, pos);		
 		const auto matchMask = DirLookup::IsLineDir(dir) ? rookLikes : bishopLikes;
-		res.first = maskLookup[idx];
+		res.first = GetRayInDir(pos, dir);
 		res.second = res.first & matchMask;
 		return res;
 	}
 
 private:
-
 	alignas(64) std::array<std::array<uint16_t, 64>, 9> idxLookup{}; // first indexing by DirLookup::Direction [0...7,8] (8==DIR_NONE is for unaligned), then by by square [0...63] - this way we avoid multiplication by 9
 	alignas(64) std::array<Bitboard, 369> maskLookup{};
 

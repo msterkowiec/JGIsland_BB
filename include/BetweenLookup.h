@@ -57,9 +57,8 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);
         assert(sq1 != sq2);
-        
-        uint16_t mask_id = index_map[sq1][sq2];
 
+        uint16_t mask_id = index_map[sq1][sq2];
         if constexpr(tbReduceMemUsage)
             return unique_masks[mask_id & 511];
         else
@@ -70,15 +69,15 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);
         assert(sq1 != sq2);
-        
+
         if constexpr (tbReduceMemUsage)
         {
-            uint16_t mask_id = index_map[sq1][sq2];            
+            uint16_t mask_id = index_map[sq1][sq2];
             return unique_lines[mask_id >> 9];
         }
         else
         {
-            auto mask_id = index_map_2[sq1][sq2];
+            auto mask_id = index_map_2[sq1][sq2];            
             return unique_lines[mask_id];
         }
     }
@@ -99,14 +98,14 @@ public:
         
         if constexpr (tbReduceMemUsage)
         {
-            uint16_t mask_id = index_map[sq1][sq2];
+            uint16_t mask_id = index_map[sq1][sq2];    
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
             return unique_lines[mask_id >> 9] & match;
         }
         else
         {
-            auto mask_id = index_map_2[sq1][sq2];
+            auto mask_id = index_map_2[sq1][sq2];    
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
             return unique_lines[mask_id] & match;
@@ -118,10 +117,10 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);        
         assert(sq1 != sq2);
-        
+
         if constexpr (tbReduceMemUsage)
         {
-            uint16_t mask_id = index_map[sq1][sq2];
+            uint16_t mask_id = index_map[sq1][sq2];        
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;    
             bool bAllBetweenEmpty = (unique_masks[mask_id & 511] & occ) == 0;
@@ -129,10 +128,10 @@ public:
         }
         else
         {
-            auto mask_id = index_map_2[sq1][sq2];
+            auto mask_id = index_map_2[sq1][sq2];    
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
-            bool bAllBetweenEmpty = (unique_masks[index_map[sq1][sq2]] & occ) == 0;
+            bool bAllBetweenEmpty = (unique_masks[mask_id] & occ) == 0;
             return unique_lines[mask_id] & match & (0ULL - static_cast<uint64_t>(bAllBetweenEmpty));
         }
     }    

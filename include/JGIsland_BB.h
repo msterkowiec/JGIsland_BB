@@ -1922,7 +1922,7 @@ private:
 			mask = sq_to_bb(sq) & King_Attacks[posBlackKing] & ~King_Attacks[posWhiteKing] & (((Black_Pawn_Attacks[sq] & white & pawns) | (Knight_Attacks[sq] & white & knights)) ? 0ULL : ~0ULL);
 
 			if (mask)
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(sq)) // -1 == verify only long distance attackers; all other already filtered out above
+				if (!IsSquareAttackedByWhiteIfTakeOffBlackKing<-1>(sq)) // -1 == verify only long distance attackers; all other already filtered out above
 					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(sq))
 						if constexpr (tbOneIsEnough)
 							return true;
@@ -2373,7 +2373,7 @@ private:
 		{
 			mask = white & kings & King_Attacks[sq];
 			if (mask)
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(sq))
+				if (!IsSquareAttackedByBlackIfTakeOffWhiteKing(sq))
 					if (!tbOnlyCheckingMoves || WillWhiteKingMoveBeCheck<tbOnlyMatingMoves>(sq))
 						if constexpr (tbOneIsEnough)
 							return true;
@@ -2488,7 +2488,7 @@ private:
 			auto matchMask = King_Attacks[posBlackKing] & maskBetween;
 			BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 			{
-				if (!tbVerifyPinning || !const_cast<FullBitboards*>(this)->IsSquareAttackedByWhiteIfTakeOffBlackKing(posBetween))
+				if (!tbVerifyPinning || !IsSquareAttackedByWhiteIfTakeOffBlackKing(posBetween))
 					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posBetween))
 					{
 						if constexpr (tbOneIsEnough)
@@ -2709,7 +2709,7 @@ private:
 				auto matchMask = King_Attacks[posWhiteKing] & maskBetween;
 				BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 				{
-					if (!tbVerifyPinning || !const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(posBetween))
+					if (!tbVerifyPinning || !IsSquareAttackedByBlackIfTakeOffWhiteKing(posBetween))
 						if (!tbOnlyCheckingMoves || WillWhiteKingMoveBeCheck<tbOnlyMatingMoves>(posBetween))
 						{
 							if constexpr (tbOneIsEnough)
@@ -3971,11 +3971,11 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
 				#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing<-1>(pos))
+				if (!IsSquareAttackedByBlackIfTakeOffWhiteKing<-1>(pos))
 				#else				
-				if (!const_cast<FullBitboards*>(this)->IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
+				if (!IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
 				#endif
-					if (const_cast<FullBitboards*>(this)->IsCheckMateAfterKingDiscoveredCheck(pos, posWhiteLongDistAttacker))
+					if (IsCheckMateAfterKingDiscoveredCheck(pos, posWhiteLongDistAttacker))
 						return true;
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
@@ -4068,7 +4068,7 @@ private:
 			#endif
 			{
 				const bool bDoubleCheck = posWhiteLongDistAttacker >= 0 && (ppos & 7) != (posToCapture & 7);
-				if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
+				if (IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
 					return true;
 			}
 		}
@@ -4083,7 +4083,7 @@ private:
 			#else
 			if (!IsWhitePinned(ppos, ppos + 8))
 			#endif
-				if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDirectCheck(ppos, ppos + 8))
+				if (IsCheckMateAfterPawnDirectCheck(ppos, ppos + 8))
 					return true;
 
 		// Double move forward with direct check?
@@ -4095,7 +4095,7 @@ private:
 				#else
 				if (!IsWhitePinned(ppos, ppos + 16))
 				#endif
-					if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDirectCheck<1>(ppos, ppos + 16))
+					if (IsCheckMateAfterPawnDirectCheck<1>(ppos, ppos + 16))
 						return true;
 
 		// promo:
@@ -4118,15 +4118,15 @@ private:
 					else
 						if (SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(ppos + 8, posBlackKing, ppos))
 						{
-							if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToQueenDirectCheck(ppos, ppos + 8, posWhiteLongDistAttacker >= 0))
+							if (IsCheckMateAfterPromoToQueenDirectCheck(ppos, ppos + 8, posWhiteLongDistAttacker >= 0))
 								return true;
 						}
 
 					if (posWhiteLongDistAttacker >= 0)
 					{
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
+						if (IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
 							return true;
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
+						if (IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
 							return true;
 					}
 				}
@@ -4143,21 +4143,21 @@ private:
 				{
 					if (IsKnightDiff(posToCapture, posBlackKing))
 					{
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToKnightDirectCheck(ppos, posToCapture, posWhiteLongDistAttacker >= 0))
+						if (IsCheckMateAfterPromoToKnightDirectCheck(ppos, posToCapture, posWhiteLongDistAttacker >= 0))
 							return true;
 					}
 					else
 						if (SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(posToCapture, posBlackKing, ppos))
 						{
-							if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToQueenDirectCheck(ppos, posToCapture, posWhiteLongDistAttacker >= 0))
+							if (IsCheckMateAfterPromoToQueenDirectCheck(ppos, posToCapture, posWhiteLongDistAttacker >= 0))
 								return true;
 						}
 
 					if (posWhiteLongDistAttacker >= 0)
 					{
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
+						if (IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
 							return true;
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
+						if (IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
 							return true;
 					}
 				}
@@ -4179,7 +4179,7 @@ private:
 					#else
 					if (!IsWhitePinned(ppos, posToCapture))
 					#endif
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
+						if (IsCheckMateAfterPawnDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
 							return true;
 				}
 				END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
@@ -4192,12 +4192,12 @@ private:
 					if (!IsWhitePinned(ppos, ppos + 8))
 					#endif
 					{
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
+						if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
 							return true;
 
 						// Discovered check with a double move forward:
 						if (((ppos >> 3) == _2_) & IsEmptyAt(ppos + 16))
-							if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 16, posWhiteLongDistAttacker)) // no need to pass info about possible en passant, since it never prevents discovered check
+							if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 16, posWhiteLongDistAttacker)) // no need to pass info about possible en passant, since it never prevents discovered check
 								return true;
 					}
 			}
@@ -4215,7 +4215,7 @@ private:
 					if (!IsWhitePinnedIfTakeOffBlackPawn<1>(ppos, bposToCaptureWithEnPassant + 8, bposToCaptureWithEnPassant))
 					{
 						const bool bDoubleCheck = (posWhiteLongDistAttacker >= 0) & ((ppos + posBlackKing) / 2 != bposToCaptureWithEnPassant + 8);
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterEnPassantDirectCheck(ppos, bposToCaptureWithEnPassant + 8, bDoubleCheck))
+						if (IsCheckMateAfterEnPassantDirectCheck(ppos, bposToCaptureWithEnPassant + 8, bDoubleCheck))
 							return true;
 					}
 				}
@@ -4255,7 +4255,7 @@ private:
 
 					if (bWhitePawnDisco | bBlackPawnDisco)
 						if (!IsWhitePinnedIfTakeOffBlackPawn<1>(ppos, bposToCaptureWithEnPassant + 8, bposToCaptureWithEnPassant))
-							if (const_cast<FullBitboards*>(this)->IsCheckMateAfterEnPassantDiscoveredCheck(ppos, bposToCaptureWithEnPassant + 8, posWhiteLongDistAttackerInEnPassant))
+							if (IsCheckMateAfterEnPassantDiscoveredCheck(ppos, bposToCaptureWithEnPassant + 8, posWhiteLongDistAttackerInEnPassant))
 								return true;
 				}
 			}
