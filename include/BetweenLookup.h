@@ -58,12 +58,13 @@ public:
         assert(((unsigned int) sq2) < 64);
         assert(sq1 != sq2);
 
-        #ifdef __clang__ // workaround for clang problems with __restric__
-        const auto& index_map = this->index_map;
-        const auto& unique_masks = this->unique_masks;
-        #endif
-                
+        #ifdef __clang__ // workaround for clang problems with __restrict__
+        __restrict__ const uint16_t* index_map = this->index_map.data();
+        __restrict__ const Bitboard* unique_masks = this->unique_masks.data();
+        uint16_t mask_id = index_map[sq1 * 64 + sq2];
+        #else            
         uint16_t mask_id = index_map[sq1][sq2];
+        #endif
 
         if constexpr(tbReduceMemUsage)
             return unique_masks[mask_id & 511];
@@ -76,20 +77,28 @@ public:
         assert(((unsigned int) sq2) < 64);
         assert(sq1 != sq2);
 
-        #ifdef __clang__ // workaround for clang problems with __restric__
-        const auto& index_map = this->index_map;
-        const auto& index_map_2 = this->index_map_2;
-        const auto& unique_lines = this->unique_lines;
-        #endif
-
         if constexpr (tbReduceMemUsage)
         {
-            uint16_t mask_id = index_map[sq1][sq2];            
+            #ifdef __clang__ // workaround for clang problems with __restrict__
+            __restrict__ const uint16_t* index_map = this->index_map.data();
+            __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
+            uint16_t mask_id = index_map[sq1 * 64 + sq2];
+            #else            
+            uint16_t mask_id = index_map[sq1][sq2];
+            #endif
+            
             return unique_lines[mask_id >> 9];
         }
         else
         {
+            #ifdef __clang__ // workaround for clang problems with __restrict__
+            __restrict__ const uint16_t* index_map_2 = this->index_map_2.data();
+            __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
+            uint16_t mask_id = index_map_2[sq1 * 64 + sq2];
+            #else            
             auto mask_id = index_map_2[sq1][sq2];
+            #endif
+            
             return unique_lines[mask_id];
         }
     }
@@ -107,24 +116,33 @@ public:
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);        
         assert(sq1 != sq2);
-
-        #ifdef __clang__ // workaround for clang problems with __restric__
-        const auto& index_map = this->index_map;
-        const auto& index_map_2 = this->index_map_2;
-        const auto& unique_lines = this->unique_lines;
-        const auto& is_it_line = this->is_it_line;
-        #endif
         
         if constexpr (tbReduceMemUsage)
         {
+            #ifdef __clang__ // workaround for clang problems with __restrict__
+            __restrict__ const uint16_t* index_map = this->index_map.data();
+            __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
+            __restrict__ const auto* is_it_line = this->is_it_line.data();
+            uint16_t mask_id = index_map[sq1 * 64 + sq2];
+            #else              
             uint16_t mask_id = index_map[sq1][sq2];
+            #endif
+            
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
             return unique_lines[mask_id >> 9] & match;
         }
         else
         {
+            #ifdef __clang__ // workaround for clang problems with __restrict__
+            __restrict__ const uint16_t* index_map_2 = this->index_map_2.data();
+            __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
+            __restrict__ const auto* is_it_line = this->is_it_line.data();
+            uint16_t mask_id = index_map_2[sq1 * 64 + sq2];
+            #else              
             auto mask_id = index_map_2[sq1][sq2];
+            #endif
+            
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
             return unique_lines[mask_id] & match;
@@ -137,17 +155,18 @@ public:
         assert(((unsigned int) sq2) < 64);        
         assert(sq1 != sq2);
 
-        #ifdef __clang__ // workaround for clang problems with __restric__
-        const auto& index_map = this->index_map;
-        const auto& index_map_2 = this->index_map_2;
-        const auto& unique_lines = this->unique_lines;
-        const auto& unique_masks = this->unique_masks;
-        const auto& is_it_line = this->is_it_line;
-        #endif
-
         if constexpr (tbReduceMemUsage)
         {
+            #ifdef __clang__ // workaround for clang problems with __restrict__
+            __restrict__ const uint16_t* index_map = this->index_map.data();
+            __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
+            __restrict__ const Bitboard* unique_masks = this->unique_masks.data();
+            __restrict__ const auto* is_it_line = this->is_it_line.data();
+            uint16_t mask_id = index_map[sq1 * 64 + sq2];
+            #else                
             uint16_t mask_id = index_map[sq1][sq2];
+            #endif
+            
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;    
             bool bAllBetweenEmpty = (unique_masks[mask_id & 511] & occ) == 0;
@@ -155,10 +174,19 @@ public:
         }
         else
         {
+            #ifdef __clang__ // workaround for clang problems with __restrict__
+            __restrict__ const uint16_t* index_map_2 = this->index_map_2.data();
+            __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
+            __restrict__ const Bitboard* unique_masks = this->unique_masks.data();
+            __restrict__ const auto* is_it_line = this->is_it_line.data();
+            uint16_t mask_id = index_map_2[sq1 * 64 + sq2];
+            #else                
             auto mask_id = index_map_2[sq1][sq2];
+            #endif
+            
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
-            bool bAllBetweenEmpty = (unique_masks[index_map[sq1][sq2]] & occ) == 0;
+            bool bAllBetweenEmpty = (unique_masks[mask_id] & occ) == 0;
             return unique_lines[mask_id] & match & (0ULL - static_cast<uint64_t>(bAllBetweenEmpty));
         }
     }    
