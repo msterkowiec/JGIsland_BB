@@ -278,7 +278,7 @@ ALWAYS_INLINE constexpr bool IsSquareAlongTheLineOrDiag(const int sq, const int 
 	return betweenLookup.IsSquareOnCommonDiagOrLineOf(sq, sq1, sq2);
 }
 
-ALWAYS_INLINE constexpr bool IsPosInBitmask(const int sq, const uint64_t mask)
+ALWAYS_INLINE constexpr bool IsPosInBitmask(const int sq, const Bitboard mask)
 {
 	assert(IsValidPos(sq));
 
@@ -310,7 +310,7 @@ ALWAYS_INLINE constexpr bool is_edge_and_not_same_edge(int sq1, int sq2)
 		return false; // NOTE: for all existing use cases it is enough to 'return false' to make the feature inactive; MAKE SURE it is the same after any other use case added
 }
 
-ALWAYS_INLINE constexpr uint64_t GetRayInDir(const int sqr, const int dx, const int dy)
+ALWAYS_INLINE constexpr Bitboard GetRayInDir(const int sqr, const int dx, const int dy)
 {
 	assert(IsValidPos(sqr));
 	assert(dx | dy);
@@ -340,7 +340,7 @@ ALWAYS_INLINE constexpr uint64_t GetRayInDir(const int sqr, const int dx, const 
 }
 
 // Ray starts from posRayAfter, while posRayBase is like a sling that only shows direction (e.g. when pinning piece is searched for with own king on posRayBase and potentially pinned piece on posRayAfter)
-ALWAYS_INLINE constexpr uint64_t GetRay(const int posRayAfter, const int posRayBase)
+ALWAYS_INLINE constexpr Bitboard GetRay(const int posRayAfter, const int posRayBase)
 {
 	assert(IsValidPos(posRayAfter));
 	assert(IsValidPos(posRayBase));
@@ -420,7 +420,7 @@ ALWAYS_INLINE std::conditional_t<std::is_same<T, bool>::value, int, T> MUL(const
 }
 
 // Constexpr version:
-[[nodiscard]] ALWAYS_INLINE constexpr uint64_t ct_bswap64(const uint64_t x) noexcept
+[[nodiscard]] ALWAYS_INLINE constexpr Bitboard ct_bswap64(const Bitboard x) noexcept
 {
 	return ((x & 0x00000000000000FFULL) << 56) |
 		((x & 0x000000000000FF00ULL) << 40) |
@@ -432,7 +432,7 @@ ALWAYS_INLINE std::conditional_t<std::is_same<T, bool>::value, int, T> MUL(const
 		((x & 0xFF00000000000000ULL) >> 56);
 }
 
-[[nodiscard]] ALWAYS_INLINE uint64_t bswap64(const uint64_t x) noexcept
+[[nodiscard]] ALWAYS_INLINE Bitboard bswap64(const Bitboard x) noexcept
 {
 	#if defined(_MSC_VER)
 		return _byteswap_uint64(x);
@@ -443,7 +443,7 @@ ALWAYS_INLINE std::conditional_t<std::is_same<T, bool>::value, int, T> MUL(const
 	#endif
 }
 
-[[nodiscard]] ALWAYS_INLINE uint64_t reflect_bits(uint64_t b) noexcept
+[[nodiscard]] ALWAYS_INLINE Bitboard reflect_bits(Bitboard b) noexcept
 {
 	#if __cplusplus >= 202302L
 		return std::bit_reverse(b);
