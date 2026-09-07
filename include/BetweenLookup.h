@@ -52,7 +52,7 @@ private:
     alignas(64) std::array<uint8_t, maxUniqueDiagOrLines> is_it_line{}; // yet another auxiliary lookup
 
 public:
-    ALWAYS_INLINE Bitboard GetBetweenMask(int sq1, int sq2) const __restrict__
+    ALWAYS_INLINE Bitboard GetBetweenMask(int sq1, int sq2) CONST_RESTRICT
     {
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);
@@ -64,7 +64,7 @@ public:
         else
             return unique_masks[mask_id];
     }
-    ALWAYS_INLINE constexpr Bitboard GetCommonDiagOrLine(int sq1, int sq2) const __restrict__
+    ALWAYS_INLINE constexpr Bitboard GetCommonDiagOrLine(int sq1, int sq2) CONST_RESTRICT
     {
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);
@@ -81,7 +81,7 @@ public:
             return unique_lines[mask_id];
         }
     }
-    ALWAYS_INLINE constexpr bool IsSquareOnCommonDiagOrLineOf(int sq, int sq1, int sq2) const __restrict__
+    ALWAYS_INLINE constexpr bool IsSquareOnCommonDiagOrLineOf(int sq, int sq1, int sq2) CONST_RESTRICT
     {
         assert(((unsigned int) sq) < 64);
         assert(((unsigned int) sq1) < 64);
@@ -90,7 +90,7 @@ public:
 
         return (1ULL << sq) & GetCommonDiagOrLine(sq1, sq2);
     }
-    ALWAYS_INLINE constexpr Bitboard MatchOnCommonDiagOrLine(int sq1, int sq2, uint64_t lineMask, uint64_t diagMask) const __restrict__
+    ALWAYS_INLINE constexpr Bitboard MatchOnCommonDiagOrLine(int sq1, int sq2, uint64_t lineMask, uint64_t diagMask) CONST_RESTRICT
     {
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);        
@@ -112,7 +112,7 @@ public:
         }
     }
     
-    ALWAYS_INLINE constexpr Bitboard MatchOnCommonDiagOrLineIfAllBetweenEmpty(int sq1, int sq2, uint64_t lineMask, uint64_t diagMask, uint64_t occ) const __restrict__
+    ALWAYS_INLINE constexpr Bitboard MatchOnCommonDiagOrLineIfAllBetweenEmpty(int sq1, int sq2, uint64_t lineMask, uint64_t diagMask, uint64_t occ) CONST_RESTRICT
     {
         assert(((unsigned int) sq1) < 64);
         assert(((unsigned int) sq2) < 64);        
