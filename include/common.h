@@ -35,3 +35,7 @@ using BYTE = std::uint8_t;
 #define __restrict__ __restrict
 #endif
 
+// clang is not supporting __restrict__ properly:
+#if defined(__clang__)
+#define __restrict__
+#endif
