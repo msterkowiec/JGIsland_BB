@@ -10,12 +10,8 @@
 #include "DirLookup.h"
 #include "common.h"
 
-#ifdef __clang__
-template<bool = false>
-#endif
 class RayLookup
 {	
-
 public:
 	constexpr RayLookup()
 	{
@@ -121,8 +117,5 @@ private:
 
 };
 
-#ifdef __clang__
-inline constexpr RayLookup<> rayLookup;
-#else
 inline constexpr RayLookup rayLookup;
-#endif
+
