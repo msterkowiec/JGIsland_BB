@@ -2488,7 +2488,7 @@ private:
 			auto matchMask = King_Attacks[posBlackKing] & maskBetween;
 			BEGIN_FOR_EACH_POS_IN_MASK(posBetween, matchMask)
 			{
-				if (!tbVerifyPinning || !sSquareAttackedByWhiteIfTakeOffBlackKing(posBetween))
+				if (!tbVerifyPinning || !IsSquareAttackedByWhiteIfTakeOffBlackKing(posBetween))
 					if (!tbOnlyIfPreventsImmediateMate || !IsImmediateMateAfterMoveByBlackKing<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posBetween))
 					{
 						if constexpr (tbOneIsEnough)
