@@ -59,7 +59,7 @@ public:
         assert(sq1 != sq2);
 
         #ifdef __clang__ // workaround for clang problems with __restrict__
-        __restrict__ const uint16_t* index_map = this->index_map.data();
+        __restrict__ const uint16_t* index_map = this->index_map[0].data();
         __restrict__ const Bitboard* unique_masks = this->unique_masks.data();
         uint16_t mask_id = index_map[sq1 * 64 + sq2];
         #else            
@@ -80,7 +80,7 @@ public:
         if constexpr (tbReduceMemUsage)
         {
             #ifdef __clang__ // workaround for clang problems with __restrict__
-            __restrict__ const uint16_t* index_map = this->index_map.data();
+            __restrict__ const uint16_t* index_map = this->index_map[0].data();
             __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
             uint16_t mask_id = index_map[sq1 * 64 + sq2];
             #else            
@@ -92,7 +92,7 @@ public:
         else
         {
             #ifdef __clang__ // workaround for clang problems with __restrict__
-            __restrict__ const uint16_t* index_map_2 = this->index_map_2.data();
+            __restrict__ const uint16_t* index_map_2 = this->index_map_2[0].data();
             __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
             uint16_t mask_id = index_map_2[sq1 * 64 + sq2];
             #else            
@@ -120,7 +120,7 @@ public:
         if constexpr (tbReduceMemUsage)
         {
             #ifdef __clang__ // workaround for clang problems with __restrict__
-            __restrict__ const uint16_t* index_map = this->index_map.data();
+            __restrict__ const uint16_t* index_map = this->index_map[0].data();
             __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
             __restrict__ const auto* is_it_line = this->is_it_line.data();
             uint16_t mask_id = index_map[sq1 * 64 + sq2];
@@ -135,7 +135,7 @@ public:
         else
         {
             #ifdef __clang__ // workaround for clang problems with __restrict__
-            __restrict__ const uint16_t* index_map_2 = this->index_map_2.data();
+            __restrict__ const uint16_t* index_map_2 = this->index_map_2[0].data();
             __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
             __restrict__ const auto* is_it_line = this->is_it_line.data();
             uint16_t mask_id = index_map_2[sq1 * 64 + sq2];
@@ -158,7 +158,7 @@ public:
         if constexpr (tbReduceMemUsage)
         {
             #ifdef __clang__ // workaround for clang problems with __restrict__
-            __restrict__ const uint16_t* index_map = this->index_map.data();
+            __restrict__ const uint16_t* index_map = this->index_map[0].data();
             __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
             __restrict__ const Bitboard* unique_masks = this->unique_masks.data();
             __restrict__ const auto* is_it_line = this->is_it_line.data();
@@ -175,7 +175,7 @@ public:
         else
         {
             #ifdef __clang__ // workaround for clang problems with __restrict__
-            __restrict__ const uint16_t* index_map_2 = this->index_map_2.data();
+            __restrict__ const uint16_t* index_map_2 = this->index_map_2[0].data();
             __restrict__ const Bitboard* unique_lines = this->unique_lines.data();
             __restrict__ const Bitboard* unique_masks = this->unique_masks.data();
             __restrict__ const auto* is_it_line = this->is_it_line.data();
