@@ -31,10 +31,12 @@ using BYTE = std::uint8_t;
 	using Bitboard = uint64_t;
 #endif
 
-#if defined(__GNUC__)
-	#define CONST_RESTRICT const __restrict__
-#elif defined(__clang__) 
+#if defined(__clang__) 
 	#define CONST_RESTRICT const
-#else
+#elif defined(__GNUC__)
+	#define CONST_RESTRICT const __restrict__	
+#elif defined(_MSC_VER)
 	#define CONST_RESTRICT const __restrict
+#else
+	#define CONST_RESTRICT const
 #endif
