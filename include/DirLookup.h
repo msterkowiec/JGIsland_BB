@@ -27,6 +27,19 @@ public:
 		DIR_NORTHWEST = 8		
 	};
 
+	static constexpr ALWAYS_INLINE bool IsDownwardDir(const Direction dir)
+	{
+		return (((int)dir) & 4) != 0;
+	}
+	static constexpr ALWAYS_INLINE bool IsUpwardDir(const Direction dir)
+	{
+		return (((int)dir) & 4) == 0;
+	}
+	static constexpr ALWAYS_INLINE bool IsLineDir(const Direction dir)
+	{
+		return (((int)dir) & 1);
+	}
+
 	alignas(16) static constexpr std::pair<char, char> DirDiffs[9] = { {0, 0}, { 0,1 }, {1,1}, {1, 0}, {1,-1},{0,-1},{-1,-1},{-1,0}, {-1,1} };
 	alignas(16) static constexpr std::array<uint8_t, 19> ReindexArray = { (uint8_t)Direction::DIR_SOUTHWEST, (uint8_t)Direction::DIR_SOUTH, (uint8_t)Direction::DIR_SOUTHEAST, 0, 0, 0, 0, 0, (uint8_t)Direction::DIR_WEST,
 																		  0, (uint8_t)Direction::DIR_EAST, 0, 0, 0, 0, 0, (uint8_t)Direction::DIR_NORTHWEST, (uint8_t)Direction::DIR_NORTH, (uint8_t)Direction::DIR_NORTHEAST };
