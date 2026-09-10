@@ -1232,6 +1232,10 @@ private:
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackLongDistFigure(const int from, const int to) CONST_RESTRICT
 	{
+		assert(IsValidPos(from));
+		assert(IsValidPos(to));
+		assert(to != from);
+		
 		const auto f = GetLongDistanceFigureAtExt(from);
 		switch (f)
 		{
@@ -1726,6 +1730,9 @@ private:
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
 	ALWAYS_INLINE bool IsImmediateMateAfterBlackCastlingShort() CONST_RESTRICT
 	{
+		assert(posBlackKing == _E8_);
+		assert(IsBlackRookAt(_H8_));
+		
 		constexpr auto fromMask = (1ULL << _E8_);
 		constexpr auto toMask = (1ULL << _G8_);
 		constexpr auto kingMoveMask = fromMask | toMask;
@@ -1757,6 +1764,9 @@ private:
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
 	ALWAYS_INLINE bool IsImmediateMateAfterBlackCastlingLong() CONST_RESTRICT
 	{
+		assert(posBlackKing == _E8_);
+		assert(IsBlackRookAt(_A8_));
+		
 		constexpr auto fromMask = (1ULL << _E8_);
 		constexpr auto toMask = (1ULL << _C8_);
 		constexpr auto kingMoveMask = fromMask | toMask;
@@ -1789,12 +1799,13 @@ private:
 	// Alias: FindMoveThatMatesAfterMoveByBlackKing
 	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKing(const int toPos) CONST_RESTRICT
-	{
+	{		
 		const int fromPos = posBlackKing;
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
 		assert(toPos != fromPos);
 		assert(!IsBlackAt(toPos));
+		assert(AreSquaresAdjacent(posBlackKing, toPos));
 		
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
@@ -2799,6 +2810,9 @@ private:
 	#ifdef __USE_WHITEKNIGHTATTACKMASK__
 	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) CONST_RESTRICT
 	{
+		assert(IsValidPos(posChecker));
+		assert((IsSquareAttackedByWhite<0,1,0>(posBlackKing) & (1ULL << posChecker)));
+		
 		const auto blackKing = black & kings;
 				
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
@@ -2833,6 +2847,8 @@ private:
 	#else
 	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) CONST_RESTRICT
 	{
+		assert(IsValidPos(posChecker));
+		
 		const auto blackKing = black & kings;
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
 		#ifdef __JGI_BB_PEDANTIC__
@@ -2869,6 +2885,7 @@ private:
 	ALWAYS_INLINE bool CanBlackMoveOn(const int sq) CONST_RESTRICT
 	{
 		static_assert(!tbInclKing, "TODO");
+		assert(IsValidPos(sq));
 		assert(!IsBlackAt(sq));
 
 		auto mask = Knight_Attacks[sq] & black & knights;
@@ -5716,6 +5733,8 @@ private:
 
 	ALWAYS_INLINE bool IsImmediateCheckMateDispatcher(const int whiteKingChecker, const int enPassantSquare, const bool whiteCastlingShortPossible, const bool whiteCastlingLongPossible)
 	{
+		assert(IsValidPos(whiteKingChecker) || whiteKingChecker == -1);
+
 		const bool bEnPassantPossible = enPassantSquare >= _A5_;
 		const int dispatcher = (whiteKingChecker >= 0) * 8 + bEnPassantPossible * 4 + whiteCastlingLongPossible + whiteCastlingShortPossible * 2;
 		switch (dispatcher)
