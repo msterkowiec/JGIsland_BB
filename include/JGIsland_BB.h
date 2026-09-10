@@ -3962,14 +3962,14 @@ private:
 	{
 		assert(IsValidPos(sq));
 
-		#if defined(__USE_FASTDETECTIONOFENPRISE__) || defined(__USE_FASTDETECTIONOFENPRISEEXT__)
-			#if defined(__USE_FASTDETECTIONOFENPRISEEXT__)
+		#if defined(__USE_FASTDETECTIONOFCAPTURABLECHECKER__) || defined(__USE_FASTDETECTIONOFCAPTURABLECHECKEREXT__)
+			#if defined(__USE_FASTDETECTIONOFCAPTURABLECHECKEREXT__)
 			return (((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights) | (((Rook_Attacks[sq] & qrooks) | (Bishop_Attacks[sq] & qbishops)) & King_Attacks[sq])) & ~Queen_Attacks[posBlackKing] & black) != 0;
 			#else
 			return (((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights)) & ~Queen_Attacks[posBlackKing] & black) != 0;
 			#endif
 		#else
-			return false;
+			return false; // the code of the method will be optimized out if feature is off
 		#endif
 	}
 
