@@ -2811,7 +2811,7 @@ private:
 	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) CONST_RESTRICT
 	{
 		assert(IsValidPos(posChecker));
-		assert(IsSquareAttackedByWhite<0,1,0>(posBlackKing) & (1ULL << posChecker));
+		assert((IsSquareAttackedByWhite<0,1,0>(posBlackKing) & (1ULL << posChecker)));
 		
 		const auto blackKing = black & kings;
 				
