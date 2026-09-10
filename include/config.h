@@ -56,6 +56,7 @@
 #define __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 
 #define __USE_OPTIMINCANWHITEKINGCHECKMATE__
+#define __USE_FASTDETECTIONOFCAPTURABLECHECKER__ // should rather be on; speeds up about 1.5%
 
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)

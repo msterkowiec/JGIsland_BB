@@ -3709,8 +3709,9 @@ private:
 				#else
 				if (!IsWhitePinned(qpos, pos))
 				#endif
-					if (IsCheckMateAfterQueenCheck(qpos, pos))
-						return true;			
+					if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(pos))
+						if (IsCheckMateAfterQueenCheck(qpos, pos))
+							return true;			
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, mask);
 
@@ -3802,8 +3803,9 @@ private:
 					#else
 					if (!IsWhitePinned(rpos, pos))
 					#endif
-						if (IsCheckMateAfterRookDirectCheck(rpos, pos))
-							return true;
+						if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(pos))
+							if (IsCheckMateAfterRookDirectCheck(rpos, pos))
+								return true;
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 		}
@@ -3898,8 +3900,9 @@ private:
 					#else
 					if (!IsWhitePinned(bpos, pos))
 					#endif
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterBishopDirectCheck(bpos, pos))
-							return true;
+						if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(pos))
+							if (IsCheckMateAfterBishopDirectCheck(bpos, pos))
+								return true;
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 		}
@@ -3943,14 +3946,31 @@ private:
 
 				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 				{
-					if (IsCheckMateAfterKnightDirectCheck(kpos, pos))
-						return true;
+					if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(pos))
+						if (IsCheckMateAfterKnightDirectCheck(kpos, pos))
+							return true;
 				}
 				END_FOR_EACH_POS_IN_MASK(pos, mask);
 			}
 		}
 
 		return false;
+	}
+
+	// Intended for super-fast detection of some non-pinned attackers (not for a conclusive verification of their existence)
+	ALWAYS_INLINE bool IsSquareSureToBeAttackedByNotPinnedBlackPiece(const int sq) const
+	{
+		assert(IsValidPos(sq));
+
+		#if defined(__USE_FASTDETECTIONOFCAPTURABLECHECKER__) || defined(__USE_FASTDETECTIONOFCAPTURABLECHECKEREXT__)
+			#if defined(__USE_FASTDETECTIONOFCAPTURABLECHECKEREXT__)
+			return (((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights) | (((Rook_Attacks[sq] & qrooks) | (Bishop_Attacks[sq] & qbishops)) & King_Attacks[sq])) & ~Queen_Attacks[posBlackKing] & black) != 0;
+			#else
+			return (((White_Pawn_Attacks[sq] & pawns) | (Knight_Attacks[sq] & knights)) & ~Queen_Attacks[posBlackKing] & black) != 0;
+			#endif
+		#else
+			return false; // the code of the method will be optimized out if feature is off
+		#endif
 	}
 
 	ALWAYS_INLINE static int GetSquareDiff(const int sqFrom, const int sqTo)
@@ -4129,7 +4149,7 @@ private:
 				{
 					if (IsKnightDiff(ppos + 8, posBlackKing))
 					{
-						if (const_cast<FullBitboards*>(this)->IsCheckMateAfterPromoToKnightDirectCheck(ppos, ppos + 8, posWhiteLongDistAttacker >= 0))
+						if (IsCheckMateAfterPromoToKnightDirectCheck(ppos, ppos + 8, posWhiteLongDistAttacker >= 0))
 							return true;
 					}
 					else
