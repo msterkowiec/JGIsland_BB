@@ -2808,11 +2808,8 @@ private:
 	}
 
 	#ifdef __USE_WHITEKNIGHTATTACKMASK__
-	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) CONST_RESTRICT
-	{
-		assert(IsValidPos(posChecker));
-		assert((IsSquareAttackedByWhite<0,1,0>(posBlackKing) & (1ULL << posChecker)));
-		
+	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked() CONST_RESTRICT
+	{		
 		const auto blackKing = black & kings;
 				
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
@@ -2845,10 +2842,8 @@ private:
 		return false;
 	}
 	#else
-	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked(const int posChecker) CONST_RESTRICT
-	{
-		assert(IsValidPos(posChecker));
-		
+	ALWAYS_INLINE bool FindOneValidMove4BlackKingWhenChecked() CONST_RESTRICT
+	{		
 		const auto blackKing = black & kings;
 		const_cast<FullBitboards*>(this)->black ^= blackKing;
 		#ifdef __JGI_BB_PEDANTIC__
@@ -2975,7 +2970,7 @@ private:
 		assert(IsValidPos(posChecker) || posChecker == DBL_CHECKED);
 		assert(IsBlackKingChecked() >= 0);
 
-		if (FindOneValidMove4BlackKingWhenChecked(posChecker))
+		if (FindOneValidMove4BlackKingWhenChecked())
 			return true;
 
 		if (posChecker != DBL_CHECKED)
@@ -5753,7 +5748,7 @@ private:
 
 	ALWAYS_INLINE bool IsImmediateCheckMateDispatcher(const int whiteKingChecker, const int enPassantSquare, const bool whiteCastlingShortPossible, const bool whiteCastlingLongPossible)
 	{
-		assert(IsValidPos(whiteKingChecker) || whiteKingChecker == -1);
+		assert(IsValidPos(whiteKingChecker) || whiteKingChecker == -1 || whiteKingChecker == DBL_CHECKED);
 
 		const bool bEnPassantPossible = enPassantSquare >= _A5_;
 		const int dispatcher = (whiteKingChecker >= 0) * 8 + bEnPassantPossible * 4 + whiteCastlingLongPossible + whiteCastlingShortPossible * 2;
