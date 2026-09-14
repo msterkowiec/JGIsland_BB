@@ -418,7 +418,33 @@ private:
 
 		return res;
 	}
-	
+
+	ALWAYS_INLINE bool AllBetweenEmptyIfTakeOffBlackPawn(const int pos1, const int pos2, const int posBlackPawnToTakeOff) const
+	{
+		assert(IsValidPos(pos1));
+		assert(IsValidPos(pos2));
+		assert(IsValidPos(posBlackPawnToTakeOff));
+		assert(pos1 != pos2);
+		assert((1ULL << posBlackPawnToTakeOff) & black & pawns);
+		assert(SameDiagonalOrLine(pos1, pos2));
+
+		const auto mask = (1ULL << posBlackPawnToTakeOff);
+		const_cast<FullBitboards*>(this)->black ^= mask;
+		#ifdef __JGI_BB_PEDANTIC__
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
+		#endif
+
+		const auto res = (GetBetweenMask(pos1, pos2) & (white | black)) == 0;
+
+		const_cast<FullBitboards*>(this)->black ^= mask;
+		#ifdef __JGI_BB_PEDANTIC__
+		const_cast<FullBitboards*>(this)->pawns ^= mask; // __JGI_BB_PEDANTIC__
+		#endif
+
+		return res;
+	}
+
+
 	template<bool tbIncludeEnds = false>
 	ALWAYS_INLINE static constexpr uint64_t GetBetweenMask(const char sq1, const char sq2)
 	{
