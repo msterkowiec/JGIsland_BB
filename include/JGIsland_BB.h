@@ -4442,6 +4442,120 @@ private:
 
 	// Here starts the part of code strictly for FindMoveThatMatesInTwoMoves
 
+	// This method is for finding fast refutations - it does not need to be exhaustive
+	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackCheck() const
+	{
+		assert(!IsSquareAttackedByWhite(posBlackKing)); // prerequisite
+
+		constexpr bool tbWhiteCastlingShortPossible = tbWhiteCastlingFlags & 1;
+		constexpr bool tbWhiteCastlingLongPossible = (tbWhiteCastlingFlags & 2) != 0;
+
+		const auto occ = this->occ();
+
+		// Potentially still TODO: 1) pawn direct check (forward or capture), 2) en passant 3) castling 4) discovered check by any piece (anyway, as already mentioned, this method does not have to be exhaustive)
+
+		// Queens:
+		auto blackQueens = black & queens();
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackQueens)
+		{
+			auto maskTo = ((get_raw_bishop_moves(pos, occ) | get_raw_rook_moves(pos, occ)) & (get_raw_bishop_moves(posWhiteKing, occ) | get_raw_rook_moves(posWhiteKing, occ))) & ~black;
+			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+			{
+				if (!IsBlackPinned(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+						return false;
+			}
+			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackQueens);
+
+		// Check with promo forward?
+		constexpr Bitboard firstLine = 255ULL;
+		const auto blackPawns = black & pawns;
+		auto blackPawnsPromoForward = ((firstLine & Queen_Attacks[posWhiteKing] & ~occ) << 8) & blackPawns; // promo to queen only
+
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward)
+		{
+			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 8, posWhiteKing, pos))
+				if (!IsBlackPinned(pos, pos - 8))
+					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 8)) // TODO: maybe add template param. tbVerifyOnlyDirectCheck
+						return false;
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward);
+
+		// Check with promo capture?
+		constexpr Bitboard firstLineWithoutAColumn = 255ULL - 1;
+		constexpr Bitboard firstLineWithoutHColumn = 255ULL - 128;
+		auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & Queen_Attacks[posWhiteKing] & white) << 7) & blackPawns;
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight)
+		{
+			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 7, posWhiteKing, pos))
+				if (!IsBlackPinned(pos, pos - 7))
+					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 7))
+						return true;
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
+
+		auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & Queen_Attacks[posWhiteKing] & white) << 9) & blackPawns;
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft)
+		{
+			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 9, posWhiteKing, pos))
+				if (!IsBlackPinned(pos, pos - 9))
+					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 9))
+						return true;
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
+
+		// Rooks:
+		auto blackRooks = black & rooks();
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRooks)
+		{
+			auto maskTo = (get_raw_rook_moves(pos, occ) & get_raw_rook_moves(posWhiteKing, occ)) & ~black;
+			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+			{
+				if (!IsBlackPinned(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+						return false;
+			}
+			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackRooks);
+
+		// Bishops:
+		auto blackBishops = black & bishops() & Bishops_That_Can_Check[posWhiteKing]; // TODO: here direct check is only searched for, but squares suitable for discovered check are included in Bishops_That_Can_Check
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackBishops)
+		{
+			auto maskTo = (get_raw_bishop_moves(pos, occ) & get_raw_bishop_moves(posWhiteKing, occ)) & ~black;
+			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+			{
+				if (!IsBlackPinned(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+						return false;
+			}
+			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackBishops);
+
+		// Knights:
+		auto blackKnights = black & knights & Knights_That_Can_Check[posWhiteKing]; // TODO: here direct check is only searched for, but squares suitable for discovered check are included in Knights_That_Can_Check
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackKnights)
+		{
+			if (!IsBlackAbsolutelyPinned(pos))
+			{
+				auto maskTo = Knight_Attacks[pos] & Knight_Attacks[posWhiteKing] & ~black;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+				{
+					if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+						return false;
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+			}
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackKnights);
+		return true;
+	}
+
 	template<bool tbEnPassantPossible = false, char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
 	bool IsImmediateMateAfterAnyBlackResponse(const int bpposForEnPassant = -1) CONST_RESTRICT
 	{
@@ -4518,6 +4632,12 @@ private:
 			const auto blackPinnedPieces = GetBlackPinnedPieces();
 			#endif
 
+			#ifdef __USE_BLACKCHECKINGMOVESFIRST__
+			// A method to find fast refutations - after a check White don't have many responses and the analysis is likely to be completed very fast
+			if (!IsImmediateMateAfterAnyBlackCheck<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>())
+				return false;
+			#endif
+			
 			const auto occ = this->occ();
 			bool legalMovesFound = false;
 
