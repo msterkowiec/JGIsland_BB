@@ -4345,6 +4345,7 @@ private:
 		return false;
 	}
 
+	// The set of methods below may seem slightly messy, but they are intended to provide an exhaustive set to enable the most proper selection to minimize branching for any specific use case
 	ALWAYS_INLINE Bitboard GetAllBlackKingCheckers() CONST_RESTRICT
 	{
 		return IsSquareAttackedByWhite<EXCL_KING, INCL_PINNED, FIND_ALL>(posBlackKing);
