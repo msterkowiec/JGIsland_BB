@@ -4345,15 +4345,38 @@ private:
 		return false;
 	}
 
+	// The set of methods below may seem slightly messy, but they are intended to provide an exhaustive set to enable the most proper selection to minimize branching for any specific use case
+	ALWAYS_INLINE Bitboard GetAllBlackKingCheckers() CONST_RESTRICT
+	{
+		return IsSquareAttackedByWhite<EXCL_KING, INCL_PINNED, FIND_ALL>(posBlackKing);
+	}
+	ALWAYS_INLINE Bitboard GetAllWhiteKingCheckers() CONST_RESTRICT
+	{
+		return IsSquareAttackedByBlack<EXCL_KING, INCL_PINNED, FIND_ALL>(posWhiteKing);
+	}
+
+	// Returns 64 if more than one bit set
+	ALWAYS_INLINE static int BitboardToPos(const Bitboard allCheckers)
+	{
+		assert(allCheckers > 0); // prerequisite
+		const bool dblCheck = std::popcount(allCheckers) > 1;
+		const auto posCheckingPiece = std::countr_zero(allCheckers); // let's encourage compilers to emit cmov below
+		return dblCheck ? DBL_CHECKED : posCheckingPiece;
+	}
+
 	// returns DBL_CHECKED (64) on double check; -1 when not checked or checking piece pos.
 	ALWAYS_INLINE int IsBlackKingChecked() CONST_RESTRICT
 	{
 		assert(IsValidPos(posBlackKing));
 		assert(black & kings & (1ULL << posBlackKing));
 
-		const auto res = IsSquareAttackedByWhite<EXCL_KING, INCL_PINNED, FIND_ALL>(posBlackKing);
+		const auto res = GetAllBlackKingCheckers();
 		if (res)
-			return (std::popcount(res) > 1) ? DBL_CHECKED : std::countr_zero(res);
+		{
+			const bool dblCheck = std::popcount(res) > 1;
+			const auto posCheckingPiece = std::countr_zero(res); // let's encourage compilers to emit cmov below
+			return dblCheck ? DBL_CHECKED : posCheckingPiece;
+		}
 		else
 			return -1;
 	}
@@ -4361,9 +4384,13 @@ private:
 	// returns DBL_CHECKED (64) on double check; -1 when not checked or checking piece pos.
 	ALWAYS_INLINE int IsWhiteKingChecked() CONST_RESTRICT
 	{
-		const auto res = IsSquareAttackedByBlack<EXCL_KING, INCL_PINNED, FIND_ALL>(posWhiteKing);
+		const auto res = GetAllWhiteKingCheckers();
 		if (res)
-			return (std::popcount(res) > 1) ? DBL_CHECKED : std::countr_zero(res);
+		{
+			const bool dblCheck = std::popcount(res) > 1;
+			const auto posCheckingPiece = std::countr_zero(res); // let's encourage compilers to emit cmov below
+			return dblCheck ? DBL_CHECKED : posCheckingPiece;
+		}
 		else
 			return -1;
 	}
@@ -4588,12 +4615,13 @@ private:
 		constexpr bool tbWhiteCastlingShortPossible = tbWhiteCastlingFlags & 1;
 		constexpr bool tbWhiteCastlingLongPossible = (tbWhiteCastlingFlags & 2) != 0;
 
-		const auto posBlackKingChecker = IsBlackKingChecked();
+		const auto allBlackKingCheckers = GetAllBlackKingCheckers();
 		
-		if (posBlackKingChecker >= 0)
+		if (allBlackKingCheckers > 0)
 		{			
 			const auto whitePawnAttacks = WhitePawnAttacks();
 			const auto whiteKnightAttacks = WhiteKnightAttacks();
+			const auto posBlackKingChecker = BitboardToPos(allBlackKingCheckers);
 
 			auto mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
 
