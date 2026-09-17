@@ -58,6 +58,7 @@
 #define __USE_OPTIMINCANWHITEKINGCHECKMATE__
 #define __USE_FASTDETECTIONOFCAPTURABLECHECKER__ // should rather be on; speeds up about 1.5%
 #define __USE_BLACKCHECKINGMOVESFIRST__ // should rather be on; observed speed-up about 1.5%
+#define __USE_FILTERONPROMOCAPTURE__
 
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
