@@ -4053,7 +4053,6 @@ private:
 		if ((mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, posBlackKing))
 			if (int posWhiteLongDistAttacker; (posWhiteLongDistAttacker = ValidateCandidateForLongDistanceFigureInDir(mask, posWhiteKing, posBlackKing)) >= 0)
 			{
-				const int posWhiteLongDistAttacker = posInRay;
 				#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
 				const auto blackPawnAttacks = BlackPawnAttacks();
 				const auto blackKnightAttacks = BlackKnightAttacks();
