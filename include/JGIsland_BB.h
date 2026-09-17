@@ -1721,7 +1721,7 @@ private:
 		assert((black & pawns & (sq_to_bb(toPos))) != 0); // after the move
 
 		const bool bDirectCheck = (white & kings & Black_Pawn_Attacks[toPos]) != 0;
-		const auto posDiscoveredChecker = (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing) & !bDirectCheck) ? BlackLongDistanceFigureInDir<1>(fromPos, posWhiteKing) : -1; // verification is AFTER making move on bitboard, so no need to bother with a move along the line			
+		const auto posDiscoveredChecker = (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing)) ? BlackLongDistanceFigureInDir<1>(fromPos, posWhiteKing) : -1; // verification is AFTER making move on bitboard, so no need to bother with a move along the line			
 		const int posWhiteKingChecker = bDirectCheck ? toPos : posDiscoveredChecker; // no chance for double check in case of a pawn move forward
 		return posWhiteKingChecker;
 	}
@@ -4048,17 +4048,10 @@ private:
 	{
 		assert(IsValidPos(posWhiteKing));
 		assert(white & kings & (1ULL << posWhiteKing));
-
-		// Here the code of WhiteMatchOnRayIfAllBetweenEmpty is copy-pasted to minimize branching on mismatch (readability sacrified for performance)
+		
 		const auto mask = white & rayLookup.MatchOnRay(posWhiteKing, posBlackKing, qrooks, qbishops);
 		if ((mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, posBlackKing))
-		{
-			const bool upRay = posWhiteKing > posBlackKing;
-			const auto posUp = std::countr_zero(mask);
-			const auto posDown = 63 - std::countl_zero(mask);
-			const auto posInRay = upRay ? posUp : posDown;
-
-			if (AllBetweenEmpty(posInRay, posWhiteKing))
+			if (int posWhiteLongDistAttacker; (posWhiteLongDistAttacker = ValidateCandidateForLongDistanceFigureInDir(mask, posWhiteKing, posBlackKing)) >= 0)
 			{
 				const int posWhiteLongDistAttacker = posInRay;
 				#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
@@ -4080,8 +4073,7 @@ private:
 							return true;
 				}
 				END_FOR_EACH_POS_IN_MASK(pos, mask);
-			}	
-		}
+			}			
 
 		if ((tbShortCastlingPossible | tbLongCastlingPossible) && IsWhiteKingAt(_E1_))
 		{
