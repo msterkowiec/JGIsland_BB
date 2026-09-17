@@ -22,6 +22,17 @@ public:
 		const auto dir = dirLookup.GetDir(posBase, pos);
 		return GetRayInDir(pos, dir);
 	}
+	constexpr ALWAYS_INLINE std::pair<uint64_t, DirLookup::Direction> GetRayAndDir(const int pos, const int posBase) CONST_RESTRICT
+	{
+		const auto dir = dirLookup.GetDir(posBase, pos);
+		return std::make_pair(GetRayInDir(pos, dir), dir);
+	}
+	constexpr ALWAYS_INLINE std::pair<uint64_t, uint64_t> GetRayAndMaskForDir(const int pos, const int posBase, const Bitboard rookLike, const Bitboard bishopLike) CONST_RESTRICT
+	{
+		const auto dir = dirLookup.GetDir(posBase, pos);
+		const auto mask = DirLookup::IsLineDir(dir) ? rookLike : bishopLike;
+		return std::make_pair(GetRayInDir(pos, dir), mask);
+	}
 	constexpr ALWAYS_INLINE Bitboard GetRayInDir(const int pos, const DirLookup::Direction dir) CONST_RESTRICT
 	{
 		const auto idx = idxLookup[(uint32_t)dir][pos];		
