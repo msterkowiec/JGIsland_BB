@@ -248,19 +248,19 @@ const bool init_done = DenseFancyMagicBitboards::initialize_sliding_attacks();
 
 } // namespace DenseFancyMagicBitboards
 
-
-ALWAYS_INLINE uint64_t get_raw_rook_moves_dfmb(int sq, uint64_t occupancy)
+ALWAYS_INLINE Bitboard get_raw_rook_moves_dfmb(int sq, Bitboard occupancy)
 {
     const auto& magicRecord = DenseFancyMagicBitboards::RookMagics[sq];
-    uint64_t blockers = occupancy & magicRecord.mask;
-    uint64_t idx = (blockers * magicRecord.magic) >> magicRecord.shift;
+    Bitboard blockers = occupancy & magicRecord.mask;
+    Bitboard idx = (blockers * magicRecord.magic) >> magicRecord.shift;
     return magicRecord.ptr[idx];
 }
 
-ALWAYS_INLINE uint64_t get_raw_bishop_moves_dfmb(int sq, uint64_t occupancy)
+ALWAYS_INLINE Bitboard get_raw_bishop_moves_dfmb(int sq, Bitboard occupancy)
 {
     const auto& magicRecord = DenseFancyMagicBitboards::BishopMagics[sq];
-    uint64_t blockers = occupancy & magicRecord.mask;
-    uint64_t idx = (blockers * magicRecord.magic) >> magicRecord.shift;
+    Bitboard blockers = occupancy & magicRecord.mask;
+    Bitboard idx = (blockers * magicRecord.magic) >> magicRecord.shift;
     return magicRecord.ptr[idx];
 }
+
