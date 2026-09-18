@@ -2769,11 +2769,12 @@ private:
 			Bitboard blackLongDistAttackers; 
 			if constexpr (tbOnlyCheckingMoves)
 			{
-				const bool diagAttack = SameDiagAndAllBetweenEmpty(posBlackKing, pos); 
-				const bool lineAttack = SameLineAndAllBetweenEmpty(posBlackKing, pos);
+				const bool allBetweenEmpty = AllBetweenEmpty(posBlackKing, pos);
+				const bool diagAttack = allBetweenEmpty & SameDiag(posBlackKing, pos); 
+				const bool lineAttack = allBetweenEmpty & SameLine(posBlackKing, pos);
 				const auto maskForQueens = 0ULL - static_cast<uint64_t>(diagAttack|lineAttack);
-				const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | Bishop_Attacks[posBlackKing];
-				const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | Rook_Attacks[posBlackKing];
+				const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | Bishop_Attacks[posBlackKing]; // incl. potential discovered check
+				const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | Rook_Attacks[posBlackKing]; // incl. potential discovered check
 				blackLongDistAttackers = (((rawBishopMoves | rawRookMoves) & queens() & maskForQueens) | (rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks)) & white;
 			}
 			else
