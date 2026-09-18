@@ -4351,8 +4351,7 @@ private:
 		if (posChecker != DBL_CHECKED)
 		{
 			constexpr bool tbFindAll = false;
-			auto mask = CanWhiteCaptureWithCheckMate<tbEnPassantPossible, tbInclKing, tbFindAll>(posChecker);
-			if (mask)
+			if (CanWhiteCaptureWithCheckMate<tbEnPassantPossible, tbInclKing, tbFindAll>(posChecker))
 				return true;
 
 			if (!AreSquaresAdjacentOrKnightDiff(posChecker, posWhiteKing))
