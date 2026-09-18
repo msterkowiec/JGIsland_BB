@@ -2456,10 +2456,13 @@ private:
 			const auto occ = this->occ();
 			const auto rawBishopMoves = get_raw_bishop_moves(sq, occ);
 			const auto rawRookMoves = get_raw_rook_moves(sq, occ);
-			const bool diagAttack = SameDiagAndAllBetweenEmpty(posBlackKing, sq); 
-			const bool lineAttack = SameLineAndAllBetweenEmpty(posBlackKing, sq);
-			const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | Bishop_Attacks[posBlackKing];
-			const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | Rook_Attacks[posBlackKing];
+			const auto rawBishopMovesFromBlackKing = get_raw_bishop_moves(posBlackKing, occ);
+			const auto rawRookMovesFromBlackKing = get_raw_rook_moves(posBlackKing, occ);			
+			const auto allBetweenEmpty = AllBetweenEmpty(posBlackKing, sq);
+			const bool diagAttack = allBetweenEmpty & SameDiag(posBlackKing, sq);
+			const bool lineAttack = allBetweenEmpty & SameLine(posBlackKing, sq);
+			const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | rawBishopMovesFromBlackKing;
+			const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | rawRookMovesFromBlackKing;
 			const auto maskForQueens = (0ULL - static_cast<uint64_t>(diagAttack | lineAttack));
 			mask = white & ((rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks) | ((rawBishopMoves | rawRookMoves) & queens() & maskForQueens));
 		}
@@ -2749,6 +2752,8 @@ private:
 			count = 0;
 
 		const auto occ = this->occ();
+		const auto rawRawBishopMovesFromBlackKing = get_raw_bishop_moves(posBlackKing, occ);
+		const auto rawRawRookMovesFromBlackKing = get_raw_rook_moves(posBlackKing, occ);		
 		auto tmpMaskBetween = maskBetween;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween)
 		{
@@ -2773,8 +2778,8 @@ private:
 				const bool diagAttack = allBetweenEmpty & SameDiag(posBlackKing, pos); 
 				const bool lineAttack = allBetweenEmpty & SameLine(posBlackKing, pos);
 				const auto maskForQueens = 0ULL - static_cast<uint64_t>(diagAttack|lineAttack);
-				const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | Bishop_Attacks[posBlackKing]; // incl. potential discovered check
-				const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | Rook_Attacks[posBlackKing]; // incl. potential discovered check
+				const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | rawRawBishopMovesFromBlackKing; // incl. potential discovered check
+				const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | rawRawRookMovesFromBlackKing; // incl. potential discovered check
 				blackLongDistAttackers = (((rawBishopMoves | rawRookMoves) & queens() & maskForQueens) | (rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks)) & white;
 			}
 			else
