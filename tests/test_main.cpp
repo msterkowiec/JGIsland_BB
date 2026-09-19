@@ -443,6 +443,7 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("2n5/3p1p1R/pp1Pk1p1/b2qP1K1/3pNP1p/n1pb2P1/QP6/2r2B2"), 0); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("R7/P2PP2k/R1P2p2/PP3N2/1B1P3N/4R2P/P1K3P1/3N4"), 1);
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("6Nq/5p2/2P1k1P1/2P1P3/2P1R2P/2K5/8/5B2"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("1Q1N2RR/2PP4/2PbK1rB/PP2P2P/4k2P/r3BRP1/RN2N1n1/3r2Q1"), 0); // White King under check
 }
 
 template<MoveGenMethodT MoveGenMethod>
