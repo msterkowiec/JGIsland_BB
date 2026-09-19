@@ -303,15 +303,19 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKingCheckMate)
 
 #ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 #define NOT_PINNED ,false
+#define NO_DISCO ,false
+#define DISCO_POSSIBLE ,true
 #else
 #define NOT_PINNED
+#define NO_DISCO
+#define DISCO_POSSIBLE
 #endif
 
 TEST(JGIsland_BB_Tests, TestCanWhiteKnightCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("3N2rk/6pp/8/8/8/8/8/4K3");
-	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_D8_), true);
+	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_D8_ NO_DISCO), true);
 
 	#ifndef __PREEMPTIVE_WHITEPINNEDPIECES__ // when preemptive pinning verification is on, this call should not be made - it would just raise assertion failure
 	bb.fromFEN("2KN2rk/6pp/8/8/8/8/8/8");
@@ -319,33 +323,33 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKnightCheckMate)
 	#endif
 
 	bb.fromFEN("2K3bk/7p/8/8/8/2N5/8/B7");
-	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_C3_), true);
+	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_C3_ DISCO_POSSIBLE), true);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhiteBishopCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("3K4/5p2/5kp1/3P1p2/7P/8/8/6B1");	
-	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_G1_ NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_G1_ NO_DISCO NOT_PINNED), true);
 		
 	bb.fromFEN("3K4/5p2/5kp1/3P4/7P/8/5B2/8");
-	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_ NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_ NO_DISCO NOT_PINNED), false);
 
 	bb.fromFEN("3K4/5p2/5kp1/3P4/7P/8/5B2/5R2");
-	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_ NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_ DISCO_POSSIBLE NOT_PINNED), true);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhiteRookCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("3K4/5p2/5kpP/3P4/3P3P/8/1R6/8");
-	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ NO_DISCO NOT_PINNED), true);
 
 	bb.fromFEN("3K4/5p2/5kp1/8/7P/8/1R6/B7");
-	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ DISCO_POSSIBLE NOT_PINNED), false);
 
 	bb.fromFEN("3K4/5p2/1P3kp1/5p2/7P/8/1R6/B7");
-	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ DISCO_POSSIBLE NOT_PINNED), true);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhiteQueenCheckMate)
@@ -418,7 +422,7 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.IsImmediateCheckMate("2N2b2/3n1pp1/Rr3kp1/4pPR1/PN1n3P/K4Q2/B7/B7 w - e6 0 2"), 1);
 	EXPECT_EQ(bb.IsImmediateCheckMate("8/1bQ5/7B/K1p1pPr1/p4k2/2P1p1N1/4Bp1p/5rb1 w - e6 0 3"), 1);
 	EXPECT_EQ(bb.IsImmediateCheckMate("3rRB1r/1n2PP1b/1Rn1k1B1/2p1p3/6p1/p3Pp2/3K4/3N4"), 1);
-
+	EXPECT_EQ(bb.IsImmediateCheckMate("8/5kPQ/5p1b/8/8/8/8/4K3"), 1);
 
 	// No immediate checkmate:
 	EXPECT_EQ(bb.IsImmediateCheckMate("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b"), 0);
