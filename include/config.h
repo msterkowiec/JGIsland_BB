@@ -21,7 +21,7 @@
 #define __USE_FIRSTRANKATTACKSLOOKUP__ // if on, it speeds up about 1%; it is a slight extention of pure Hyperbola Quintessence that requires only 512B of additional lookup; for details see https://www.chessprogramming.org/First_Rank_Attacks
 
 
-#define __PREEMPTIVE_WHITEPINNEDPIECES__ // Most probably this macro should be on - it seems responsible for about 2% speed-up
+#define __PREEMPTIVE_WHITEPINNEDPIECES__ // This macro should be on - it seems responsible for about 2% speed-up; NOTE: it also switches on not only a preemptive call to GetWhitePinnedPieces but also GetWhitePiecesThatCanMakeDiscoveredCheck
 
 
 // #define __PREEMPTIVE_BLACKPINNEDPIECES__ // It should be off (not defined), since statistically already the first Black move found is a refutation, so we should not make this preemptive check (this macro is for IsImmediateMateAfterAnyBlackResponse)
@@ -55,6 +55,7 @@
 #define __USE_MOVEGENINCANBLACKMOVEON__
 #define __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 #define __USE_MOVEGENINCANWHITECAPTURE__
+// #define __USE_MOVEGENTWICEWHENLOOKINGFORPINNEDANDDISCOVEREDCHECKERS__ // should rather be commented out - tests show it slower
 
 #define __USE_OPTIMINCANWHITEKINGCHECKMATE__
 #define __USE_FASTDETECTIONOFCAPTURABLECHECKER__ // should rather be on; speeds up about 1.5%
