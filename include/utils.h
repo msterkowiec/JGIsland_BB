@@ -463,3 +463,9 @@ ALWAYS_INLINE std::conditional_t<std::is_same<T, bool>::value, int, T> MUL(const
 	#endif
 	#endif
 }
+
+// An alternative is to use std::has_single_bit but some compilers are noticed to emit too many branches with it
+ALWAYS_INLINE bool HasSingleBit(const Bitboard val)
+{
+	return (val != 0) & ((val & (val - 1)) == 0);
+}
