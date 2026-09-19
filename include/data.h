@@ -414,6 +414,102 @@ constexpr std::array<uint64_t, 64> init_white_pawn_check_area()
 	return res;
 }
 
+constexpr std::array<uint64_t, 64> init_white_pawn_direct_check_area()
+{
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		uint64_t mask = 0;
+		const int x = sq % 8;
+		const int y = sq / 8;
+
+		// Direct check:
+		if (y >= 3)
+		{
+			mask |= 1ULL << (sq - 16); // capture
+			if (x != 0)
+			{
+				mask |= 1ULL << (sq - 17); // move forward
+				if (x != 1)
+					mask |= 1ULL << (sq - 18); // capture
+				if (y == 4) // fifth line
+					mask |= 1ULL << (sq - 25); // double move forward
+			}
+			if (x != 7)
+			{
+				mask |= 1ULL << (sq - 15); // move forward
+				if (x != 6)
+					mask |= 1ULL << (sq - 14); // capture
+				if (y == 4) // fifth line
+					mask |= 1ULL << (sq - 23); // double move forward
+			}
+		}
+
+		// Promo to queen:
+		if (y == 7)
+			mask |= 255ULL << 48;
+		else
+			for (int dx = -1; dx <= 1; ++dx)
+			{
+				auto cy = y + 1;
+				auto cx = x + dx;
+				while (cx >= 0 && cx < 8 && cy < 8)
+				{
+					if (cy == 7)
+					{
+						mask |= 1ULL << (cx + 6 * 8); // move forward
+						if (cx != 0)
+							mask |= 1ULL << (cx - 1 + 6 * 8); // capture right
+						if (cx != 7)
+							mask |= 1ULL << (cx + 1 + 6 * 8); // capture left
+					}
+					++cy;
+					cx += dx;
+				}
+			}
+
+		// Promo to knight:
+		if (y == 5)
+		{
+			mask |= 1ULL << (x + 6 * 8); // promo capture
+			if (x != 0)
+			{
+				mask |= 1ULL << (x - 1 + 6 * 8); // promo forward
+				if (x != 1)
+					mask |= 1ULL << (x - 2 + 6 * 8); // promo capture
+			}
+			if (x != 7)
+			{
+				mask |= 1ULL << (x + 1 + 6 * 8); // promo forward
+				if (x != 6)
+					mask |= 1ULL << (x + 2 + 6 * 8); // promo capture
+			}
+		}
+		else
+			if (y == 6)
+			{
+				if (x >= 2)
+				{
+					mask |= 1ULL << (x - 2 + 6 * 8); // promo forward
+					if (x >= 3)
+						mask |= 1ULL << (x - 3 + 6 * 8); // promo capture
+				}
+				if (x <= 5)
+				{
+					mask |= 1ULL << (x + 2 + 6 * 8); // promo forward
+					if (x <= 6)
+						mask |= 1ULL << (x + 3 + 6 * 8); // promo capture
+				}
+				// other squares match queen promo ...
+			}
+
+		res[sq] = mask;
+	}
+
+	return res;
+}
+
 constexpr std::array<uint64_t, 64> init_bishops_that_can_check()
 {	
 	constexpr uint64_t FILE_A_NO_EDGES = 0x0001010101010100ULL;
@@ -432,6 +528,25 @@ constexpr std::array<uint64_t, 64> init_bishops_that_can_check()
 		const bool isDarkSquare = DARK_SQUARES & (1ULL << sq);
 		res[sq] = isDarkSquare ? DARK_SQUARES : LIGHT_SQUARES; // direct check		
 		res[sq] |= (LINE_1_NO_EDGES << (y * 8)) | (FILE_A_NO_EDGES << x); // discovered check					  		
+	}
+
+	return res;
+}
+
+constexpr std::array<uint64_t, 64> init_bishops_that_can_directly_check()
+{
+	constexpr uint64_t DARK_SQUARES = 0xAA55AA55AA55AA55ULL; // a1, c1 etc.
+	constexpr uint64_t LIGHT_SQUARES = ~DARK_SQUARES; // b1, d1 etc.
+
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		const int x = sq & 7;
+		const int y = sq >> 3;
+
+		const bool isDarkSquare = DARK_SQUARES & (1ULL << sq);
+		res[sq] = isDarkSquare ? DARK_SQUARES : LIGHT_SQUARES; // direct check		
 	}
 
 	return res;
@@ -464,6 +579,32 @@ constexpr std::array<uint64_t, 64> init_knights_that_can_check()
 					cy += dy;
 				}
 			}
+
+		// direct check:
+		for (int knpos = 0; knpos < 64; ++knpos)
+		{
+			const int kx = knpos & 7;
+			const int ky = knpos >> 3;
+			const int diffx = CTABS(kx - x);
+			const int diffy = CTABS(ky - y);
+			if (diffx + diffy <= 6)
+				if (((diffx + diffy) & 1) == 0) // even sum diffs
+					if (diffx != 2 || diffy != 2)
+						res[sq] |= (1ULL << (kx + ky * 8));
+		}
+	}
+
+	return res;
+}
+
+constexpr std::array<uint64_t, 64> init_knights_that_can_directly_check()
+{
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		const int x = sq & 7;
+		const int y = sq >> 3;
 
 		// direct check:
 		for (int knpos = 0; knpos < 64; ++knpos)
@@ -565,4 +706,6 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Check_Area
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Check = init_bishops_that_can_check();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Check = init_knights_that_can_check();
 
-
+alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Check_Area = init_white_pawn_direct_check_area();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Directly_Check = init_bishops_that_can_directly_check();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Directly_Check = init_knights_that_can_directly_check();
