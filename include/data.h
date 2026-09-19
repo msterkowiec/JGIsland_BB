@@ -542,9 +542,6 @@ constexpr std::array<uint64_t, 64> init_bishops_that_can_directly_check()
 
 	for (int sq = 0; sq < 64; ++sq)
 	{
-		const int x = sq & 7;
-		const int y = sq >> 3;
-
 		const bool isDarkSquare = DARK_SQUARES & (1ULL << sq);
 		res[sq] = isDarkSquare ? DARK_SQUARES : LIGHT_SQUARES; // direct check		
 	}
