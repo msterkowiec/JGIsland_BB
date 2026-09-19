@@ -5694,7 +5694,7 @@ private:
 
 		Bitboard res = 0;
 		const auto blackQRooks = black & qrooks;
-		auto blackRookLikes = get_raw_bishop_moves(posWhiteKing, white | blackQRooks) & blackQRooks;
+		auto blackRookLikes = get_raw_rook_moves(posWhiteKing, white | blackQRooks) & blackQRooks;
 
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRookLikes)
 		{
