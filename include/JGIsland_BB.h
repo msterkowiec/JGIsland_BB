@@ -2490,12 +2490,12 @@ private:
 			res = 0;
 
 		Bitboard mask;
-		#ifdef __USE_MOVEGENINCANWHITECAPTURE__
+		#ifdef __USE_MOVEGENINCANWHITECAPTURE__				
+		const auto occ = this->occ();
+		const auto rawBishopMoves = get_raw_bishop_moves(sq, occ);
+		const auto rawRookMoves = get_raw_rook_moves(sq, occ);
 		if constexpr (tbOnlyCheckingMoves)
 		{
-			const auto occ = this->occ();
-			const auto rawBishopMoves = get_raw_bishop_moves(sq, occ);
-			const auto rawRookMoves = get_raw_rook_moves(sq, occ);
 			const auto allBetweenEmpty = AllBetweenEmpty(posBlackKing, sq);
 			const bool diagAttack = allBetweenEmpty & SameDiag(posBlackKing, sq);
 			const bool lineAttack = allBetweenEmpty & SameLine(posBlackKing, sq);
@@ -2505,7 +2505,8 @@ private:
 			mask = white & ((rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks) | ((rawBishopMoves | rawRookMoves) & queens() & maskForQueens));
 		}
 		else
-		#endif
+			mask = white & ((rawBishopMoves & bishops()) | (rawRookMoves & rooks()) | ((rawBishopMoves | rawRookMoves) & queens()));
+		#else
 		{
 			if constexpr (tbOnlyCheckingMoves)
 			{
@@ -2520,6 +2521,7 @@ private:
 			else
 				mask = white & ((qrooks & Rook_Attacks[sq]) | (qbishops & Bishop_Attacks[sq]));
 		}
+		#endif
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
 			#ifndef __USE_MOVEGENINCANWHITECAPTURE__
