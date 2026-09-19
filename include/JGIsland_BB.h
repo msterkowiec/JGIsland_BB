@@ -4587,7 +4587,8 @@ private:
 		else
 		{			
 			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-			const auto whitePinnedPieces = GetWhitePinnedPieces();			
+			constexpr bool tbWhiteKingKnownToBeNotUnderCheck = true;
+			const auto whitePinnedPieces = GetWhitePinnedPieces<tbWhiteKingKnownToBeNotUnderCheck>();			
 			#endif
 			auto mask = queens() & white;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
@@ -5678,7 +5679,8 @@ private:
 			const auto maskBetween = GetBetweenMask(posWhiteKing, pos);
 			const auto blackPiecesBetween = maskBetween & black;
 
-			const bool exactlyOneBlackPieceBetween = HasSingleBit(blackPiecesBetween); // exactly one black piece between?
+			assert(blackPiecesBetween != 0); // otherwise White King would be under check before Black move
+			const bool exactlyOneBlackPieceBetween = HasSingleBit<1>(blackPiecesBetween); // exactly one black piece between?
 			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneBlackPieceBetween)) & blackPiecesBetween;
 
 			res |= maskToApply;
@@ -5701,7 +5703,8 @@ private:
 			const auto maskBetween = GetBetweenMask(posWhiteKing, pos);
 			const auto blackPiecesBetween = maskBetween & black;
 
-			const bool exactlyOneBlackPieceBetween = HasSingleBit(blackPiecesBetween); // exactly one black piece between?
+			assert(blackPiecesBetween != 0); // otherwise White King would be under check before Black move
+			const bool exactlyOneBlackPieceBetween = HasSingleBit<1>(blackPiecesBetween); // exactly one black piece between?
 			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneBlackPieceBetween)) & blackPiecesBetween;
 
 			res |= maskToApply;
@@ -5743,7 +5746,8 @@ private:
 			const auto maskBetween = GetBetweenMask(posBlackKing, pos);
 			const auto whitePiecesBetween = maskBetween & white;
 
-			const bool exactlyOneWhitePieceBetween = HasSingleBit(whitePiecesBetween); // exactly one white piece between?
+			assert(whitePiecesBetween != 0); // otherwise Black King would be under check before White move
+			const bool exactlyOneWhitePieceBetween = HasSingleBit<1>(whitePiecesBetween); // exactly one white piece between?
 			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneWhitePieceBetween)) & whitePiecesBetween;
 
 			res |= maskToApply;
@@ -5781,7 +5785,8 @@ private:
 			const auto maskBetween = GetBetweenMask(posBlackKing, pos);
 			const auto whitePiecesBetween = maskBetween & white;
 
-			const bool exactlyOneWhitePieceBetween = HasSingleBit(whitePiecesBetween); // exactly one white piece between?
+			assert(whitePiecesBetween != 0); // otherwise Black King would be under check before White move
+			const bool exactlyOneWhitePieceBetween = HasSingleBit<1>(whitePiecesBetween); // exactly one white piece between?
 			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneWhitePieceBetween)) & whitePiecesBetween;
 
 			res |= maskToApply;
@@ -5796,6 +5801,7 @@ private:
 		return GetWhiteBishopsThatCanMakeDiscoveredCheck<1>() | GetWhiteRooksThatCanMakeDiscoveredCheck<1>();
 	}
 
+	template<bool tbWhiteKingKnownToBeNotUnderCheck = false>
 	Bitboard GetWhitePinnedPieces() CONST_RESTRICT
 	{
 		Bitboard pinned = 0ULL;
@@ -5826,7 +5832,8 @@ private:
 			const auto maskBetween = GetBetweenMask(posWhiteKing, posPinner);
 			const auto whitePiecesBetween = maskBetween & white;
 
-			const bool exactlyOneWhitePieceBetween = HasSingleBit(whitePiecesBetween); // exactly one white piece between?
+			assert(!tbWhiteKingKnownToBeNotUnderCheck || whitePiecesBetween != 0);
+			const bool exactlyOneWhitePieceBetween = HasSingleBit<tbWhiteKingKnownToBeNotUnderCheck>(whitePiecesBetween); // exactly one white piece between?
 			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneWhitePieceBetween)) & whitePiecesBetween;
 
 			pinned |= maskToApply;
@@ -5837,6 +5844,7 @@ private:
 		#endif
 	}
 
+	template<bool tbBlackKingKnownToBeNotUnderCheck = false>
 	Bitboard GetBlackPinnedPieces() CONST_RESTRICT
 	{
 		Bitboard pinned = 0ULL;
@@ -5850,7 +5858,8 @@ private:
 			const auto maskBetween = GetBetweenMask(posBlackKing, posPinner);
 			const auto blackPiecesBetween = maskBetween & black;
 
-			const bool exactlyOneBlackPieceBetween = HasSingleBit(blackPiecesBetween);
+			assert(!tbBlackKingKnownToBeNotUnderCheck || blackPiecesBetween != 0);
+			const bool exactlyOneBlackPieceBetween = HasSingleBit<tbBlackKingKnownToBeNotUnderCheck>(blackPiecesBetween);
 			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneBlackPieceBetween)) & blackPiecesBetween;
 
 			pinned |= maskToApply;
@@ -5951,7 +5960,8 @@ private:
 		}
 		else
 		{
-			const auto whitePinnedPieces = GetWhitePinnedPieces();
+			constexpr bool tbWhiteKingKnownToBeNotUnderCheck = true;
+			const auto whitePinnedPieces = GetWhitePinnedPieces<tbWhiteKingKnownToBeNotUnderCheck>();
 
 			auto mask = white & queens();
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
