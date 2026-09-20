@@ -4691,7 +4691,7 @@ private:
 
 	// This method is for finding fast refutations - it does not need to be exhaustive
 	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers) const
+	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers, bool& legalMovesFound) const
 	{
 		assert(!IsSquareAttackedByWhite(posBlackKing)); // prerequisite
 
@@ -4710,8 +4710,11 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
+				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
+				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
 		}
@@ -4726,8 +4729,11 @@ private:
 		{
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 8, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 8))
+				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 8)) // TODO: maybe add template param. tbVerifyOnlyDirectCheck
 						return false;
+				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward);
 
@@ -4739,8 +4745,11 @@ private:
 		{
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 7, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 7))
+				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 7))
 						return true;
+				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
 
@@ -4749,8 +4758,11 @@ private:
 		{
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 9, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 9))
+				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 9))
 						return true;
+				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
 
@@ -4763,8 +4775,11 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
+				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
+				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
 		}
@@ -4779,8 +4794,11 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
+				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
+				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
 		}
@@ -4796,6 +4814,7 @@ private:
 				auto maskTo = Knight_Attacks[pos] & ((0ULL - static_cast<uint64_t>(isDiscoveredChecker)) | Knight_Attacks[posWhiteKing]) & ~black;
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 				{
+					legalMovesFound = true;
 					if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
 				}
@@ -4879,6 +4898,8 @@ private:
 		}
 		else
 		{
+			bool legalMovesFound = false;
+			
 			#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
 			const auto blackPinnedPieces = GetBlackPinnedPieces();
 			#endif
@@ -4886,13 +4907,12 @@ private:
 			#ifdef __USE_BLACKCHECKINGMOVESFIRST__
 			const auto blackDiscoveredCheckers = GetBlackPiecesThatCanMakeDiscoveredCheck();
 			// A method to find fast refutations - after a check White don't have many responses and the analysis is likely to be completed very fast
-			if (!IsImmediateMateAfterAnyBlackCheck<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(blackDiscoveredCheckers))
+			if (!IsImmediateMateAfterAnyBlackCheck<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(blackDiscoveredCheckers, legalMovesFound))
 				return false;
 			#endif
 			
 			const auto occ = this->occ();
-			bool legalMovesFound = false;
-
+			
 			// Queens:
 			auto mask = queens() & black;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
