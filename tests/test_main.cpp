@@ -445,6 +445,8 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("6Nq/5p2/2P1k1P1/2P1P3/2P1R2P/2K5/8/5B2"), 1);
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("1Q1N2RR/2PP4/2PbK1rB/PP2P2P/4k2P/r3BRP1/RN2N1n1/3r2Q1"), 0); // White King under check
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/P4K2/1Q2P3/1N1PB3/8/8/3p1np1/3Bbrkb"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("4B1Q1/8/5N2/p7/rp4p1/qn2K1P1/kp1N4/1R6"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/1p1N4/bp6/kn3R2/1p3P1p/1P5P/8/5K2"), 1);	
 }
 
 template<MoveGenMethodT MoveGenMethod>
