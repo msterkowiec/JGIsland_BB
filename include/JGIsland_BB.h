@@ -4757,10 +4757,10 @@ private:
 		{
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 8, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 8))
-				{
-					legalMovesFound = true;
+				{					
 					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 8)) // TODO: maybe add template param. tbVerifyOnlyDirectCheck
 						return false;
+					legalMovesFound = true;
 				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward);
@@ -4773,10 +4773,10 @@ private:
 		{
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 7, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 7))
-				{
-					legalMovesFound = true;
+				{					
 					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 7))
-						return true;
+						return false;
+					legalMovesFound = true;
 				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
@@ -4786,10 +4786,10 @@ private:
 		{
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 9, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 9))
-				{
-					legalMovesFound = true;
+				{					
 					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 9))
-						return true;
+						return false;
+					legalMovesFound = true;
 				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
@@ -4803,10 +4803,10 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
-				{
-					legalMovesFound = true;
+				{					
 					if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
+					legalMovesFound = true;
 				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
@@ -4822,10 +4822,10 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
-				{
-					legalMovesFound = true;
+				{					
 					if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
+					legalMovesFound = true;
 				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
@@ -4841,10 +4841,10 @@ private:
 				const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
 				auto maskTo = Knight_Attacks[pos] & ((0ULL - static_cast<uint64_t>(isDiscoveredChecker)) | Knight_Attacks[posWhiteKing]) & ~black;
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
-				{
-					legalMovesFound = true;
+				{					
 					if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 						return false;
+					legalMovesFound = true;
 				}
 				END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
 			}
