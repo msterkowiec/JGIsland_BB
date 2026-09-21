@@ -4729,8 +4729,9 @@ private:
 
 	// This method is for finding fast refutations - it does not need to be exhaustive
 	// Note that this method calls methods from family IsImmediateMateAfter* with template parameters for castling <0,0>, since only checking moves are considered and castling is out of scope anyway
+	// NOTE: This method should NOT be ALWAYS_INLINE
 	template<char tbBlackCastlingFlags = 3>
-	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers, bool& legalMovesFound) const
+	bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers, bool& legalMovesFound) const
 	{
 		assert(!IsSquareAttackedByWhite(posBlackKing)); // prerequisite
 
