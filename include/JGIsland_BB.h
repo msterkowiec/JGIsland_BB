@@ -3831,31 +3831,59 @@ private:
 		#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 		assert(IsPinnedFlagOK(qpos, pinned));
 		#endif
-				
-		#ifdef __USE_MOVEGENINCANWHITEQUEENCHECK__
-		const auto occ = this->occ();
-		const auto movesByQueen = get_raw_bishop_moves(qpos, occ) | get_raw_rook_moves(qpos, occ);		
-		const auto movesFromKing = get_raw_bishop_moves(posBlackKing, occ) | get_raw_rook_moves(posBlackKing, occ);
-		auto mask = movesByQueen & movesFromKing & (~white);
-		#else
-		auto mask = Queen_Attacks[posBlackKing] & Queen_Attacks[qpos] & (~white);
-		#endif
 
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+		#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+		if (pinned)
 		{
-			#ifndef __USE_MOVEGENINCANWHITEQUEENCHECK__
-			if (AllBetweenEmpty(qpos, pos) & AllBetweenEmpty(pos, posBlackKing))			
-			#endif
-				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-				if (!pinned || IsSquareAlongTheLineOrDiag(pos, qpos, posWhiteKing))
-				#else
-				if (!IsWhitePinned(qpos, pos))
-				#endif
+			const auto posBlackPinner = BlackLongDistanceFigureInDir<1, 1>(qpos, posWhiteKing);
+			assert(IsValidPos(posBlackPinner));
+
+			// Can White Queen capture Black pinner with check?
+			if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackPinner, posBlackKing)) 
+				if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(posBlackPinner))
+					if (IsCheckMateAfterQueenCheck(qpos, posBlackPinner))
+						return true;
+
+			const bool isPinnerPinnedItself = IsBlackPinned(posBlackPinner, qpos);
+			if (isPinnerPinnedItself)
+			{
+				const auto movesFromKing = get_raw_bishop_moves(posBlackKing, occ()) | get_raw_rook_moves(posBlackKing, occ());
+				auto mask = GetBetweenMask(posBlackPinner, posWhiteKing) & movesFromKing;
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+				{
 					if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(pos))
 						if (IsCheckMateAfterQueenCheck(qpos, pos))
 							return true;			
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, mask);
+			}
 		}
-		END_FOR_EACH_POS_IN_MASK(pos, mask);
+		else
+		#endif
+		{		
+			#ifdef __USE_MOVEGENINCANWHITEQUEENCHECK__
+			const auto occ = this->occ();
+			const auto movesByQueen = get_raw_bishop_moves(qpos, occ) | get_raw_rook_moves(qpos, occ);		
+			const auto movesFromKing = get_raw_bishop_moves(posBlackKing, occ) | get_raw_rook_moves(posBlackKing, occ);
+			auto mask = movesByQueen & movesFromKing & (~white);
+			#else
+			auto mask = Queen_Attacks[posBlackKing] & Queen_Attacks[qpos] & (~white);
+			#endif
+	
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+			{
+				#ifndef __USE_MOVEGENINCANWHITEQUEENCHECK__
+				if (AllBetweenEmpty(qpos, pos) & AllBetweenEmpty(pos, posBlackKing))			
+				#endif
+					#ifndef __PREEMPTIVE_WHITEPINNEDPIECES__
+					if (!IsWhitePinned(qpos, pos))
+					#endif
+						if (!IsSquareSureToBeAttackedByNotPinnedBlackPiece(pos))
+							if (IsCheckMateAfterQueenCheck(qpos, pos))
+								return true;			
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, mask);
+		}
 
 		return false;
 	}
