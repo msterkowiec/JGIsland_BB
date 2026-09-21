@@ -4734,9 +4734,6 @@ private:
 	{
 		assert(!IsSquareAttackedByWhite(posBlackKing)); // prerequisite
 
-		constexpr bool tbWhiteCastlingShortPossible = tbWhiteCastlingFlags & 1;
-		constexpr bool tbWhiteCastlingLongPossible = (tbWhiteCastlingFlags & 2) != 0;
-
 		const auto occ = this->occ();
 
 		// Potentially still TODO: 1) discovered check by pawn 2) en passant 3) castling (formally, this method does not have to be exhaustive)
