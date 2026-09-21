@@ -386,6 +386,16 @@ private:
 	{
 		return KnightAttacks<0>();
 	}
+	// Pinning is not verified by this method:
+	ALWAYS_INLINE Bitboard BlackPawnsThatCanCaptureWithCheck() CONST_RESTRICT
+	{
+		const auto auxMask = (White_Pawn_Attacks[posWhiteKing] & white) << 8;
+		constexpr Bitboard NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
+		constexpr Bitboard NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
+		const auto maskForBlackPawnsThatCanCaptureWithCheck = ((auxMask & NOT_A_FILE) >> 1) | ((auxMask & NOT_H_FILE) << 1);
+		const auto blackPawnsThatCanCaptureWithCheck = maskForBlackPawnsThatCanCaptureWithCheck & black & pawns;
+		return blackPawnsThatCanCaptureWithCheck;
+	}
 
 	ALWAYS_INLINE bool AllBetweenEmpty(const int pos1, const int pos2) CONST_RESTRICT
 	{
@@ -4718,7 +4728,8 @@ private:
 	// Here starts the part of code strictly for FindMoveThatMatesInTwoMoves
 
 	// This method is for finding fast refutations - it does not need to be exhaustive
-	template<char tbWhiteCastlingFlags = 3, char tbBlackCastlingFlags = 3>
+	// Note that this method calls methods from family IsImmediateMateAfter* with template parameters for castling <0,0>, since only checking moves are considered and castling is out of scope anyway
+	template<char tbBlackCastlingFlags = 3>
 	ALWAYS_INLINE bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers, bool& legalMovesFound) const
 	{
 		assert(!IsSquareAttackedByWhite(posBlackKing)); // prerequisite
@@ -4728,7 +4739,7 @@ private:
 
 		const auto occ = this->occ();
 
-		// Potentially still TODO: 1) pawn direct check (forward or capture), 2) en passant 3) castling 4) discovered check by any piece (anyway, as already mentioned, this method does not have to be exhaustive)
+		// Potentially still TODO: 1) discovered check by pawn 2) en passant 3) castling (formally, this method does not have to be exhaustive)
 
 		// Queens:
 		auto blackQueens = black & queens();
@@ -4740,7 +4751,7 @@ private:
 				if (!IsBlackPinned(pos, posTo))
 				{
 					legalMovesFound = true;
-					if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackQueen<0,0>(pos, posTo))
 						return false;
 				}
 			}
@@ -4758,7 +4769,7 @@ private:
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 8, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 8))
 				{					
-					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 8)) // TODO: maybe add template param. tbVerifyOnlyDirectCheck
+					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<0,0>(pos, pos - 8)) // TODO: maybe add template param. tbVerifyOnlyDirectCheck
 						return false;
 					legalMovesFound = true;
 				}
@@ -4774,7 +4785,7 @@ private:
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 7, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 7))
 				{					
-					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 7))
+					if (!IsImmediateMateAfterCaptureWithPromo<0,0>(pos, pos - 7))
 						return false;
 					legalMovesFound = true;
 				}
@@ -4787,13 +4798,61 @@ private:
 			if (AllBetweenEmptyIfTakeOffBlackPawn(pos - 9, posWhiteKing, pos))
 				if (!IsBlackPinned(pos, pos - 9))
 				{					
-					if (!IsImmediateMateAfterCaptureWithPromo<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, pos - 9))
+					if (!IsImmediateMateAfterCaptureWithPromo<0,0>(pos, pos - 9))
 						return false;
 					legalMovesFound = true;
 				}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
 
+		// Black pawn check with a move forward:	
+		auto maskForBlackPawnDirectCheck = (White_Pawn_Attacks[posWhiteKing] & ~occ) << 8;
+		auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnDirectCheck & blackPawns;
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
+		{
+			if (!IsBlackPinned(pos, pos - 8))
+			{
+				if (!IsImmediateMateAfterMoveForwardByBlackPawn<0, 0>(pos, pos - 8))
+					return false;
+				legalMovesFound = true;
+			}
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward);
+
+		// Black pawn check with a double move forward:		
+		constexpr Bitboard seventhLine = 255ULL << _A7_;
+		auto blackPawnsThatCanCheckWithDoubleMoveForward = ((maskForBlackPawnDirectCheck & ~occ) << 8) & blackPawns & seventhLine;
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward)
+		{
+			if (!IsBlackPinned(pos, pos - 16))
+			{
+				if (!IsImmediateMateAfterLongMoveByBlackPawn<0, 0>(pos, pos - 16))
+					return false;
+				legalMovesFound = true;
+			}
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward);
+
+		// Black pawn check with a capture:
+		auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck();
+		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck)
+		{
+			assert((pos >> 3) == (posWhiteKing >> 3) + 2);
+			assert(abs((pos & 7) - (posWhiteKing & 7)) <= 2 && abs((pos & 7) - (posWhiteKing & 7)) != 1);
+			auto maskPosTo = White_Pawn_Attacks[posWhiteKing] & Black_Pawn_Attacks[pos] & white;
+			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskPosTo)
+			{
+				if (!IsBlackPinned(pos, posTo))
+				{
+					if (!IsImmediateMateAfterCaptureByBlackPawn<0, 0>(pos, posTo))
+						return false;
+					legalMovesFound = true;
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(posTo, maskPosTo);
+		}
+		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck);
+		
 		// Rooks:
 		auto blackRooks = black & rooks();
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRooks)
@@ -4804,7 +4863,7 @@ private:
 			{
 				if (!IsBlackPinned(pos, posTo))
 				{					
-					if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackRook<0,0>(pos, posTo))
 						return false;
 					legalMovesFound = true;
 				}
@@ -4823,7 +4882,7 @@ private:
 			{
 				if (!IsBlackPinned(pos, posTo))
 				{					
-					if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackBishop<0,0>(pos, posTo))
 						return false;
 					legalMovesFound = true;
 				}
@@ -4842,7 +4901,7 @@ private:
 				auto maskTo = Knight_Attacks[pos] & ((0ULL - static_cast<uint64_t>(isDiscoveredChecker)) | Knight_Attacks[posWhiteKing]) & ~black;
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 				{					
-					if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+					if (!IsImmediateMateAfterMoveByBlackKnight<0,0>(pos, posTo))
 						return false;
 					legalMovesFound = true;
 				}
@@ -4850,6 +4909,23 @@ private:
 			}
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, blackKnights);
+
+		// Discovered check with black king:
+		if (blackDiscoveredCheckers & black & kings)
+		{
+			auto mask = King_Attacks[posBlackKing] & ~black & ~GetCommonDiagOrLine(posWhiteKing, posBlackKing) & ~WhitePawnAttacks() & ~WhiteKnightAttacks() & ~King_Attacks[posWhiteKing];
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+			{
+				if (!IsSquareAttackedByWhite<-1>(pos)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
+				{
+					if (!IsImmediateMateAfterMoveByBlackKing<0, 0>(pos))
+						return false;
+					legalMovesFound = true;
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, mask);
+		}
+
 		return true;
 	}
 
@@ -4935,7 +5011,7 @@ private:
 			#ifdef __USE_BLACKCHECKINGMOVESFIRST__
 			const auto blackDiscoveredCheckers = GetBlackPiecesThatCanMakeDiscoveredCheck();
 			// A method to find fast refutations - after a check White don't have many responses and the analysis is likely to be completed very fast
-			if (!IsImmediateMateAfterAnyBlackCheck<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(blackDiscoveredCheckers, legalMovesFound))
+			if (!IsImmediateMateAfterAnyBlackCheck<tbBlackCastlingFlags>(blackDiscoveredCheckers, legalMovesFound))
 				return false;
 			#endif
 			
