@@ -124,7 +124,7 @@ public:
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;    
             bool bAllBetweenEmpty = (unique_masks[mask_id & 511] & occ) == 0;
-            return unique_lines[mask_id >> 9] & match & (0ULL - static_cast<uint64_t>(bAllBetweenEmpty));
+            return unique_lines[mask_id >> 9] & match & BOOL_EXTEND64(bAllBetweenEmpty);
         }
         else
         {
@@ -132,7 +132,7 @@ public:
             auto line = is_it_line[mask_id];
             auto match = line ? lineMask : diagMask;
             bool bAllBetweenEmpty = (unique_masks[mask_id] & occ) == 0;
-            return unique_lines[mask_id] & match & (0ULL - static_cast<uint64_t>(bAllBetweenEmpty));
+            return unique_lines[mask_id] & match & BOOL_EXTEND64(bAllBetweenEmpty);
         }
     }    
 

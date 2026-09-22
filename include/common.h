@@ -40,3 +40,8 @@ using BYTE = std::uint8_t;
 #else
 	#define CONST_RESTRICT const
 #endif
+
+// This might be an ALWAYS_INLINE function. 
+// Subtraction is optimized out and calms down compiler warnings. 
+// BTW: ternary operator ((b) ? 0xFFFFFFFFFFFFFFFFULL : 0ULL) might have the same performance due to compiler optimizations
+#define BOOL_EXTEND64(b) (0ULL - static_cast<uint64_t>(b))
