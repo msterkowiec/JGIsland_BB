@@ -173,6 +173,11 @@ ALWAYS_INLINE int sgn(T val) {
 	return (T(0) < val) - (val < T(0));
 }
 
+// This might be an ALWAYS_INLINE function. 
+// Subtraction is optimized out and calms down compiler warnings. 
+// BTW: ternary operator ((b) ? 0xFFFFFFFFFFFFFFFFULL : 0ULL) might have the same performance due to compiler optimizations
+#define BOOL_EXTEND64(b) (0ULL - static_cast<uint64_t>(b))
+
 #ifdef __USE_STDBITLOOPING__ // this way of looping wins in integrated tests
 	#define BEGIN_FOR_EACH_POS_IN_MASK(pos, mask) while (mask) { const int pos = std::countr_zero(mask);
 	#define END_FOR_EACH_POS_IN_MASK(pos, mask)  mask &= mask - 1; } 
