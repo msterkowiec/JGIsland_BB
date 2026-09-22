@@ -449,7 +449,7 @@ ALWAYS_INLINE std::conditional_t<std::is_same<T, bool>::value, int, T> MUL(const
 		return std::bit_reverse(b);
 	#else
 
-	#if !defined(_MSC_VER) && !defined(__GNUC__)
+	#if !defined(_MSC_VER) && defined(__clang__)
 		return __builtin_bitreverse64(b);
 	#else
 
