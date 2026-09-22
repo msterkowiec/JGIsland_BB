@@ -2509,9 +2509,9 @@ private:
 			const auto allBetweenEmpty = AllBetweenEmpty(posBlackKing, sq);
 			const bool diagAttack = allBetweenEmpty & SameDiag(posBlackKing, sq);
 			const bool lineAttack = allBetweenEmpty & SameLine(posBlackKing, sq);
-			const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | whitePiecesWithDiscoveredCheck;
-			const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | whitePiecesWithDiscoveredCheck;
-			const auto maskForQueens = (0ULL - static_cast<uint64_t>(diagAttack | lineAttack));
+			const auto maskForRooks = BOOL_EXTEND64(lineAttack) | whitePiecesWithDiscoveredCheck;
+			const auto maskForBishops = BOOL_EXTEND64(diagAttack) | whitePiecesWithDiscoveredCheck;
+			const auto maskForQueens = BOOL_EXTEND64(diagAttack | lineAttack);
 			mask = white & ((rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks) | ((rawBishopMoves | rawRookMoves) & queens() & maskForQueens));
 		}
 		else
@@ -2520,9 +2520,9 @@ private:
 		{
 			if constexpr (tbOnlyCheckingMoves)
 			{
-				const auto maskForQueens = 0ULL - static_cast<uint64_t>(SameDiagonalOrLineAndAllBetweenEmpty(sq, posBlackKing)); // a queen cannot make a discovered check
-				const auto maskForRooks = (0ULL - static_cast<uint64_t>(SameLineAndAllBetweenEmpty(posBlackKing, sq))) | whitePiecesWithDiscoveredCheck;
-				const auto maskForBishops = (0ULL - static_cast<uint64_t>(SameDiagAndAllBetweenEmpty(posBlackKing, sq))) | whitePiecesWithDiscoveredCheck;
+				const auto maskForQueens = BOOL_EXTEND64(SameDiagonalOrLineAndAllBetweenEmpty(sq, posBlackKing)); // a queen cannot make a discovered check
+				const auto maskForRooks = BOOL_EXTEND64(SameLineAndAllBetweenEmpty(posBlackKing, sq)) | whitePiecesWithDiscoveredCheck;
+				const auto maskForBishops = BOOL_EXTEND64(SameDiagAndAllBetweenEmpty(posBlackKing, sq)) | whitePiecesWithDiscoveredCheck;
 			
 				mask = white & ((rooks() & Rook_Attacks[sq] & (tbOnlyCheckingMoves ? maskForRooks : ~0ULL)) | 
 								(queens() & Queen_Attacks[sq] & (tbOnlyCheckingMoves ? maskForQueens : ~0ULL)) |
@@ -2547,7 +2547,7 @@ private:
 		END_FOR_EACH_POS_IN_MASK(pos, mask);
 
 		const bool bKnightDiff = IsKnightDiff(sq, posBlackKing);
-		mask = white & knights & Knight_Attacks[sq] & (tbOnlyCheckingMoves ? ((0ULL - static_cast<uint64_t>(bKnightDiff)) & Knights_That_Can_Directly_Check[posBlackKing] | whitePiecesWithDiscoveredCheck): ~0ULL);
+		mask = white & knights & Knight_Attacks[sq] & (tbOnlyCheckingMoves ? (BOOL_EXTEND64(bKnightDiff) & Knights_That_Can_Directly_Check[posBlackKing]) | whitePiecesWithDiscoveredCheck: ~0ULL);
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 		{
 			if (!IsWhiteAbsolutelyPinned(pos))
@@ -2802,7 +2802,7 @@ private:
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween)
 		{
 			const bool bKnightDiff = IsKnightDiff(posBlackKing, pos);
-			auto knightBitboard = Knight_Attacks[pos] & white & knights & (tbOnlyCheckingMoves ? ((0ULL - static_cast<uint64_t>(bKnightDiff)) & Knights_That_Can_Directly_Check[posBlackKing]) | whitePiecesWithDiscoveredCheck : ~0ULL);
+			auto knightBitboard = Knight_Attacks[pos] & white & knights & (tbOnlyCheckingMoves ? (BOOL_EXTEND64(bKnightDiff) & Knights_That_Can_Directly_Check[posBlackKing]) | whitePiecesWithDiscoveredCheck : ~0ULL);
 			BEGIN_FOR_EACH_POS_IN_MASK(kpos, knightBitboard)
 			{
 				if (!tbVerifyPinning || !IsWhiteAbsolutelyPinned(kpos))
@@ -2822,9 +2822,9 @@ private:
 				const bool allBetweenEmpty = AllBetweenEmpty(posBlackKing, pos);
 				const bool diagAttack = allBetweenEmpty & SameDiag(posBlackKing, pos);
 				const bool lineAttack = allBetweenEmpty & SameLine(posBlackKing, pos);
-				const auto maskForQueens = 0ULL - static_cast<uint64_t>(diagAttack|lineAttack);
-				const auto maskForRooks = (0ULL - static_cast<uint64_t>(lineAttack)) | whitePiecesWithDiscoveredCheck;
-				const auto maskForBishops = (0ULL - static_cast<uint64_t>(diagAttack)) | whitePiecesWithDiscoveredCheck;
+				const auto maskForQueens = BOOL_EXTEND64(diagAttack|lineAttack);
+				const auto maskForRooks = BOOL_EXTEND64(lineAttack) | whitePiecesWithDiscoveredCheck;
+				const auto maskForBishops = BOOL_EXTEND64(diagAttack) | whitePiecesWithDiscoveredCheck;
 				blackLongDistAttackers = (((rawBishopMoves | rawRookMoves) & queens() & maskForQueens) | (rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks)) & white;
 			}
 			else
@@ -4856,7 +4856,7 @@ private:
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRooks)
 		{
 			const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
-			auto maskTo = (get_raw_rook_moves(pos, occ) & ((0ULL - static_cast<uint64_t>(isDiscoveredChecker)) | get_raw_rook_moves(posWhiteKing, occ))) & ~black;
+			auto maskTo = (get_raw_rook_moves(pos, occ) & (BOOL_EXTEND64(isDiscoveredChecker) | get_raw_rook_moves(posWhiteKing, occ))) & ~black;
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
@@ -4875,7 +4875,7 @@ private:
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackBishops)
 		{
 			const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
-			auto maskTo = (get_raw_bishop_moves(pos, occ) & ((0ULL - static_cast<uint64_t>(isDiscoveredChecker)) | get_raw_bishop_moves(posWhiteKing, occ))) & ~black;
+			auto maskTo = (get_raw_bishop_moves(pos, occ) & (BOOL_EXTEND64(isDiscoveredChecker) | get_raw_bishop_moves(posWhiteKing, occ))) & ~black;
 			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 			{
 				if (!IsBlackPinned(pos, posTo))
@@ -4896,7 +4896,7 @@ private:
 			if (!IsBlackAbsolutelyPinned(pos))
 			{
 				const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
-				auto maskTo = Knight_Attacks[pos] & ((0ULL - static_cast<uint64_t>(isDiscoveredChecker)) | Knight_Attacks[posWhiteKing]) & ~black;
+				auto maskTo = Knight_Attacks[pos] & (BOOL_EXTEND64(isDiscoveredChecker) | Knight_Attacks[posWhiteKing]) & ~black;
 				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 				{					
 					if (!IsImmediateMateAfterMoveByBlackKnight<0,0>(pos, posTo))
@@ -5805,7 +5805,7 @@ private:
 
 			assert(blackPiecesBetween != 0); // otherwise White King would be under check before Black move
 			const bool exactlyOneBlackPieceBetween = HasSingleBit<1>(blackPiecesBetween); // exactly one black piece between?
-			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneBlackPieceBetween)) & blackPiecesBetween;
+			const auto maskToApply = BOOL_EXTEND64(exactlyOneBlackPieceBetween) & blackPiecesBetween;
 
 			res |= maskToApply;
 		}
@@ -5829,7 +5829,7 @@ private:
 
 			assert(blackPiecesBetween != 0); // otherwise White King would be under check before Black move
 			const bool exactlyOneBlackPieceBetween = HasSingleBit<1>(blackPiecesBetween); // exactly one black piece between?
-			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneBlackPieceBetween)) & blackPiecesBetween;
+			const auto maskToApply = BOOL_EXTEND64(exactlyOneBlackPieceBetween) & blackPiecesBetween;
 
 			res |= maskToApply;
 		}
@@ -5872,7 +5872,7 @@ private:
 
 			assert(whitePiecesBetween != 0); // otherwise Black King would be under check before White move
 			const bool exactlyOneWhitePieceBetween = HasSingleBit<1>(whitePiecesBetween); // exactly one white piece between?
-			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneWhitePieceBetween)) & whitePiecesBetween;
+			const auto maskToApply = BOOL_EXTEND64(exactlyOneWhitePieceBetween) & whitePiecesBetween;
 
 			res |= maskToApply;
 		}
@@ -5911,7 +5911,7 @@ private:
 
 			assert(whitePiecesBetween != 0); // otherwise Black King would be under check before White move
 			const bool exactlyOneWhitePieceBetween = HasSingleBit<1>(whitePiecesBetween); // exactly one white piece between?
-			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneWhitePieceBetween)) & whitePiecesBetween;
+			const auto maskToApply = BOOL_EXTEND64(exactlyOneWhitePieceBetween) & whitePiecesBetween;
 
 			res |= maskToApply;
 		}
@@ -5958,7 +5958,7 @@ private:
 
 			assert(!tbWhiteKingKnownToBeNotUnderCheck || whitePiecesBetween != 0);
 			const bool exactlyOneWhitePieceBetween = HasSingleBit<tbWhiteKingKnownToBeNotUnderCheck>(whitePiecesBetween); // exactly one white piece between?
-			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneWhitePieceBetween)) & whitePiecesBetween;
+			const auto maskToApply = BOOL_EXTEND64(exactlyOneWhitePieceBetween) & whitePiecesBetween;
 
 			pinned |= maskToApply;
 		}
@@ -5984,7 +5984,7 @@ private:
 
 			assert(!tbBlackKingKnownToBeNotUnderCheck || blackPiecesBetween != 0);
 			const bool exactlyOneBlackPieceBetween = HasSingleBit<tbBlackKingKnownToBeNotUnderCheck>(blackPiecesBetween);
-			const auto maskToApply = (0ULL - static_cast<uint64_t>(exactlyOneBlackPieceBetween)) & blackPiecesBetween;
+			const auto maskToApply = BOOL_EXTEND64(exactlyOneBlackPieceBetween) & blackPiecesBetween;
 
 			pinned |= maskToApply;
 		}
