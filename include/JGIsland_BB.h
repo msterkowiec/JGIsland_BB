@@ -1443,8 +1443,7 @@ private:
 
 		if constexpr (!tbKnownThatItIsNotACapture)
 		{		
-			const bool bCapture = (white & toMask) != 0;
-			const auto captureMask = bCapture ? toMask : 0;
+			const auto captureMask = white & toMask;
 	
 			const auto bbSaved = *this; // save
 	
@@ -1499,8 +1498,7 @@ private:
 
 		if constexpr (!tbKnownThatItIsNotACapture)
 		{		
-			const bool bCapture = (white & toMask) != 0;
-			const auto captureMask = bCapture ? toMask : 0;
+			const auto captureMask = white & toMask;
 	
 			const auto bbSaved = *this; // save
 	
@@ -1552,8 +1550,7 @@ private:
 
 		if constexpr (!tbKnownThatItIsNotACapture)
 		{		
-			const bool bCapture = (white & toMask) != 0;
-			const auto captureMask = bCapture ? toMask : 0;
+			const auto captureMask = white & toMask;
 	
 			const auto bbSaved = *this; // save
 	
@@ -1605,8 +1602,7 @@ private:
 
 		if constexpr (!tbKnownThatItIsNotACapture)
 		{
-			const bool bCapture = (white & toMask) != 0;
-			const auto captureMask = bCapture ? toMask : 0;
+			const auto captureMask = white & toMask;
 	
 			const auto bbSaved = *this; // save
 	
@@ -1946,8 +1942,7 @@ private:
 
 		if constexpr (!tbKnownThatItIsNotACapture)
 		{		
-			const bool bCapture = (white & toMask) != 0;
-			const auto captureMask = bCapture ? toMask : 0;
+			const auto captureMask = white & toMask;
 	
 			const auto bbSaved = *this; // save
 	
@@ -3143,8 +3138,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3171,8 +3165,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3198,8 +3191,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3239,8 +3231,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3268,8 +3259,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3367,8 +3357,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3401,8 +3390,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3436,8 +3424,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3470,8 +3457,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3506,8 +3492,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3543,8 +3528,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3580,8 +3564,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3618,8 +3601,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3653,8 +3635,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3689,8 +3670,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3724,8 +3704,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3759,8 +3738,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -3792,8 +3770,7 @@ private:
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5359,8 +5336,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5391,8 +5367,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5421,8 +5396,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5451,8 +5425,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5483,8 +5456,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5580,8 +5552,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
@@ -5696,8 +5667,7 @@ private:
 		const auto fromMask = sq_to_bb(posFrom);
 		const auto toMask = sq_to_bb(posTo);
 		const auto moveMask = fromMask | toMask;
-		const bool bCapture = (black & toMask) != 0;
-		const auto captureMask = bCapture ? toMask : 0;
+		const auto captureMask = black & toMask;
 
 		const auto bbSaved = *this; // save
 
