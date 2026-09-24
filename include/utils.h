@@ -220,6 +220,14 @@ ALWAYS_INLINE constexpr bool SameLine(const int pos1, const int pos2)
 	return (Rook_Attacks[pos1] & sq_to_bb(pos2)) != 0;
 }
 
+ALWAYS_INLINE constexpr bool SameFile(const int sq1, const int sq2) 
+{
+	assert(IsValidPos(sq1));
+	assert(IsValidPos(sq2));
+
+	return ((sq1 - sq2) & 7) == 0;
+}
+
 ALWAYS_INLINE constexpr bool IsKnightDiff(const int pos1, const int pos2)
 {
 	assert(IsValidPos(pos1));
