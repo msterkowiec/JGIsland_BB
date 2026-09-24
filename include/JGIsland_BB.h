@@ -3655,8 +3655,7 @@ private:
 	template<bool tbKnownToBeNotACapture = false>
 	ALWAYS_INLINE bool IsCheckMateAfterPromoToRookDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) CONST_RESTRICT
 	{
-		static_assert(!tbKnownToBeNotACapture, "TODO");
-		
+		assert(!tbKnownToBeNotACapture); // TODO
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
 		assert(toPos != fromPos);
@@ -3691,8 +3690,7 @@ private:
 	template<bool tbKnownToBeNotACapture = false>
 	ALWAYS_INLINE bool IsCheckMateAfterPromoToBishopDirectCheck(const int fromPos, const int toPos, bool bDoubleCheck = false) CONST_RESTRICT
 	{
-		static_assert(!tbKnownToBeNotACapture, "TODO");
-		
+		assert(!tbKnownToBeNotACapture); // TODO
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
 		assert(toPos != fromPos);
@@ -3949,8 +3947,7 @@ private:
 	template<bool tbKnownToBeNotACapture = false>
 	ALWAYS_INLINE bool IsCheckMateAfterPromoToRookDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) CONST_RESTRICT
 	{
-		static_assert(!tbKnownToBeNotACapture, "TODO");
-		
+		assert(!tbKnownToBeNotACapture); // TODO
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
 		assert(IsValidPos(posWhiteLongDistAttacker));
@@ -3986,8 +3983,7 @@ private:
 	template<bool tbKnownToBeNotACapture = false>
 	ALWAYS_INLINE bool IsCheckMateAfterPromoToBishopDiscoveredCheck(const int fromPos, const int toPos, const int posWhiteLongDistAttacker) CONST_RESTRICT
 	{
-		static_assert(!tbKnownToBeNotACapture, "TODO");
-		
+		assert(!tbKnownToBeNotACapture); // TODO
 		assert(IsValidPos(fromPos));
 		assert(IsValidPos(toPos));
 		assert(IsValidPos(posWhiteLongDistAttacker));
