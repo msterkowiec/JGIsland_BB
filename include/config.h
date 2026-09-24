@@ -53,7 +53,6 @@
 #define __USE_FASTANDLARGEDIRLOOKUP__ // uses relatively large 4kB lookup, but allows to preserve maximum simplicity of code (avoiding risk of register spilling)
 #define __USE_MOVEGENINCANBLACKCAPTURE__
 #define __USE_MOVEGENINCANBLACKMOVEON__
-#define __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 #define __USE_MOVEGENINCANWHITECAPTURE__
 // #define __USE_MOVEGENTWICEWHENLOOKINGFORPINNEDANDDISCOVEREDCHECKERS__ // should rather be commented out - tests show it slower
 
@@ -61,6 +60,10 @@
 #define __USE_FASTDETECTIONOFCAPTURABLECHECKER__ // should rather be on; speeds up about 1.5%
 #define __USE_BLACKCHECKINGMOVESFIRST__ // should rather be on; observed speed-up about 1.5%
 #define __USE_FILTERONPROMOCAPTURE__
+// #define __USE_PEDANTICFILTERINGOUTMOVESALREADYANALYZED__ // should rather be commented out - if on, it causes a tiny slowdown
+
+#define __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__ // speeds up about ~1% although significantly increases compilation time in release mode (and binary size); the speed-up should be higher in case of #2 subproblems (not real two-movers)
+//#define __USE_OPTIMFORMISSINGBLACKKNIGHTS__ // significantly increases binary size (~70%) but provides no measurable performance gain on JGIsland_BB test suite
 
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
