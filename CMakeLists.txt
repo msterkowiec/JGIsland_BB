@@ -12,6 +12,7 @@ if(MSVC)
     # RelWithDebInfo is expected to generate exactly the same code as Release, so replace the default /Ob1 with /Ob2 to avoid a warning later about conflicting settings
     string(REPLACE "/Ob1" "/Ob2" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
     string(REPLACE "/Ob1" "/Ob2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+	add_compile_options(/bigobj) # config option __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__ increased binary size significantly
 endif()
 
 add_library (JGIsland_BB INTERFACE)
