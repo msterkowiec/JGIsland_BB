@@ -53,7 +53,6 @@
 #define __USE_FASTANDLARGEDIRLOOKUP__ // uses relatively large 4kB lookup, but allows to preserve maximum simplicity of code (avoiding risk of register spilling)
 #define __USE_MOVEGENINCANBLACKCAPTURE__
 #define __USE_MOVEGENINCANBLACKMOVEON__
-#define __USE_MOVEGENINCANBLACKMOVEINBETWEEN__
 #define __USE_MOVEGENINCANWHITECAPTURE__
 // #define __USE_MOVEGENTWICEWHENLOOKINGFORPINNEDANDDISCOVEREDCHECKERS__ // should rather be commented out - tests show it slower
 
