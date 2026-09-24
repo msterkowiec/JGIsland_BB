@@ -5072,7 +5072,7 @@ private:
 
 		const auto occ = this->occ();
 
-		// Potentially still TODO: 1) discovered check by pawn 2) en passant 3) castling (formally, this method does not have to be exhaustive)
+		// Potentially still TODO: 1) en passant 2) castling (formally, this method does not have to be exhaustive)
 
 		// Queens:
 		if constexpr (tbBlackHaveRookLikes || tbBlackHaveBishopLikes)
