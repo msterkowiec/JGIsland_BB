@@ -4283,11 +4283,11 @@ private:
 			const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1,1>(rpos, posBlackKing);
 			assert(posWhiteLongDistAttacker >= 0);
 		#else
-			if (!is_edge(rpos) & SameDiagAndAllBetweenEmpty(posBlackKing, rpos))		
-				if (const auto mask = GetCandidatesForWhiteLongDistanceFigureInDir<0>(rpos, posBlackKing))		
-				{
-					const int posWhiteLongDistAttacker = ValidateCandidateForLongDistanceFigureInDir(mask, rpos, posBlackKing);
-					if (posWhiteLongDistAttacker >= 0)
+		if (!is_edge(rpos) & SameDiagAndAllBetweenEmpty(posBlackKing, rpos))		
+			if (const auto mask = GetCandidatesForWhiteLongDistanceFigureInDir<0>(rpos, posBlackKing))		
+			{
+				const int posWhiteLongDistAttacker = ValidateCandidateForLongDistanceFigureInDir(mask, rpos, posBlackKing);
+				if (posWhiteLongDistAttacker >= 0)
 		#endif
 				{
 					#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
