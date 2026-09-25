@@ -5242,7 +5242,7 @@ private:
 		// Bishops:
 		if constexpr (tbBlackHaveBishopLikes)
 		{
-			auto blackBishops = black & bishops() & Bishops_That_Can_Check[posWhiteKing]; // TODO: here direct check is only searched for, but squares suitable for discovered check are included in Bishops_That_Can_Check
+			auto blackBishops = black & bishops() & (blackDiscoveredCheckers | Bishops_That_Can_Directly_Check[posWhiteKing]);
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackBishops)
 			{
 				const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
@@ -5262,7 +5262,7 @@ private:
 		}
 
 		// Knights:		
-		auto blackKnights = black & knights & Knights_That_Can_Check[posWhiteKing];
+		auto blackKnights = black & knights & (blackDiscoveredCheckers | Knights_That_Can_Directly_Check[posWhiteKing]);
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackKnights)
 		{
 			if (!IsBlackAbsolutelyPinned(pos))
