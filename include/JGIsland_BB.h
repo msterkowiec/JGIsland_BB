@@ -3285,11 +3285,13 @@ private:
 	{
 		assert(IsValidPos(posChecker) || posChecker == DBL_CHECKED);
 		assert(IsBlackKingChecked() >= 0);
+		assert((posChecker == DBL_CHECKED) ^ (tbLongDistanceChecker <= 1));
 
 		if (FindOneValidMove4BlackKingWhenChecked<tbLongDistanceChecker>(posChecker))
 			return true;
 
-		if (posChecker != DBL_CHECKED)
+		constexpr bool dblCheck = tbLongDistanceChecker > 1;
+		if constexpr(!dblCheck)
 			return FindOneValidMove4OtherBlackPieceWhenChecked<tbEnPassantPossible>(posChecker);
 
 		return false;
