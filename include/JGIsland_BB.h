@@ -1767,7 +1767,7 @@ private:
 		return res;
 	}
 
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbVerifyPromoWithCheckOnly = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterCaptureWithPromo(const int fromPos, const int toPos) CONST_RESTRICT
 	{
 		assert(IsValidPos(fromPos));
@@ -1788,19 +1788,29 @@ private:
 		const_cast<FullBitboards*>(this)->ClearOnPieceBitboardsExcept<FGR_PAWN>(toMask);
 
 		// 1) Promo to queen
-		const_cast<FullBitboards*>(this)->qrooks ^= toMask;
-		const_cast<FullBitboards*>(this)->qbishops ^= toMask;
-		bool res;		
-		#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
-		if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
-			res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
-		else
-		#endif
-		// TODO: maybe find checker(s) and dispatch to proper template version?
-			res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
-
-		if (res)
+		if (!tbVerifyPromoWithCheckOnly || AllBetweenEmpty(toPos, posWhiteKing) || (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing) && BlackLongDistanceFigureInDir(fromPos, posWhiteKing))) // !tbVerifyPromoWithCheckOnly or direct check or discovered check
 		{
+			bool res;	
+			const_cast<FullBitboards*>(this)->qrooks ^= toMask;
+			const_cast<FullBitboards*>(this)->qbishops ^= toMask;
+			#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
+			if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
+				res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+			else
+			#endif
+			// TODO: maybe find checker(s) and dispatch to proper template version?
+				res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+
+			if (!res)
+			{
+				*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+				return false;
+			}
+		}
+
+		if (!tbVerifyPromoWithCheckOnly || IsKnightDiff(toPos, posWhiteKing) || (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing) && BlackLongDistanceFigureInDir(fromPos, posWhiteKing))) // !tbVerifyPromoWithCheckOnly or direct check or discovered check		
+		{
+			bool res;
 			// 2) Try promo to knight (no need to check bishop and rook for immediate checkmate)
 			const_cast<FullBitboards*>(this)->qrooks ^= toMask;
 			const_cast<FullBitboards*>(this)->qbishops ^= toMask;
@@ -1812,14 +1822,16 @@ private:
 			#endif
 				// TODO: maybe find checker(s) and dispatch to proper template version?
 				res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+
+			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
+			return res;
 		}
 
 		*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
-
-		return res;
+		return true;
 	}
 
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible>
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbVerifyPromoWithCheckOnly = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterPromoMoveForwardByBlackPawn(const int fromPos, const int toPos) CONST_RESTRICT
 	{
 		assert(IsValidPos(fromPos));
@@ -1833,35 +1845,44 @@ private:
 
 		const_cast<FullBitboards*>(this)->black ^= moveMask;
 		const_cast<FullBitboards*>(this)->pawns ^= moveMask;
-
-		// 1) Promo to queen
-		const_cast<FullBitboards*>(this)->qrooks |= toMask;
-		const_cast<FullBitboards*>(this)->qbishops |= toMask;
 		bool res;
-		#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
-		if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
-			res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
-		else
-		#endif
-			// TODO: maybe find checker(s) and dispatch to proper template version?
-			res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(); // TODO: maybe find checker(s) and dispatch to proper template version?
 
-		const_cast<FullBitboards*>(this)->qrooks ^= toMask;
-		const_cast<FullBitboards*>(this)->qbishops ^= toMask;
-		if (res)
-		{
-			// 2) Try promo to knight (no need to check bishop and rook for immediate checkmate)
-
-			const_cast<FullBitboards*>(this)->knights ^= toMask;			
+		if (!tbVerifyPromoWithCheckOnly || AllBetweenEmpty(toPos, posWhiteKing) || (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing) && BlackLongDistanceFigureInDir(fromPos, posWhiteKing))) // !tbVerifyPromoWithCheckOnly or direct check or discovered check
+		{	
+			// 1) Promo to queen
+			const_cast<FullBitboards*>(this)->qrooks |= toMask;
+			const_cast<FullBitboards*>(this)->qbishops |= toMask;
+			
 			#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
-			if constexpr(!tbAnyBlackKnights)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+			if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
+				res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
 			#endif
 				// TODO: maybe find checker(s) and dispatch to proper template version?
-				res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
-			const_cast<FullBitboards*>(this)->knights ^= toMask;
+				res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(); // TODO: maybe find checker(s) and dispatch to proper template version?
+	
+			const_cast<FullBitboards*>(this)->qrooks ^= toMask;
+			const_cast<FullBitboards*>(this)->qbishops ^= toMask;
 		}
+		else
+			res = true;
+
+			
+		if (res)
+			if (!tbVerifyPromoWithCheckOnly || IsKnightDiff(toPos, posWhiteKing) || (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing) && BlackLongDistanceFigureInDir(fromPos, posWhiteKing))) // !tbVerifyPromoWithCheckOnly or direct check or discovered check
+			{
+				// 2) Try promo to knight (no need to check bishop and rook for immediate checkmate)
+	
+				const_cast<FullBitboards*>(this)->knights ^= toMask;			
+				#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
+				if constexpr(!tbAnyBlackKnights)
+					res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+				else
+				#endif
+					// TODO: maybe find checker(s) and dispatch to proper template version?
+					res = FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+				const_cast<FullBitboards*>(this)->knights ^= toMask;
+			}
 
 		const_cast<FullBitboards*>(this)->black ^= moveMask;
 		const_cast<FullBitboards*>(this)->pawns ^= moveMask;
@@ -5101,15 +5122,16 @@ private:
 		constexpr Bitboard firstLine = 255ULL;
 		const auto blackPawns = black & pawns;
 		const auto shiftedBlackDiscoveredCheckers = blackDiscoveredCheckers >> 8;
-		const auto candidateSquaresForBlackPromo = Queen_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers;
+		const auto candidateSquaresForBlackPromo = Queen_Attacks[posWhiteKing] | Knight_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers;
 		auto blackPawnsPromoForward = (((firstLine & candidateSquaresForBlackPromo & ~occ) << 8)) & blackPawns; // promo to queen only
 
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward)
 		{
-			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 8, posWhiteKing, pos) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 8, posWhiteKing, pos) | IsKnightDiff(pos - 8, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
 				if (!IsBlackPinned(pos, pos - 8))
 				{					
-					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<0, 0>(pos, pos - 8)) // TODO: maybe add template param. tbVerifyOnlyDirectCheck
+					constexpr bool tbVerifyPromoWithCheckOnly = true;
+					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 8))
 						return false;
 					legalMovesFound = true;
 				}
@@ -5122,10 +5144,11 @@ private:
 		auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & candidateSquaresForBlackPromo & white) << 7) & blackPawns;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight)
 		{
-			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 7, posWhiteKing, pos) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 7, posWhiteKing, pos) | IsKnightDiff(pos - 7, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
 				if (!IsBlackPinned(pos, pos - 7))
 				{					
-					if (!IsImmediateMateAfterCaptureWithPromo<0, 0>(pos, pos - 7))
+					constexpr bool tbVerifyPromoWithCheckOnly = true;
+					if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 7)) 
 						return false;
 					legalMovesFound = true;
 				}
@@ -5135,10 +5158,11 @@ private:
 		auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & candidateSquaresForBlackPromo & white) << 9) & blackPawns;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft)
 		{
-			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 9, posWhiteKing, pos) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 9, posWhiteKing, pos) | IsKnightDiff(pos - 9, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
 				if (!IsBlackPinned(pos, pos - 9))
 				{					
-					if (!IsImmediateMateAfterCaptureWithPromo<0, 0>(pos, pos - 9))
+					constexpr bool tbVerifyPromoWithCheckOnly = true;
+					if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 9))
 						return false;
 					legalMovesFound = true;
 				}
