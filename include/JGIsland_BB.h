@@ -5098,7 +5098,7 @@ private:
 		// Potentially still TODO: 1) en passant 2) castling (formally, this method does not have to be exhaustive)
 
 		// Queens:
-		if constexpr (tbBlackHaveRookLikes || tbBlackHaveBishopLikes)
+		if constexpr (tbBlackHaveRookLikes && tbBlackHaveBishopLikes)
 		{
 			auto blackQueens = black & queens();
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackQueens)
