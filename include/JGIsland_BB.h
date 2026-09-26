@@ -5170,7 +5170,8 @@ private:
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
 
 		// Black pawn check with a move forward:	
-		const auto maskForBlackPawnCheckWithMoveForward = ((White_Pawn_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers) & ~occ) << 8;
+		constexpr auto NOT_FIRST_LINE = ~255ULL;
+		const auto maskForBlackPawnCheckWithMoveForward = ((White_Pawn_Attacks[posWhiteKing] | (shiftedBlackDiscoveredCheckers & NOT_FIRST_LINE)) & ~occ) << 8; // NOT_FIRST_LINE added to exclude promo - already handled
 		auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnCheckWithMoveForward & blackPawns;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
 		{
@@ -5198,7 +5199,8 @@ private:
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward);
 
 		// Black pawn check with a capture:
-		auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck(blackDiscoveredCheckers); // incl. capture with discovered check
+		constexpr auto NOT_SECOND_LINE = ~(255ULL << 8);
+		auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck(blackDiscoveredCheckers & NOT_SECOND_LINE); // incl. capture with discovered check (excl. promo capture - already handled)
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck)
 		{
 			assert((pos >> 3) == (posWhiteKing >> 3) + 2 || IsPosInBitmask(pos, blackDiscoveredCheckers));
