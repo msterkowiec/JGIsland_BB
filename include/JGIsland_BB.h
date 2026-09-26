@@ -5170,8 +5170,8 @@ private:
 		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
 
 		// Black pawn check with a move forward:	
-		auto maskForBlackPawnDirectCheck = ((White_Pawn_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers) & ~occ) << 8;
-		auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnDirectCheck & blackPawns;
+		const auto maskForBlackPawnCheckWithMoveForward = ((White_Pawn_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers) & ~occ) << 8;
+		auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnCheckWithMoveForward & blackPawns;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
 		{
 			if (!IsBlackPinned(pos, pos - 8) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
@@ -5185,7 +5185,7 @@ private:
 
 		// Black pawn check with a double move forward:		
 		constexpr Bitboard seventhLine = 255ULL << _A7_;
-		auto blackPawnsThatCanCheckWithDoubleMoveForward = ((maskForBlackPawnDirectCheck & ~occ) << 8) & blackPawns & seventhLine;
+		auto blackPawnsThatCanCheckWithDoubleMoveForward = (((maskForBlackPawnCheckWithMoveForward >> 16) & ~occ) << 16) & blackPawns & seventhLine;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward)
 		{
 			if (!IsBlackPinned(pos, pos - 16) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
