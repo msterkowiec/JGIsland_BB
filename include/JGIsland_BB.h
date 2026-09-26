@@ -751,7 +751,7 @@ private:
 		return LongDistanceFigureInDir<tbGetPos, 1>(pos, dx, dy);
 	}
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int WhiteLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int posBase, const int posWhitePawnToTakeOff)
+	ALWAYS_INLINE int WhiteLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int posBase, const int posWhitePawnToTakeOff) CONST_RESTRICT
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posBase));
@@ -761,22 +761,22 @@ private:
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		const auto res = WhiteLongDistanceFigureInDir<tbGetPos>(pos, posBase);
 
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		return res;
 	}
 
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int WhiteLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int dx, const int dy, const int posWhitePawnToTakeOff)
+	ALWAYS_INLINE int WhiteLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int dx, const int dy, const int posWhitePawnToTakeOff)  CONST_RESTRICT
 	{
 		assert(IsValidPos(pos));
 		assert(abs(dx) <= 1 && abs(dy) <= 1 && (dx | dy));
@@ -786,21 +786,21 @@ private:
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		const auto res = WhiteLongDistanceFigureInDir<tbGetPos>(pos, dx, dy);
 
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		return res;
 	}
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int BlackLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int posBase, const int posWhitePawnToTakeOff)
+	ALWAYS_INLINE int BlackLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int posBase, const int posWhitePawnToTakeOff) CONST_RESTRICT
 	{
 		assert(IsValidPos(pos));
 		assert(IsValidPos(posBase));
@@ -814,22 +814,22 @@ private:
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		const auto res = BlackLongDistanceFigureInDir<tbGetPos>(pos, posBase);
 
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		return res;
 	}
 
 	template<bool tbGetPos = false>
-	ALWAYS_INLINE int BlackLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int dx, const int dy, const int posWhitePawnToTakeOff)
+	ALWAYS_INLINE int BlackLongDistanceFigureInDirIfTakeOffWhitePawn(const int pos, const int dx, const int dy, const int posWhitePawnToTakeOff) CONST_RESTRICT
 	{
 		assert(IsValidPos(pos));
 		assert(abs(dx) <= 1 && abs(dy) <= 1 && (dx | dy));
@@ -842,16 +842,16 @@ private:
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		const auto res = BlackLongDistanceFigureInDir<tbGetPos>(pos, dx, dy);
 
 		#ifdef __JGI_BB_PEDANTIC__
-		pawns ^= mask;
+		const_cast<FullBitboards*>(this)->pawns ^= mask;
 		#endif
-		white ^= mask;
+		const_cast<FullBitboards*>(this)->white ^= mask;
 
 		return res;
 	}
@@ -2626,7 +2626,7 @@ private:
 		else
 		{
 			assert(posWhitePawnDiscoveredChecker == -1 && posBlackPawnDiscoveredChecker == -1);
-			posWhitePawnDiscoveredChecker = AllBetweenEmptyIfTakeOffWhitePawn(posBlackKing, posBlackPawn, posFrom) ? const_cast<FullBitboards*>(this)->WhiteLongDistanceFigureInDirIfTakeOffWhitePawn<1>(posBlackPawn, posBlackKing, posFrom) : -1;
+			posWhitePawnDiscoveredChecker = AllBetweenEmptyIfTakeOffWhitePawn(posBlackKing, posBlackPawn, posFrom) ? WhiteLongDistanceFigureInDirIfTakeOffWhitePawn<1>(posBlackPawn, posBlackKing, posFrom) : -1;
 			if constexpr (!tbCheckMateOnly)
 				if (posWhitePawnDiscoveredChecker >= 0)
 					return true;
@@ -4855,7 +4855,7 @@ private:
 						{
 							if (AllBetweenEmptyIfTakeOffWhitePawn(bposToCaptureWithEnPassant, posBlackKing, ppos))
 							{
-								posWhiteLongDistAttackerInEnPassant = const_cast<FullBitboards*>(this)->WhiteLongDistanceFigureInDirIfTakeOffWhitePawn<1>(bposToCaptureWithEnPassant, posBlackKing, ppos);
+								posWhiteLongDistAttackerInEnPassant = WhiteLongDistanceFigureInDirIfTakeOffWhitePawn<1>(bposToCaptureWithEnPassant, posBlackKing, ppos);
 								bBlackPawnDisco = posWhiteLongDistAttackerInEnPassant >= 0;
 							}
 						}
