@@ -5186,7 +5186,8 @@ private:
 
 		// Black pawn check with a double move forward:		
 		constexpr Bitboard seventhLine = 255ULL << _A7_;
-		auto blackPawnsThatCanCheckWithDoubleMoveForward = (((maskForBlackPawnCheckWithMoveForward >> 16) & ~occ) << 16) & blackPawns & seventhLine;
+		const auto maskForBlackPawnCheckWithDoubleMoveForward = (((((White_Pawn_Attacks[posWhiteKing] | (shiftedBlackDiscoveredCheckers >> 8)) & ~occ) << 8) & ~occ) << 8) & seventhLine;
+		auto blackPawnsThatCanCheckWithDoubleMoveForward = maskForBlackPawnCheckWithDoubleMoveForward & blackPawns;
 		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward)
 		{
 			if (!IsBlackPinned(pos, pos - 16) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
