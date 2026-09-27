@@ -5118,185 +5118,351 @@ private:
 			END_FOR_EACH_POS_IN_MASK(pos, blackQueens);
 		}
 
-		// Check with promo forward?
-		constexpr Bitboard firstLine = 255ULL;
-		const auto blackPawns = black & pawns;
-		const auto shiftedBlackDiscoveredCheckers = blackDiscoveredCheckers >> 8;
-		const auto candidateSquaresForBlackPromo = Queen_Attacks[posWhiteKing] | Knight_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers;
-		auto blackPawnsPromoForward = (((firstLine & candidateSquaresForBlackPromo & ~occ) << 8)) & blackPawns; // promo to queen only
-
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward)
+		if (blackDiscoveredCheckers != 0)
 		{
-			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 8, posWhiteKing, pos) | IsKnightDiff(pos - 8, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+			// Check with promo forward?
+			constexpr Bitboard firstLine = 255ULL;
+			const auto blackPawns = black & pawns;
+			const auto shiftedBlackDiscoveredCheckers = blackDiscoveredCheckers >> 8;
+			const auto candidateSquaresForBlackPromo = Queen_Attacks[posWhiteKing] | Knight_Attacks[posWhiteKing] | shiftedBlackDiscoveredCheckers;
+			auto blackPawnsPromoForward = (((firstLine & candidateSquaresForBlackPromo & ~occ) << 8)) & blackPawns;
+
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward)
+			{
+				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 8, posWhiteKing, pos) | IsKnightDiff(pos - 8, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+					if (!IsBlackPinned(pos, pos - 8))
+					{
+						constexpr bool tbVerifyPromoWithCheckOnly = true;
+						if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 8))
+							return false;
+						legalMovesFound = true;
+					}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward);
+
+			// Check with promo capture?
+			constexpr Bitboard firstLineWithoutAColumn = 255ULL - 1;
+			constexpr Bitboard firstLineWithoutHColumn = 255ULL - 128;
+			auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & candidateSquaresForBlackPromo & white) << 7) & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight)
+			{
+				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 7, posWhiteKing, pos) | IsKnightDiff(pos - 7, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+					if (!IsBlackPinned(pos, pos - 7))
+					{
+						constexpr bool tbVerifyPromoWithCheckOnly = true;
+						if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 7))
+							return false;
+						legalMovesFound = true;
+					}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
+
+			auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & candidateSquaresForBlackPromo & white) << 9) & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft)
+			{
+				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 9, posWhiteKing, pos) | IsKnightDiff(pos - 9, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
+					if (!IsBlackPinned(pos, pos - 9))
+					{
+						constexpr bool tbVerifyPromoWithCheckOnly = true;
+						if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 9))
+							return false;
+						legalMovesFound = true;
+					}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);
+
+			// Black pawn check with a move forward:	
+			constexpr auto NOT_FIRST_LINE = ~255ULL;
+			const auto maskForBlackPawnCheckWithMoveForward = ((White_Pawn_Attacks[posWhiteKing] | (shiftedBlackDiscoveredCheckers & NOT_FIRST_LINE)) & ~occ) << 8; // NOT_FIRST_LINE added to exclude promo - already handled
+			auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnCheckWithMoveForward & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
+			{
+				if (!IsBlackPinned(pos, pos - 8) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
+				{
+					if (!IsImmediateMateAfterMoveForwardByBlackPawn<0, 0>(pos, pos - 8))
+						return false;
+					legalMovesFound = true;
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward);
+
+			// Black pawn check with a double move forward:		
+			constexpr Bitboard seventhLine = 255ULL << _A7_;
+			const auto maskForBlackPawnCheckWithDoubleMoveForward = (((((White_Pawn_Attacks[posWhiteKing] | (shiftedBlackDiscoveredCheckers >> 8)) & ~occ) << 8) & ~occ) << 8) & seventhLine;
+			auto blackPawnsThatCanCheckWithDoubleMoveForward = maskForBlackPawnCheckWithDoubleMoveForward & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward)
+			{
+				if (!IsBlackPinned(pos, pos - 16) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
+				{
+					if (!IsImmediateMateAfterLongMoveByBlackPawn<0, 0>(pos, pos - 16))
+						return false;
+					legalMovesFound = true;
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward);
+
+			// Black pawn check with a capture:
+			constexpr auto NOT_SECOND_LINE = ~(255ULL << 8);
+			auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck(blackDiscoveredCheckers & NOT_SECOND_LINE); // incl. capture with discovered check (excl. promo capture - already handled)
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck)
+			{
+				assert((pos >> 3) == (posWhiteKing >> 3) + 2 || IsPosInBitmask(pos, blackDiscoveredCheckers));
+				assert((abs((pos & 7) - (posWhiteKing & 7)) <= 2 && abs((pos & 7) - (posWhiteKing & 7)) != 1) || IsPosInBitmask(pos, blackDiscoveredCheckers));
+				auto maskPosTo = (BOOL_EXTEND64(IsPosInBitmask(pos, blackDiscoveredCheckers)) | White_Pawn_Attacks[posWhiteKing]) & Black_Pawn_Attacks[pos] & white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskPosTo)
+				{
+					if (!IsBlackPinned(pos, posTo))
+					{
+						if (!IsImmediateMateAfterCaptureByBlackPawn<0, 0>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(posTo, maskPosTo);
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck);
+
+			// Rooks:
+			if constexpr (tbBlackHaveRookLikes)
+			{
+				auto blackRooks = black & rooks();
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRooks)
+				{
+					const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
+					auto maskTo = (get_raw_rook_moves(pos, occ) & (BOOL_EXTEND64(isDiscoveredChecker) | get_raw_rook_moves(posWhiteKing, occ))) & ~black;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+					{
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackRook<0, 0>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, blackRooks);
+			}
+
+			// Bishops:
+			if constexpr (tbBlackHaveBishopLikes)
+			{
+				auto blackBishops = black & bishops() & (blackDiscoveredCheckers | Bishops_That_Can_Directly_Check[posWhiteKing]);
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, blackBishops)
+				{
+					const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
+					auto maskTo = (get_raw_bishop_moves(pos, occ) & (BOOL_EXTEND64(isDiscoveredChecker) | get_raw_bishop_moves(posWhiteKing, occ))) & ~black;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+					{
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackBishop<0, 0>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, blackBishops);
+			}
+
+			// Knights:		
+			auto blackKnights = black & knights & (blackDiscoveredCheckers | Knights_That_Can_Directly_Check[posWhiteKing]);
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackKnights)
+			{
+				if (!IsBlackAbsolutelyPinned(pos))
+				{
+					const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
+					auto maskTo = Knight_Attacks[pos] & (BOOL_EXTEND64(isDiscoveredChecker) | Knight_Attacks[posWhiteKing]) & ~black;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKnight<0, 0>(pos, posTo))
+							return false;
+						legalMovesFound = true;
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackKnights);
+
+			// Discovered check with black king:
+			if (blackDiscoveredCheckers & black & kings)
+			{
+				auto mask = King_Attacks[posBlackKing] & ~black & ~GetCommonDiagOrLine(posWhiteKing, posBlackKing) & ~WhitePawnAttacks() & ~WhiteKnightAttacks() & ~King_Attacks[posWhiteKing];
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+				{
+					if (!IsSquareAttackedByWhite<-1>(pos)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKing<0, 0>(pos))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, mask);
+			}
+		}
+		else // discovered check not possible:
+		{
+			// Check with promo forward?
+			constexpr Bitboard firstLine = 255ULL;
+			const auto blackPawns = black & pawns;
+			const auto candidateSquaresForBlackPromo = Queen_Attacks[posWhiteKing] | Knight_Attacks[posWhiteKing];
+			auto blackPawnsPromoForward = (((firstLine & candidateSquaresForBlackPromo & ~occ) << 8)) & blackPawns; 
+
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward)
+			{
+				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 8, posWhiteKing, pos) | IsKnightDiff(pos - 8, posWhiteKing))
+					if (!IsBlackPinned(pos, pos - 8))
+					{
+						constexpr bool tbVerifyPromoWithCheckOnly = true;
+						if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 8))
+							return false;
+						legalMovesFound = true;
+					}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward);
+
+			// Check with promo capture?
+			constexpr Bitboard firstLineWithoutAColumn = 255ULL - 1;
+			constexpr Bitboard firstLineWithoutHColumn = 255ULL - 128;
+			auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & white) << 7) & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight)
+			{
+				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 7, posWhiteKing, pos) | IsKnightDiff(pos - 7, posWhiteKing))
+					if (!IsBlackPinned(pos, pos - 7))
+					{
+						constexpr bool tbVerifyPromoWithCheckOnly = true;
+						if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 7))
+							return false;
+						legalMovesFound = true;
+					}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
+
+			auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & white) << 9) & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft)
+			{
+				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 9, posWhiteKing, pos) | IsKnightDiff(pos - 9, posWhiteKing))
+					if (!IsBlackPinned(pos, pos - 9))
+					{
+						constexpr bool tbVerifyPromoWithCheckOnly = true;
+						if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 9))
+							return false;
+						legalMovesFound = true;
+					}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);
+
+			// Black pawn check with a move forward:	
+			constexpr auto NOT_FIRST_LINE = ~255ULL;
+			const auto maskForBlackPawnCheckWithMoveForward = (White_Pawn_Attacks[posWhiteKing] & ~occ) << 8; // NOT_FIRST_LINE added to exclude promo - already handled
+			auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnCheckWithMoveForward & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
+			{
 				if (!IsBlackPinned(pos, pos - 8))
-				{					
-					constexpr bool tbVerifyPromoWithCheckOnly = true;
-					if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 8))
-						return false;
-					legalMovesFound = true;
-				}
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsPromoForward);
-
-		// Check with promo capture?
-		constexpr Bitboard firstLineWithoutAColumn = 255ULL - 1;
-		constexpr Bitboard firstLineWithoutHColumn = 255ULL - 128;
-		auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & candidateSquaresForBlackPromo & white) << 7) & blackPawns;
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight)
-		{
-			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 7, posWhiteKing, pos) | IsKnightDiff(pos - 7, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
-				if (!IsBlackPinned(pos, pos - 7))
-				{					
-					constexpr bool tbVerifyPromoWithCheckOnly = true;
-					if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 7)) 
-						return false;
-					legalMovesFound = true;
-				}
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
-
-		auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & candidateSquaresForBlackPromo & white) << 9) & blackPawns;
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft)
-		{
-			if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 9, posWhiteKing, pos) | IsKnightDiff(pos - 9, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
-				if (!IsBlackPinned(pos, pos - 9))
-				{					
-					constexpr bool tbVerifyPromoWithCheckOnly = true;
-					if (!IsImmediateMateAfterCaptureWithPromo<0, 0, tbVerifyPromoWithCheckOnly>(pos, pos - 9))
-						return false;
-					legalMovesFound = true;
-				}
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);		
-
-		// Black pawn check with a move forward:	
-		constexpr auto NOT_FIRST_LINE = ~255ULL;
-		const auto maskForBlackPawnCheckWithMoveForward = ((White_Pawn_Attacks[posWhiteKing] | (shiftedBlackDiscoveredCheckers & NOT_FIRST_LINE)) & ~occ) << 8; // NOT_FIRST_LINE added to exclude promo - already handled
-		auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnCheckWithMoveForward & blackPawns;
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
-		{
-			if (!IsBlackPinned(pos, pos - 8) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
-			{
-				if (!IsImmediateMateAfterMoveForwardByBlackPawn<0, 0>(pos, pos - 8))
-					return false;
-				legalMovesFound = true;
-			}
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward);
-
-		// Black pawn check with a double move forward:		
-		constexpr Bitboard seventhLine = 255ULL << _A7_;
-		const auto maskForBlackPawnCheckWithDoubleMoveForward = (((((White_Pawn_Attacks[posWhiteKing] | (shiftedBlackDiscoveredCheckers >> 8)) & ~occ) << 8) & ~occ) << 8) & seventhLine;
-		auto blackPawnsThatCanCheckWithDoubleMoveForward = maskForBlackPawnCheckWithDoubleMoveForward & blackPawns;
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward)
-		{
-			if (!IsBlackPinned(pos, pos - 16) & !SameFile(pos, posWhiteKing)) // if black pawn is in blackDiscoveredCheckers, we need to make sure it is on a different file than white king so that discovered check will actually occur
-			{
-				if (!IsImmediateMateAfterLongMoveByBlackPawn<0, 0>(pos, pos - 16))
-					return false;
-				legalMovesFound = true;
-			}
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward);
-
-		// Black pawn check with a capture:
-		constexpr auto NOT_SECOND_LINE = ~(255ULL << 8);
-		auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck(blackDiscoveredCheckers & NOT_SECOND_LINE); // incl. capture with discovered check (excl. promo capture - already handled)
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck)
-		{
-			assert((pos >> 3) == (posWhiteKing >> 3) + 2 || IsPosInBitmask(pos, blackDiscoveredCheckers));
-			assert((abs((pos & 7) - (posWhiteKing & 7)) <= 2 && abs((pos & 7) - (posWhiteKing & 7)) != 1) || IsPosInBitmask(pos, blackDiscoveredCheckers));
-			auto maskPosTo = (BOOL_EXTEND64(IsPosInBitmask(pos, blackDiscoveredCheckers)) | White_Pawn_Attacks[posWhiteKing]) & Black_Pawn_Attacks[pos] & white;
-			BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskPosTo)
-			{
-				if (!IsBlackPinned(pos, posTo))
 				{
-					if (!IsImmediateMateAfterCaptureByBlackPawn<0, 0>(pos, posTo))
+					if (!IsImmediateMateAfterMoveForwardByBlackPawn<0, 0>(pos, pos - 8))
 						return false;
 					legalMovesFound = true;
 				}
 			}
-			END_FOR_EACH_POS_IN_MASK(posTo, maskPosTo);
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck);
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward);
 
-		// Rooks:
-		if constexpr (tbBlackHaveRookLikes)
-		{
-			auto blackRooks = black & rooks();
-			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRooks)
+			// Black pawn check with a double move forward:		
+			constexpr Bitboard seventhLine = 255ULL << _A7_;
+			const auto maskForBlackPawnCheckWithDoubleMoveForward = ((maskForBlackPawnCheckWithMoveForward & ~occ) << 8) & seventhLine;
+			auto blackPawnsThatCanCheckWithDoubleMoveForward = maskForBlackPawnCheckWithDoubleMoveForward & blackPawns;
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward)
 			{
-				const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
-				auto maskTo = (get_raw_rook_moves(pos, occ) & (BOOL_EXTEND64(isDiscoveredChecker) | get_raw_rook_moves(posWhiteKing, occ))) & ~black;
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+				if (!IsBlackPinned(pos, pos - 16))
+				{
+					if (!IsImmediateMateAfterLongMoveByBlackPawn<0, 0>(pos, pos - 16))
+						return false;
+					legalMovesFound = true;
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward);
+
+			// Black pawn check with a capture:
+			constexpr auto NOT_SECOND_LINE = ~(255ULL << 8);
+			auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck<false>();
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck)
+			{
+				assert((pos >> 3) == (posWhiteKing >> 3) + 2);
+				assert((abs((pos & 7) - (posWhiteKing & 7)) <= 2 && abs((pos & 7) - (posWhiteKing & 7)) != 1));
+				auto maskPosTo = White_Pawn_Attacks[posWhiteKing] & Black_Pawn_Attacks[pos] & white;
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskPosTo)
 				{
 					if (!IsBlackPinned(pos, posTo))
 					{
-						if (!IsImmediateMateAfterMoveByBlackRook<0, 0>(pos, posTo))
+						if (!IsImmediateMateAfterCaptureByBlackPawn<0, 0>(pos, posTo))
 							return false;
 						legalMovesFound = true;
 					}
 				}
-				END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+				END_FOR_EACH_POS_IN_MASK(posTo, maskPosTo);
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, blackRooks);
-		}
+			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck);
 
-		// Bishops:
-		if constexpr (tbBlackHaveBishopLikes)
-		{
-			auto blackBishops = black & bishops() & (blackDiscoveredCheckers | Bishops_That_Can_Directly_Check[posWhiteKing]);
-			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackBishops)
+			// Rooks:
+			if constexpr (tbBlackHaveRookLikes)
 			{
-				const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
-				auto maskTo = (get_raw_bishop_moves(pos, occ) & (BOOL_EXTEND64(isDiscoveredChecker) | get_raw_bishop_moves(posWhiteKing, occ))) & ~black;
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+				auto blackRooks = black & rooks();
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, blackRooks)
 				{
-					if (!IsBlackPinned(pos, posTo))
+					auto maskTo = (get_raw_rook_moves(pos, occ) & get_raw_rook_moves(posWhiteKing, occ)) & ~black;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
 					{
-						if (!IsImmediateMateAfterMoveByBlackBishop<0, 0>(pos, posTo))
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackRook<0, 0>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, blackRooks);
+			}
+
+			// Bishops:
+			if constexpr (tbBlackHaveBishopLikes)
+			{
+				auto blackBishops = black & bishops() & Bishops_That_Can_Directly_Check[posWhiteKing];
+				BEGIN_FOR_EACH_POS_IN_MASK(pos, blackBishops)
+				{
+					auto maskTo = (get_raw_bishop_moves(pos, occ) & get_raw_bishop_moves(posWhiteKing, occ)) & ~black;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+					{
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackBishop<0, 0>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, blackBishops);
+			}
+
+			// Knights:		
+			auto blackKnights = black & knights & Knights_That_Can_Directly_Check[posWhiteKing];
+			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackKnights)
+			{
+				if (!IsBlackAbsolutelyPinned(pos))
+				{
+					auto maskTo = Knight_Attacks[pos] & Knight_Attacks[posWhiteKing] & ~black;
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKnight<0, 0>(pos, posTo))
 							return false;
 						legalMovesFound = true;
 					}
-				}
-				END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
-			}
-			END_FOR_EACH_POS_IN_MASK(pos, blackBishops);
-		}
-
-		// Knights:		
-		auto blackKnights = black & knights & (blackDiscoveredCheckers | Knights_That_Can_Directly_Check[posWhiteKing]);
-		BEGIN_FOR_EACH_POS_IN_MASK(pos, blackKnights)
-		{
-			if (!IsBlackAbsolutelyPinned(pos))
-			{				
-				const bool isDiscoveredChecker = blackDiscoveredCheckers & (1ULL << pos);
-				auto maskTo = Knight_Attacks[pos] & (BOOL_EXTEND64(isDiscoveredChecker) | Knight_Attacks[posWhiteKing]) & ~black;
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, maskTo)
-				{					
-					if (!IsImmediateMateAfterMoveByBlackKnight<0, 0>(pos, posTo))
-						return false;
-					legalMovesFound = true;
-				}
-				END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
-			}
-		}
-		END_FOR_EACH_POS_IN_MASK(pos, blackKnights);
-
-		// Discovered check with black king:
-		if (blackDiscoveredCheckers & black & kings)
-		{
-			auto mask = King_Attacks[posBlackKing] & ~black & ~GetCommonDiagOrLine(posWhiteKing, posBlackKing) & ~WhitePawnAttacks() & ~WhiteKnightAttacks() & ~King_Attacks[posWhiteKing];
-			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
-			{
-				if (!IsSquareAttackedByWhite<-1>(pos)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
-				{
-					if (!IsImmediateMateAfterMoveByBlackKing<0, 0>(pos))
-						return false;
-					legalMovesFound = true;
+					END_FOR_EACH_POS_IN_MASK(posTo, maskTo);
 				}
 			}
-			END_FOR_EACH_POS_IN_MASK(pos, mask);
+			END_FOR_EACH_POS_IN_MASK(pos, blackKnights);
 		}
 
 		return true;
