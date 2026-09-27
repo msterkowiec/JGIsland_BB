@@ -5143,7 +5143,8 @@ private:
 			// Check with promo capture?
 			constexpr Bitboard firstLineWithoutAColumn = 255ULL - 1;
 			constexpr Bitboard firstLineWithoutHColumn = 255ULL - 128;
-			auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & candidateSquaresForBlackPromo & white) << 7) & blackPawns;
+			// a) promo capture right:
+			auto blackPawnsThatCanPromoCaptureRight = ((firstLineWithoutAColumn & (candidateSquaresForBlackPromo | (shiftedBlackDiscoveredCheckers << 1)) & white) << 7) & blackPawns;			
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight)
 			{
 				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 7, posWhiteKing, pos) | IsKnightDiff(pos - 7, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
@@ -5156,8 +5157,9 @@ private:
 					}
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureRight);
-
-			auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & candidateSquaresForBlackPromo & white) << 9) & blackPawns;
+			
+			// b) promo capture left:
+			auto blackPawnsThatCanPromoCaptureLeft = ((firstLineWithoutHColumn & (candidateSquaresForBlackPromo | (shiftedBlackDiscoveredCheckers >> 1)) & white) << 9) & blackPawns;			
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft)
 			{
 				if (AllBetweenEmptyIfTakeOffBlackPawn<1>(pos - 9, posWhiteKing, pos) | IsKnightDiff(pos - 9, posWhiteKing) | IsPosInBitmask(pos, blackDiscoveredCheckers))
