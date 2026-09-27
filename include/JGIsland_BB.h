@@ -5353,9 +5353,8 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanPromoCaptureLeft);
 
-			// Black pawn check with a move forward:	
-			constexpr auto NOT_FIRST_LINE = ~255ULL;
-			const auto maskForBlackPawnCheckWithMoveForward = (White_Pawn_Attacks[posWhiteKing] & ~occ) << 8; // NOT_FIRST_LINE added to exclude promo - already handled
+			// Black pawn check with a move forward:				
+			const auto maskForBlackPawnCheckWithMoveForward = (White_Pawn_Attacks[posWhiteKing] & ~occ) << 8;
 			auto blackPawnsThatCanCheckMovingForward = maskForBlackPawnCheckWithMoveForward & blackPawns;
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckMovingForward)
 			{
@@ -5383,8 +5382,7 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCheckWithDoubleMoveForward);
 
-			// Black pawn check with a capture:
-			constexpr auto NOT_SECOND_LINE = ~(255ULL << 8);
+			// Black pawn check with a capture:			
 			auto blackPawnsThatCanCaptureWithCheck = BlackPawnsThatCanCaptureWithCheck<false>();
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, blackPawnsThatCanCaptureWithCheck)
 			{
