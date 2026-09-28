@@ -33,10 +33,10 @@ jobs:
       env:
        CC:   clang
        CXX:  clang++
+       CMAKE_BUILD_PARALLEL_LEVEL: 2
 
     - name: Build
-      # Build your program with the given configuration
-      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      # Build your program with the given configuration      
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
     - name: Test
