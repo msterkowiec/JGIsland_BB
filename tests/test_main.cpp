@@ -503,27 +503,13 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 
 	auto start = std::chrono::steady_clock::now();
 
-	const char* ptr = test_suite_realistic;
+	constexpr auto num = sizeof(test_suite_realistic) / sizeof(test_suite_realistic[0]);
 	size_t numSuccessful = 0;
 	size_t numFailed = 0;	
-	char szFEN[256];
-	do
-	{		
-		const char* fen = strchr(ptr, '\'');
-		if (!fen)
-			break;
-		++fen;
-		const char* fenEnd = strchr(fen, '\'');
-		if (!fenEnd)
-			break;
-		const auto len = fenEnd - fen;
-		memcpy(szFEN, fen, len);
-		szFEN[len] = 0;
-
-		const auto noMate = strchr(fenEnd, '0');
-		const auto mate = strchr(fenEnd, '1');
-		const int expectedOutcome = (mate && (mate < noMate || !noMate)) ? 1 : 0;
-		ptr = expectedOutcome ? mate + 2 : noMate + 2;
+	for (size_t i = 0; i < num; ++i)
+	{
+		const auto szFEN = test_suite_realistic[i].first;
+		const auto expectedOutcome = test_suite_realistic[i].second;
 
 		auto res = bb.SolveTwoMover(szFEN, aMoves.data()); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
 		if (res < 0)
@@ -540,7 +526,6 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 				++numSuccessful;
 		}
 	}
-	while (*ptr != 0);
 
 	auto end = std::chrono::steady_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
