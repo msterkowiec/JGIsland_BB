@@ -2,6 +2,7 @@
 #include <chrono>
 #include <gtest/gtest.h>
 #include "integration_tests_suite.h"
+#include "integration_tests_suite_realistic.h"
 
 #define private public // dirty trick for UTs only 
 #include "utils.h"
@@ -494,6 +495,49 @@ size_t RunTestFindMoveThatMatesInTwoMoves()
 	return numFailed;
 }
 
+template<MoveGenMethodT MoveGenMethod>
+size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
+{
+	FullBitboards<MoveGenMethod> bb;
+	std::array<TMove, 256> aMoves;
+
+	auto start = std::chrono::steady_clock::now();
+
+	constexpr auto num = sizeof(test_suite_realistic) / sizeof(test_suite_realistic[0]);
+	size_t numSuccessful = 0;
+	size_t numFailed = 0;	
+	for (size_t i = 0; i < num; ++i)
+	{
+		const auto szFEN = test_suite_realistic[i].first.c_str();
+		const auto expectedOutcome = test_suite_realistic[i].second;
+
+		auto res = bb.SolveTwoMover(szFEN, aMoves.data()); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
+		if (res < 0)
+			std::cout << "Error parsing FEN: " << szFEN << "\n";
+		else
+		{
+			if (res != expectedOutcome)
+			{
+				std::string additionalInfo = res ? " (checkmate found but expected no solution)" : " (no solution but expected checkmate)";
+				std::cout << "Test failed for FEN=" << szFEN << additionalInfo << "\n";
+				++numFailed;
+			}
+			else
+				++numSuccessful;
+		}
+	}
+
+	auto end = std::chrono::steady_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+	std::cout << "[   INFO   ] Successful: " << std::to_string(numSuccessful) << std::endl;
+	std::cout << "[   INFO   ] Failed: " << std::to_string(numFailed) << std::endl;
+	std::cout << "[   INFO   ] Elapsed time: " << duration.count() << " ms" << std::endl;
+	std::cout << "[   INFO   ] Twomovers per millisecond: " << std::to_string(((double)(numSuccessful + numFailed)) / duration.count()) << "\n";
+
+	return numFailed;
+}
+
 TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_HQ)
 {
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::HyperbolaQuintessence>();
@@ -511,5 +555,11 @@ TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_FMB)
 TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_DFMB)
 {
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
+	EXPECT_EQ(numFailed, 0);
+}
+
+TEST(JGIsland_BB_Integration, TestRealisticFindMoveThatMatesInTwoMoves_DFMB)
+{
+	auto numFailed = RunTestRealisticFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
 	EXPECT_EQ(numFailed, 0);
 }
