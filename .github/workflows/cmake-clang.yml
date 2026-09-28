@@ -33,7 +33,6 @@ jobs:
       env:
        CC:   clang
        CXX:  clang++
-       CMAKE_BUILD_PARALLEL_LEVEL: 2
 
     - name: Build
       # Build your program with the given configuration      
