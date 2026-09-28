@@ -517,7 +517,6 @@ constexpr std::array<uint64_t, 64> init_white_pawn_direct_capture_check_area()
 	for (int sq = 24; sq < 64; ++sq)
 	{
 		const int x = sq & 7;
-		const int y = sq >> 3;
 
 		if (x >= 2)
 			res[sq] |= 1ULL << (sq - 18);
