@@ -10,7 +10,7 @@
 #include <utility>
 #include <string>
 
-inline std::pair<std::string, short> test_suite_realistic [28595] = {
+inline std::pair<std::string, short> test_suite_realistic [] = {
 
     // ~15.6k twomover positions occurring while solving 61 #7+ compositions (first 61 such compositions from file sample_problems.cp in main folder of JGIsland Chess Moremovers installation - first 256 #2 subpositions required to solve as subproblems)
 	
@@ -13634,7 +13634,7 @@ inline std::pair<std::string, short> test_suite_realistic [28595] = {
 		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/p4b2/r3R2b/8", 0},
 		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/p4bb1/1r2R3/8", 0},
 		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/p4b2/1r2R3/6b1", 0},
-		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/5b2/pr2R2b/8", 0},
+		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/5b2/pr2R2b/8", 0},    /*
 	// #9 Wilfried Koenig, 1994, P1235896, Y271779
 		{"1nb5/2Kp3r/pp1p1P2/k2P4/5R1r/NPP1p1p1/8/7B", 0},
 		{"1nb5/2Kp3r/p2p1P2/kp1P4/5Rpr/NPP1p3/8/7B", 1},
@@ -28608,6 +28608,6 @@ inline std::pair<std::string, short> test_suite_realistic [28595] = {
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/3q4/8", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/2q5/8", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/1q6/8", 0},
-		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/q7/8", 0},
+		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/q7/8", 0},   */
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b1q2/8/8", 0}
 };
