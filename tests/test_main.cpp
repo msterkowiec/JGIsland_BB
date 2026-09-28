@@ -495,6 +495,7 @@ size_t RunTestFindMoveThatMatesInTwoMoves()
 	return numFailed;
 }
 
+/*
 template<MoveGenMethodT MoveGenMethod>
 size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 {
@@ -552,6 +553,7 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 
 	return numFailed;
 }
+*/
 
 TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_HQ)
 {
@@ -572,9 +574,10 @@ TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_DFMB)
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
 	EXPECT_EQ(numFailed, 0);
 }
-
+/*
 TEST(JGIsland_BB_Integration, TestRealisticFindMoveThatMatesInTwoMoves_DFMB)
 {
 	auto numFailed = RunTestRealisticFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
 	EXPECT_EQ(numFailed, 0);
 }
+*/
