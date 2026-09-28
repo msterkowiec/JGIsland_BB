@@ -10,13 +10,13 @@
 #include <utility>
 #include <string>
 
-inline std::pair<std::string, short> test_suite_realistic [] = {
+inline std::pair<std::string, short> test_suite_realistic [28595] = {
 
     // ~15.6k twomover positions occurring while solving 61 #7+ compositions (first 61 such compositions from file sample_problems.cp in main folder of JGIsland Chess Moremovers installation - first 256 #2 subpositions required to solve as subproblems)
 	
 	// #7 Dawid Przepiórka, 1915, Y67096, P1341983
 		{"k7/2B3pp/K1pp1p2/PP1pb3/p7/n4p1r/4QP2/4n2q", 1},
-		/*    {"k7/2B3pp/K1pp1p2/PP1p4/p7/n6r/4pP1b/4n2q", 0},
+		{"k7/2B3pp/K1pp1p2/PP1p4/p7/n6r/4pP1b/4n2q", 0},
 		{"k7/2B3pp/K1pp1p2/PP1p4/p1n5/2Q2p1r/5P1b/4n2q", 0},
 		{"k7/2B3pp/K2p1p2/PPpp4/p7/n1Q2p1r/5P1b/4n2q", 0},
 		{"k7/2B3pp/K1pp1p2/PP1p4/p7/Q2n1p1r/5P1b/7q", 0},
@@ -28609,5 +28609,5 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/2q5/8", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/1q6/8", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/q7/8", 0},
-		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b1q2/8/8", 0}		*/
+		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b1q2/8/8", 0}
 };
