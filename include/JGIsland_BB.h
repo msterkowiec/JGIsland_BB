@@ -5119,7 +5119,7 @@ private:
 			END_FOR_EACH_POS_IN_MASK(pos, blackQueens);
 		}
 
-		if (blackDiscoveredCheckers != 0)
+		if ((tbBlackHaveRookLikes || tbBlackHaveBishopLikes) && blackDiscoveredCheckers != 0)
 		{
 			// Check with promo forward?
 			constexpr Bitboard firstLine = 255ULL;
