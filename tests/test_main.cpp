@@ -508,7 +508,7 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 	size_t numFailed = 0;	
 	for (size_t i = 0; i < num; ++i)
 	{
-		const auto szFEN = test_suite_realistic[i].first.c_str();
+		const auto szFEN = test_suite_realistic[i].first;
 		const auto expectedOutcome = test_suite_realistic[i].second;
 
 		auto res = bb.SolveTwoMover(szFEN, aMoves.data()); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
