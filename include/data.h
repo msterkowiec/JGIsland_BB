@@ -510,6 +510,25 @@ constexpr std::array<uint64_t, 64> init_white_pawn_direct_check_area()
 	return res;
 }
 
+constexpr std::array<uint64_t, 64> init_white_pawn_direct_capture_check_area()
+{
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 24; sq < 64; ++sq)
+	{
+		const int x = sq & 7;
+		const int y = sq >> 3;
+
+		if (x >= 2)
+			res[sq] |= 1ULL << (sq - 18);
+		if (x < 6)
+			res[sq] |= 1ULL << (sq - 14);
+		res[sq] |= 1ULL << (sq - 16);
+	}
+
+	return res;
+}
+
 constexpr std::array<uint64_t, 64> init_bishops_that_can_check()
 {	
 	constexpr uint64_t FILE_A_NO_EDGES = 0x0001010101010100ULL;
@@ -704,5 +723,6 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Chec
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Check = init_knights_that_can_check();
 
 alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Check_Area = init_white_pawn_direct_check_area();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Capture_Check_Area = init_white_pawn_direct_capture_check_area();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Directly_Check = init_bishops_that_can_directly_check();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Directly_Check = init_knights_that_can_directly_check();
