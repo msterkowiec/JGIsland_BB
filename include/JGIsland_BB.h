@@ -446,7 +446,7 @@ private:
 	}
 
 	template<bool tbSkipAssertionIfNotSameDiagOrLine = false>
-	ALWAYS_INLINE bool AllBetweenEmptyIfTakeOffBlackPawn(const int pos1, const int pos2, const int posBlackPawnToTakeOff) const
+	ALWAYS_INLINE bool AllBetweenEmptyIfTakeOffBlackPawn(const int pos1, const int pos2, const int posBlackPawnToTakeOff) CONST_RESTRICT
 	{
 		assert(IsValidPos(pos1));
 		assert(IsValidPos(pos2));
@@ -4522,7 +4522,7 @@ private:
 	}
 
 	// Intended for super-fast detection of some non-pinned attackers (not for a conclusive verification of their existence)
-	ALWAYS_INLINE bool IsSquareSureToBeAttackedByNotPinnedBlackPiece(const int sq) const
+	ALWAYS_INLINE bool IsSquareSureToBeAttackedByNotPinnedBlackPiece(const int sq) CONST_RESTRICT
 	{
 		assert(IsValidPos(sq));
 
@@ -5090,7 +5090,7 @@ private:
 	// Note that this method calls methods from family IsImmediateMateAfter* with template parameters for castling <0,0>, since only checking moves are considered and castling is out of scope anyway
 	// NOTE: This method should NOT be ALWAYS_INLINE
 	template<char tbBlackCastlingFlags>
-	bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers, bool& legalMovesFound) const
+	bool IsImmediateMateAfterAnyBlackCheck(const Bitboard blackDiscoveredCheckers, bool& legalMovesFound) CONST_RESTRICT
 	{
 		assert(!IsSquareAttackedByWhite(posBlackKing)); // prerequisite
 
@@ -5119,7 +5119,7 @@ private:
 			END_FOR_EACH_POS_IN_MASK(pos, blackQueens);
 		}
 
-		if (blackDiscoveredCheckers != 0)
+		if ((tbBlackHaveRookLikes || tbBlackHaveBishopLikes) && blackDiscoveredCheckers != 0)
 		{
 			// Check with promo forward?
 			constexpr Bitboard firstLine = 255ULL;
