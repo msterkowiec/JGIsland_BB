@@ -14,7 +14,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 
     // ~15.6k twomover positions occurring while solving 61 #7+ compositions (first 61 such compositions from file sample_problems.cp in main folder of JGIsland Chess Moremovers installation - first 256 #2 subpositions required to solve as subproblems)
 	
-	// #7 Dawid Przepiórka, 1915, Y67096, P1341983
+	// #7 Dawid PrzepiÃ³rka, 1915, Y67096, P1341983
 		{"k7/2B3pp/K1pp1p2/PP1pb3/p7/n4p1r/4QP2/4n2q", 1},
 		{"k7/2B3pp/K1pp1p2/PP1p4/p7/n6r/4pP1b/4n2q", 0},
 		{"k7/2B3pp/K1pp1p2/PP1p4/p1n5/2Q2p1r/5P1b/4n2q", 0},
@@ -2841,7 +2841,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/1KQ5/8/8/8/kp4p1/r1p1pppp/1q1brqbn", 0},
 		{"2Q5/1K6/8/8/8/kp4p1/r1p1pppp/1q1brqbn", 0},
 		{"8/1K6/8/8/8/kp1Q2p1/r1p1pppp/1q1brqbn", 0},
-	// #9 Jorma Pitkänen, 10/2012, P1251766
+	// #9 Jorma Pitkanen, 10/2012, P1251766
 		{"8/3Kp3/4p1pp/4p1pk/4p1r1/5BP1/4p3/8", 0},
 		{"8/3Kp3/4p1pp/4p1pk/6r1/4ppP1/8/8", 0},
 		{"8/4p3/4K1pp/4p1pk/4p1r1/6P1/4p3/3B4", 0},
@@ -3098,7 +3098,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/4p3/B1K1p1pp/6pk/4p3/4p1r1/8/8", 0},
 		{"3K4/4p3/4p1pp/1B4pk/4p3/6r1/4p3/8", 0},
 		{"8/4K3/6pp/4p1pk/1q2p1r1/6P1/2B5/8", 0},
-	// #9 Jorma Pitkänen, 10/2012, P1251767
+	// #9 Jorma Pitkanen, 10/2012, P1251767
 		{"8/p6p/p5pp/7P/6pP/p7/N4pBk/5K2", 0},
 		{"8/p6p/p6p/7p/6pP/p5p1/N4NBk/5K2", 0},
 		{"8/p6p/p5pp/7P/6pP/p5p1/N5Bk/5KN1", 0},
@@ -3355,7 +3355,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/p6p/p6p/7N/6pP/2N3p1/6Bk/q4K2", 0},
 		{"8/p6p/p6p/7p/6pP/2N2Bp1/7k/q4KN1", 0},
 		{"8/p6p/p3N2p/7p/6pP/2N3p1/6Bk/q4K2", 0},
-		// #7 Jorma Pitkänen, 09/2011, P1245955
+		// #7 Jorma Pitkanen, 09/2011, P1245955
 		{"k1b4N/1p1p4/1P1P4/8/1p6/p7/pP6/4K3", 0},
 		{"1kb4N/1p1p4/1P1P4/8/1p6/pp6/RP6/4K3", 0},
 		{"1kb4N/1p1p4/1P1P4/8/1p6/Rp6/1P6/4K3", 0},
@@ -3869,7 +3869,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"k1B5/2B1p2p/3pP1bK/1NpP2P1/2P2rpP/2p5/2N3PR/q6n", 0},
 		{"k1B5/2B1p2p/4P1bK/1NpPp1P1/2P2ppP/2p5/2N3PR/q4r1n", 0},
 		{"k1B5/2B1p2p/3pP2K/1NpP2PP/2P1bpp1/2p5/2N3PR/q4r1n", 0},
-	// #7 Wolfgang Bär, 1977, P1246008, Y189750
+	// #7 Wolfgang Baer, 1977, P1246008, Y189750
 		{"1B6/1K2p1r1/1p2P3/2pR1R2/2p1k2q/1b2pp2/1Np5/2r1n3", 0},
 		{"1B6/1K2p1r1/1p2P3/2pR1R2/2p1k1pq/1b2pn2/1Np5/2r5", 0},
 		{"1B6/1K2p1r1/1p2P3/2pR1R2/4k1pq/1b1pp3/1Np5/2r1n3", 0},
@@ -4383,7 +4383,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"1K6/5p2/8/Nk1p4/p2pn1n1/B1p5/2p1b3/q7", 0},
 		{"8/5p2/1K4b1/N2p4/pk1p1Bn1/p1p5/5n2/8", 1},
 		{"8/5p2/1KN4n/3p4/p1kp4/p1pb4/5n2/Nq6", 0},
-	// #9 Wolfgang Bär, 1977, Y192316, P1246067
+	// #9 Wolfgang Baer, 1977, Y192316, P1246067
 		{"4nn1r/3RpK1p/3p3N/3P3k/rp3R2/2p3p1/1p1B2P1/8", 0},
 		{"4nn1r/3RpK1p/3p3N/3P2k1/rp3R2/2p3p1/1p1B2P1/8", 0},
 		{"4nn1r/4RK1p/3p3N/3P1R2/rp5k/2p3p1/3B2P1/1q6", 0},
@@ -7981,7 +7981,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/8/8/8/3k4/8/p3K3/5BN1", 0},
 		{"8/8/8/8/3k4/7B/p7/2R1K1N1", 0},
 		{"8/8/8/8/3R4/1p6/k7/4KBN1", 0},
-	// #7 Willy Schütz, 1950, P1233612
+	// #7 Willy Schuetz, 1950, P1233612
 		{"6b1/5p2/4pPp1/3pP1P1/pPpP4/2P5/K1pp4/2kn2Q1", 0},
 		{"8/5p1b/4pPp1/1p1pP1P1/RPpP4/2P5/K1pp4/2kn2Q1", 0},
 		{"6b1/5p2/4pPp1/3pP1P1/pPpP4/2P5/K2p4/2kq4", 0},
@@ -9266,7 +9266,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/1p2pp1K/1N3p2/4p3/P3kB1n/6b1/1P2npr1/q7", 0},
 		{"8/1p2pp1K/8/4pp2/PPp1k2n/4B1b1/p4pr1/6n1", 0},
 		{"6K1/1p2pp2/5p2/3kp1n1/P1N4n/6b1/1P3pr1/q1B5", 0},
-	// #9 Wolfgang Bär, 1989, P1234427, Y271458
+	// #9 Wolfgang Baer, 1989, P1234427, Y271458
 		{"2b2n2/N5pr/1p4pB/4R3/KNk2P2/2p2n2/5p1q/8", 0},
 		{"2b2n2/N5pr/1p4pB/4R3/KNk2P2/2p5/4np1q/8", 0},
 		{"2b2n2/N5pr/1p4pB/4R3/KNk2P2/2p4n/5p1q/8", 0},
@@ -9523,7 +9523,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"2N2n2/b5pr/1p4pB/4R3/KN1k1P2/2p4q/5p2/6n1", 0},
 		{"1k6/N2n2p1/1p4pr/2N5/5P2/1Kp5/5p1q/6n1", 0},
 		{"2b2n2/N6r/1p4pp/2k5/KN2RP2/2p5/5p1q/6n1", 0},
-	// #8 Jorma Pitkänen, 2012, P1234460 (illegal position)
+	// #8 Jorma Pitkanen, 2012, P1234460 (illegal position)
 		{"6n1/4p1p1/2p3K1/q3R2p/5pkr/3p1pbr/5p1n/5b2", 0},
 		{"6n1/4p1p1/2p3K1/2q1R2p/5pkr/3p1pbr/5p1n/5b2", 0},
 		{"6n1/q3p1p1/2R3K1/7p/5pkr/3p1pbr/5pbn/8", 0},
@@ -11065,7 +11065,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"4K2k/2p4p/7P/6b1/2Pp1p2/8/8/8", 0},
 		{"6k1/2p1K2p/7P/6N1/2Pp1p2/8/8/8", 0},
 		{"6Nk/2p1pK1p/3b3P/2P3N1/3p1p2/8/8/8", 0},
-	// #11 Wilfried König, 1990, P1234686, Y271583
+	// #11 Wilfried Keonig, 1990, P1234686, Y271583
 		{"n1B2b1r/5p1n/1pK2pb1/1N4pq/4k1p1/1Np3B1/1R1P2P1/8", 0},
 		{"n1B2b1r/5p1n/1pK2pb1/1N4pq/4k1p1/1p4B1/1R1P2P1/8", 0},
 		{"n1B2b1r/5p1n/1pK2pb1/1N4pq/2p3p1/1N1k2B1/1R1P2P1/8", 0},
@@ -11322,7 +11322,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"n1B2b1r/5p1n/1pK2pbq/1N4p1/2p1k1p1/1p6/1R1P2P1/2N1B3", 0},
 		{"n1B2b1r/5p1n/1pK2pb1/1N4p1/2p1k1pq/1p6/1R1P2P1/2N1B3", 0},
 		{"n1B2b1r/5p1n/1pK2pb1/1N4p1/2p1k1p1/1p5q/1R1P2P1/2N1B3", 0},
-	// #9 Ralf Krätschmer, 1991, P1234732
+	// #9 Ralf Kraetschmer, 1991, P1234732
 		{"8/2K5/3p1NR1/n1kP4/8/N7/pr1P4/8", 0},
 		{"8/2K5/3p1NR1/n1kP4/8/N7/pP1P4/2r5", 0},
 		{"8/2K5/3p1NR1/n1kP4/8/N7/pP1P4/3r4", 0},
@@ -13635,7 +13635,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/p4bb1/1r2R3/8", 0},
 		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/p4b2/1r2R3/6b1", 0},
 		{"3N4/K2kp3/B3N3/2Pp2p1/1P1ppp1q/5b2/pr2R2b/8", 0},
-	// #9 Wilfried König, 1994, P1235896, Y271779
+	// #9 Wilfried Koenig, 1994, P1235896, Y271779
 		{"1nb5/2Kp3r/pp1p1P2/k2P4/5R1r/NPP1p1p1/8/7B", 0},
 		{"1nb5/2Kp3r/p2p1P2/kp1P4/5Rpr/NPP1p3/8/7B", 1},
 		{"1nb5/2Kp3r/pp1p1P2/k2P4/7r/NPP1R1p1/8/7B", 0},
@@ -14406,7 +14406,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/3Np2K/3bP3/6p1/2pkP3/3p1P1B/5P2/8", 0},
 		{"1b6/4p3/4P1K1/2kP1Pp1/6B1/8/3p1P2/8", 0},
 		{"1b6/4p2K/4P3/3P2p1/3kP3/5P1B/5P2/1q6", 0},
-	// #9 Horst Böttger, 1994, P1236007, Y271790
+	// #9 Horst Boettger, 1994, P1236007, Y271790
 		{"3K4/n1N3b1/2pk1pp1/2n1p3/5P2/1p2B3/8/8", 0},
 		{"3K4/n1N3b1/2pk1pp1/2N5/4np2/1p2B3/8/8", 0},
 		{"3KN3/n5b1/2p2pp1/2pkp3/4nP2/1p1NB3/8/8", 0},
@@ -15177,7 +15177,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"1n4b1/r1p3p1/1pB5/p1nPB2N/R1P1k1pN/2P5/2KP2P1/2b5", 0},
 		{"1n4b1/2p3p1/rpB5/p1nPB2N/R1P1k1pN/2P5/2KP2P1/2b5", 0},
 		{"r5b1/2p3p1/npB5/p1nPB2N/R1P1k1pN/2P5/2KP2P1/2b5", 0},
-	// #10 Sven Trommler, Dieter Müller, 1995, P1236051, Y271794
+	// #10 Sven Trommler, Dieter Mueller, 1995, P1236051, Y271794
 		{"3N3K/1B2p3/3kP1N1/BP3pPp/2p5/2p5/4bp2/6q1", 0},
 		{"3N3K/1B2p3/3kP1N1/BP3pPp/2p5/2p2b2/5p2/6q1", 0},
 		{"3N3K/1B2p3/3kP1N1/BP3pPp/2p3b1/2p5/5p2/6q1", 0},
@@ -19546,7 +19546,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"3B2B1/pKNR4/1p5r/2k1p1b1/Pn2p2q/P2P1Rn1/8/1r3b2", 1},
 		{"3B2B1/pKNR4/1p1r4/2k1p1b1/P3p2q/P2P1Rn1/2n5/1r3b2", 0},
 		{"3B2B1/pKNR4/1p5r/2k3b1/P2pp2q/P4Rn1/2n5/1r3b2", 0},
-	// #9 Wolfgang Bär, 2006, P1241162
+	// #9 Wolfgang Baer, 2006, P1241162
 		{"1r6/8/3p1BBp/N1p5/P3p3/2P2k2/2pp1p2/3rbK2", 0},
 		{"1r6/8/3p1BBp/N1p5/P7/2P1kp2/2pp1p2/3rbK2", 0},
 		{"1r6/8/3p2Bp/N4R2/P2pp3/2P1kp2/2pp1p2/3rbK2", 0},
@@ -21345,7 +21345,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"1B5K/5np1/5pP1/1n4Pk/8/4P2p/8/8", 0},
 		{"3n4/6pK/6P1/1n4pk/5B2/4P2p/8/8", 0},
 		{"3n2K1/6p1/2N2pP1/1n4Pk/5Bp1/4P2p/8/8", 0},
-	// #9 Horst Böttger, 1971, P1243776, Y189908
+	// #9 Horst Boettger, 1971, P1243776, Y189908
 		{"1K6/1p4R1/2p2p1p/3N1B1k/2p3p1/3p2P1/b4r1n/qn6", 0},
 		{"1K6/1p4R1/5p1p/3p1B1k/2p3p1/3p2P1/br5n/qn6", 1},
 		{"1K6/1R6/1Np2p1p/5B1k/2p3p1/n2p2P1/br5n/q7", 0},
@@ -22887,7 +22887,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"K1k4b/R4p2/N1p2p2/B1p2P2/1p1p4/8/2r3b1/2r5", 0},
 		{"K1k4b/R4p2/N1p2p2/B1p2P2/1p1p4/8/2r3b1/1r6", 0},
 		{"K1k4b/R4p2/N1p2p2/B1p2P2/1p1p4/8/2r3b1/r7", 0},
-	// #8 Jorma Pitkänen, 2012, P1244384
+	// #8 Jorma Pitkanen, 2012, P1244384
 		{"7k/5P1p/5n1p/7p/7p/8/5K1p/8", 0},
 		{"7k/5P1p/7p/7p/4n2p/7p/5K2/8", 0},
 		{"7k/3n1P1p/7p/7p/7p/7p/5K2/8", 0},
@@ -24429,7 +24429,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"4Nb2/4p1pr/4p1P1/RpN1k2p/7P/p1P2K2/P1P5/8", 0},
 		{"4Nb2/3pp1pr/4p1P1/R1N1k2p/2p4P/pB3K2/P1P5/8", 0},
 		{"4Nb2/3pp1pr/4p1P1/R1N1k2p/1p5P/pBP5/P1P2K2/8", 1},
-	// #7 Wolfgang Bär, 1974, P1244578, Y188501
+	// #7 Wolfgang Baer, 1974, P1244578, Y188501
 		{"1B6/3R4/npp5/p7/2k1P2r/Kp1N1p2/3PP3/2n1rb2", 0},
 		{"1B6/3R4/npp5/p1k5/2P1P2r/Kp1n1p2/3PP3/4rb2", 0},
 		{"1B6/3R4/npp5/p1k5/2P1P2r/Kp1n1p2/1N1P4/4rb2", 0},
@@ -24943,7 +24943,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/8/B3p1N1/1rp1P3/b2kPK2/1p1p2P1/1P1P4/8", 0},
 		{"8/8/B3p1N1/2pkP3/br3KP1/1p1pP3/1P1P4/8", 0},
 		{"8/8/B3p1N1/2pkP3/br6/1p1pPKP1/1P1P4/8", 0},
-	// #7 Ralf Krätschmer, 2012, P1244631
+	// #7 Ralf Kraetschmer, 2012, P1244631
 		{"n1r3b1/2ppp3/1pQ1P3/3P1p2/1n1K1k1B/2p2P1P/2N1p1Rr/8", 1},
 		{"n1r3b1/2ppp3/1pQ1P3/3P1p2/3K1k1B/2p2P1P/2N1p1Rr/2n5", 1},
 		{"n1r3b1/2ppp3/1pQ1P3/3P1p2/3K1k1B/2p2P1P/n1N3Rr/4q3", 1},
@@ -26228,7 +26228,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"8/7p/5B2/7k/1PPP4/r7/5PPK/8", 0},
 		{"8/7p/4BBk1/8/1PPP4/r7/5PPK/8", 0},
 		{"8/7p/5Bk1/8/1PPP4/r7/5PPK/8", 0},
-	// #7 Wolfgang Bär, 1975, P1244779, Y193101
+	// #7 Wolfgang Baer, 1975, P1244779, Y193101
 		{"6Kb/8/1pk2P2/4pB2/P2RNpP1/2Pp3r/5P2/7n", 0},
 		{"6Kb/8/1p3P2/3k1B2/P2pNpP1/2Pp3r/5P2/7n", 0},
 		{"6Kb/7r/1p3PB1/3kp3/P1R1NpP1/2Pp4/5P2/7n", 0},
@@ -26742,7 +26742,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"5b2/5p1k/8/4P1P1/4P3/5p1K/5P2/8", 0},
 		{"5B2/5p2/5N2/4P3/4Pk2/5p2/5P1K/8", 0},
 		{"5B2/5p2/5Nk1/4P3/4P3/5pK1/5P2/8", 0},
-	// #8 Horst Böttger, 1975, P1244893, Y188952
+	// #8 Horst Boettger, 1975, P1244893, Y188952
 		{"8/K1Rp2N1/3p2p1/3k2p1/4p1B1/3bp3/1B1np3/5nrr", 1},
 		{"8/K1Rp2N1/3p2p1/3k2p1/4ppB1/3bn3/1B1np3/6rr", 0},
 		{"8/K1RB2N1/3p2p1/3k2p1/5p2/3bp3/1B1np3/3N1nrr", 0},
@@ -28353,7 +28353,7 @@ inline std::pair<std::string, short> test_suite_realistic [] = {
 		{"5q2/8/6B1/3p4/3Pp1p1/6pk/6p1/6K1", 0},
 		{"8/4R2q/6B1/3p4/3Pp1p1/7k/5K2/6q1", 0},
 		{"8/5q2/6B1/3p4/3Pp1p1/6pk/6p1/4B1K1", 0},
-	// #10 Wolfgang Bär, 1975, Y191660, P1245270
+	// #10 Wolfgang Baer, 1975, Y191660, P1245270
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4P2/1n1bq3/8/3N4", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P3qP2/1n1b4/8/3N4", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4P2/1n1b4/8/3Nq3", 0},
