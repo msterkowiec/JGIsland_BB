@@ -5060,7 +5060,8 @@ private:
 			if constexpr(tbEnPassantPossible || !tbUseWhitePawnCheckOptim)
 				mask = pawns & white;
 			else
-				mask = pawns & white & (whitePiecesWithDiscoveredCheck | White_Pawn_Direct_Check_Area[posBlackKing]);
+				mask = pawns & white & (whitePiecesWithDiscoveredCheck | (White_Pawn_Direct_Check_Area[posBlackKing] & ~(BOOL_EXTEND64((Black_Pawn_Attacks[posBlackKing] & black) == 0) & White_Pawn_Direct_Capture_Check_Area[posBlackKing])));
+			mask &= ~((Black_Pawn_Attacks[posBlackKing] & occ()) >> 8);
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
