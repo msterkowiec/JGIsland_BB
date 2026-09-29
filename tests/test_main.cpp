@@ -30,6 +30,71 @@ bool IsSolutionAsExpected(int count, const TMove* aMoves, const std::vector<TMov
 	return true;
 }
 
+// Returns an empty string if castling possibilities change in mirrored position
+std::string MakeFENMirror(const char* szFEN)
+{
+	std::string res(szFEN);
+
+	size_t first = 0;
+	int curpos = 56;
+	int col = 0;
+	bool whiteRooksOnOrigPos = res[res.size()-1] == 'R';
+	bool blackRooksOnOrigPos = szFEN[0] == 'r';
+	bool whiteKingOnOrigPos = false;
+	bool blackKingOnOrigPos = false;
+	for (size_t i = 0; res[i] != 0; ++i)
+	{
+		if (res[i] == '/')
+		{
+			char* start = (char*)(res.c_str() + first);
+			char* end = (char*)(res.c_str() + i);
+			std::reverse(start, end);
+			first = i + 1;
+			curpos -= 8;
+			col = 0;
+		}
+		else
+		{
+			switch (res[i])
+			{
+				case '1':++col; break;
+				case '2':col += 2; break;
+				case '3':col += 3; break;
+				case '4':col += 4; break;
+				case '5':col += 5; break;
+				case '6':col += 6; break;
+				case '7':col += 7; break;
+				case '8':col += 8; break;
+				case 'k':if (curpos == 56 && (col == 3 || col == 4)) blackKingOnOrigPos = true; ++col; break;
+				case 'K':if (curpos == 0 && (col == 3 || col == 4)) whiteKingOnOrigPos = true; ++col; break;
+				case 'r':if (curpos == 56 && (col == 0 || col == 7)) blackRooksOnOrigPos = true; ++col; break;
+				case 'R':if (curpos == 0 && (col == 0 || col == 7)) whiteRooksOnOrigPos = true; ++col; break;
+				default: ++col; break;
+			}			
+		}
+	}
+
+	if ((whiteKingOnOrigPos && whiteRooksOnOrigPos) || (blackKingOnOrigPos && blackRooksOnOrigPos))
+		res.clear();
+	else
+	{
+		char* start = (char*)(res.c_str() + first);
+		char* end = (char*)(res.c_str() + res.size());
+		std::reverse(start, end);
+	}
+
+	return res;
+}
+
+void MakeMoveMirror(std::string& sExpectedSolution)
+{
+	for (size_t i = 0; i < sExpectedSolution.size(); ++i)
+		if (sExpectedSolution[i] >= 'a' && sExpectedSolution[i] <= 'h')
+			sExpectedSolution[i] = 'a' + 'h' - sExpectedSolution[i];
+}
+
+// ------------------------------------------------------------------------
+
 TEST(JGIsland_BB_Tests, TestAllBetweenEmpty)
 {
 	FullBitboards_HQ bb;
@@ -424,7 +489,10 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.IsImmediateCheckMate("8/1bQ5/7B/K1p1pPr1/p4k2/2P1p1N1/4Bp1p/5rb1 w - e6 0 3"), 1);
 	EXPECT_EQ(bb.IsImmediateCheckMate("3rRB1r/1n2PP1b/1Rn1k1B1/2p1p3/6p1/p3Pp2/3K4/3N4"), 1);
 	EXPECT_EQ(bb.IsImmediateCheckMate("8/5kPQ/5p1b/8/8/8/8/4K3"), 1);
-
+	EXPECT_EQ(bb.IsImmediateCheckMate("4K1b1/6kr/6pp/8/1p6/8/1P6/B7"), 1);
+	EXPECT_EQ(bb.IsImmediateCheckMate("r7/1P5p/1Q1p3K/8/2P5/k7/2Pn3p/1q6"), 1);
+	EXPECT_EQ(bb.IsImmediateCheckMate("2nb4/3Pk2N/6P1/B4P2/B7/4K3/8/8"), 1);
+	
 	// No immediate checkmate:
 	EXPECT_EQ(bb.IsImmediateCheckMate("b3BN1n/b3npP1/pP1RRPP1/p1k1b1Rn/B1p1b2p/2K1pp1p/3PP1R1/1b2r2b"), 0);
 	EXPECT_EQ(bb.IsImmediateCheckMate("B2B4/3p1p2/1R1pkp1p/5r2/p2P1P2/Pr4KB/B2PP3/4Q3"), 0);
@@ -496,6 +564,57 @@ size_t RunTestFindMoveThatMatesInTwoMoves()
 }
 
 template<MoveGenMethodT MoveGenMethod>
+size_t RunTestFindMoveThatMatesInTwoMoves_Mirrors()
+{
+	FullBitboards<MoveGenMethod> bb;
+	std::array<TMove, 256> aMoves;
+
+	auto start = std::chrono::steady_clock::now();
+
+	constexpr auto num = sizeof(test_suite) / sizeof(test_suite[0]);
+	size_t numSuccessful = 0;
+	size_t numFailed = 0;
+	for (size_t i = 0; i < num; ++i)
+	{
+		const auto szFENOrig = test_suite[i].first.c_str();
+		auto sExpectedSolutions = test_suite[i].second;
+
+		const auto sFENMirror = MakeFENMirror(szFENOrig);
+		if (sFENMirror.size())
+		{
+			const auto szFEN = sFENMirror.c_str();
+			MakeMoveMirror(sExpectedSolutions);
+
+			auto res = bb.SolveTwoMover_AllSolutions(szFEN, aMoves.data()); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
+			if (res < 0)
+				std::cout << "Error parsing FEN: " << szFEN << "\n";
+			else
+			{
+				const auto expectedSolutions = bb.StringToMoves(sExpectedSolutions);
+				if (!IsSolutionAsExpected(res, aMoves.data(), expectedSolutions))
+				{
+					std::string additionalInfo = (res != expectedSolutions.size()) ? " (" + std::to_string(res) + " solutions found)" : "";
+					std::cout << "Test failed for FEN=" << szFEN << additionalInfo << "\n";
+					++numFailed;
+				}
+				else
+					++numSuccessful;
+			}
+		}
+	}
+
+	auto end = std::chrono::steady_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+	std::cout << "[   INFO   ] Successful: " << std::to_string(numSuccessful) << std::endl;
+	std::cout << "[   INFO   ] Failed: " << std::to_string(numFailed) << std::endl;
+	std::cout << "[   INFO   ] Elapsed time: " << duration.count() << " ms" << std::endl;
+	std::cout << "[   INFO   ] Twomovers per millisecond: " << std::to_string(((double)(numSuccessful + numFailed)) / duration.count()) << "\n";
+
+	return numFailed;
+}
+
+template<MoveGenMethodT MoveGenMethod>
 size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 {
 	FullBitboards<MoveGenMethod> bb;
@@ -538,23 +657,29 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 	return numFailed;
 }
 
-TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_HQ)
+TEST(JGIsland_BB_Integration, TestCompositionsFindMoveThatMatesInTwoMoves_HQ)
 {
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::HyperbolaQuintessence>();
 	EXPECT_EQ(numFailed, 0);
 }
 
 #if defined(__INCLUDE_FANCY_MAGIC_BITBOARDS__)
-TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_FMB)
+TEST(JGIsland_BB_Integration, TestCompositionsFindMoveThatMatesInTwoMoves_FMB)
 {
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::FancyMagics>();
 	EXPECT_EQ(numFailed, 0);
 }
 #endif
 
-TEST(JGIsland_BB_Integration, TestFindMoveThatMatesInTwoMoves_DFMB)
+TEST(JGIsland_BB_Integration, TestCompositionsFindMoveThatMatesInTwoMoves_DFMB)
 {
 	auto numFailed = RunTestFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
+	EXPECT_EQ(numFailed, 0);
+}
+
+TEST(JGIsland_BB_Integration, TestCompositionsFindMoveThatMatesInTwoMoves_DFMB_Mirrors)
+{
+	auto numFailed = RunTestFindMoveThatMatesInTwoMoves_Mirrors<MoveGenMethodT::DenseFancyMagics>();
 	EXPECT_EQ(numFailed, 0);
 }
 

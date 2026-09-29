@@ -4660,54 +4660,11 @@ private:
 
 		const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, ppos);
 		
-		// Capture with direct check?
-		auto maskToCapture = White_Pawn_Attacks[ppos] & black & Black_Pawn_Attacks[posBlackKing];
-		BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
-		{
-			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-			if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(posToCapture, ppos, posWhiteKing))
-			#else
-			if (!tbCanBePinned || IsWhitePinned(ppos, posToCapture))
-			#endif
-			{
-				assert((ppos & 7) != (posToCapture & 7));
-				const bool bDoubleCheck = posWhiteLongDistAttacker >= 0;
-				if (IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
-					return true;
-			}
-		}
-		END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
-
-		// Move forward with direct check?
-		const bool bMoveForwardPossible = IsEmptyAt(ppos + 8);
-		const bool bKingCheckedAfterMoveForward = ((White_Pawn_Attacks[ppos + 8] & black & kings) != 0) & bMoveForwardPossible;
-		if (bKingCheckedAfterMoveForward)
-			#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-			if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
-			#else
-			if (!tbCanBePinned || !IsWhitePinned(ppos, ppos + 8))
-			#endif
-				if (IsCheckMateAfterPawnDirectCheck<0,1>(ppos, ppos + 8))
-					return true;
-
-		// Double move forward with direct check?
-		constexpr Bitboard secondLine = 255UL << 8;
-		const bool bKingCheckedAfterDoubleMoveForward = bMoveForwardPossible & (((Black_Pawn_Attacks[posBlackKing] >> 16) & (1ULL << ppos) & secondLine) != 0); //((ppos >> 3) == _2_) & ((posBlackKing >> 3) == _5_) & bMoveForwardPossible & (abs((ppos & 7) - (posBlackKing & 7)) == 1);
-		if (bKingCheckedAfterDoubleMoveForward)
-			if (IsEmptyAt(ppos + 16))
-				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-				if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 16, ppos, posWhiteKing))
-				#else
-				if (!tbCanBePinned || !IsWhitePinned(ppos, ppos + 16))
-				#endif
-					if (IsCheckMateAfterPawnDirectCheck<1,1>(ppos, ppos + 16))
-						return true;
-
 		// promo:
 		if (ppos >= _A7_)
 		{
 			// promo forward:
-			if (bMoveForwardPossible)
+			if (IsEmptyAt(ppos + 8)) // move forward possible ?
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 				if (!tbCanBePinned || !pinned) // promo forward cannot be along the pinning line or diagonal || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
 				#else
@@ -4780,6 +4737,49 @@ private:
 		}
 		else
 		{
+			// Capture with direct check?
+			auto maskToCapture = White_Pawn_Attacks[ppos] & black & Black_Pawn_Attacks[posBlackKing];
+			BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
+			{
+				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+				if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(posToCapture, ppos, posWhiteKing))
+				#else
+				if (!tbCanBePinned || IsWhitePinned(ppos, posToCapture))
+				#endif
+				{
+					assert((ppos & 7) != (posToCapture & 7));
+					const bool bDoubleCheck = posWhiteLongDistAttacker >= 0;
+					if (IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
+						return true;
+				}
+			}
+			END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
+	
+			// Move forward with direct check?
+			const bool bMoveForwardPossible = IsEmptyAt(ppos + 8);
+			const bool bKingCheckedAfterMoveForward = ((White_Pawn_Attacks[ppos + 8] & black & kings) != 0) & bMoveForwardPossible;
+			if (bKingCheckedAfterMoveForward)
+				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+				if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
+				#else
+				if (!tbCanBePinned || !IsWhitePinned(ppos, ppos + 8))
+				#endif
+					if (IsCheckMateAfterPawnDirectCheck<0,1>(ppos, ppos + 8))
+						return true;
+	
+			// Double move forward with direct check?
+			constexpr Bitboard secondLine = 255UL << 8;
+			const bool bKingCheckedAfterDoubleMoveForward = bMoveForwardPossible & (((Black_Pawn_Attacks[posBlackKing] >> 16) & (1ULL << ppos) & secondLine) != 0); //((ppos >> 3) == _2_) & ((posBlackKing >> 3) == _5_) & bMoveForwardPossible & (abs((ppos & 7) - (posBlackKing & 7)) == 1);
+			if (bKingCheckedAfterDoubleMoveForward)
+				if (IsEmptyAt(ppos + 16))
+					#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
+					if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 16, ppos, posWhiteKing))
+					#else
+					if (!tbCanBePinned || !IsWhitePinned(ppos, ppos + 16))
+					#endif
+						if (IsCheckMateAfterPawnDirectCheck<1,1>(ppos, ppos + 16))
+							return true;
+			
 			// Discovered check without promo (discovered check with a promo already covered)
 			if (posWhiteLongDistAttacker >= 0)
 			{
@@ -5058,10 +5058,21 @@ private:
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 
 			if constexpr(tbEnPassantPossible || !tbUseWhitePawnCheckOptim)
+			{
 				mask = pawns & white;
+				mask &= ~((Black_Pawn_Attacks[posBlackKing] & occ()) >> 8);
+			}
 			else
-				mask = pawns & white & (whitePiecesWithDiscoveredCheck | (White_Pawn_Direct_Check_Area[posBlackKing] & ~(BOOL_EXTEND64((Black_Pawn_Attacks[posBlackKing] & black) == 0) & White_Pawn_Direct_Capture_Check_Area[posBlackKing])));
-			mask &= ~((Black_Pawn_Attacks[posBlackKing] & occ()) >> 8);
+			{
+				constexpr Bitboard NOT_A_FILE = 0xFEFEFEFEFEFEFEFEULL;
+				constexpr Bitboard NOT_H_FILE = 0x7F7F7F7F7F7F7F7FULL;
+
+				const auto positionsWhitePawnsMightCaptureFrom = ((black & NOT_A_FILE) >> 9) | ((black & NOT_H_FILE) >> 7);
+				const auto positionsWhitePawnsMightMoveForwardFrom = ~occ() >> 8;
+				const auto positionsWhitePawnsMightMoveFrom = positionsWhitePawnsMightCaptureFrom | positionsWhitePawnsMightMoveForwardFrom;
+
+				mask = pawns & white & ((whitePiecesWithDiscoveredCheck & positionsWhitePawnsMightMoveFrom) | (White_Pawn_Direct_Capture_Check_Area[posBlackKing] & positionsWhitePawnsMightCaptureFrom) | (White_Pawn_Direct_Check_Forward_Area[posBlackKing] & positionsWhitePawnsMightMoveForwardFrom)); // this filtering of candidates for a checking move is not perfect but both cheap and good enough
+			}
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
