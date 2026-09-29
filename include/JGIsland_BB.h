@@ -4958,6 +4958,43 @@ private:
 		return IsWhiteKingChecked();
 	}
 
+	template<bool tbTakeOffFromOcc = false>
+	ALWAYS_INLINE Bitboard GetFreeAround(const int pos) CONST_RESTRICT
+	{
+		assert(IsValidPos(pos));
+
+		const auto whitePawnAttacks = WhitePawnAttacks();
+		const auto whiteKnightAttacks = WhiteKnightAttacks();
+		const auto occ = this->occ() & (tbTakeOffFromOcc ? ~(1ULL << pos) : ~0ULL);
+
+		// King, pawns and knights:
+		auto maskFree = King_Attacks[pos] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
+
+		// Bishops and queens:
+		auto mask = Ngbh_Bishop_Attack_Area[pos] & white & qbishops;
+		BEGIN_FOR_EACH_POS_IN_MASK(bqpos, mask)
+		{
+			maskFree &= ~get_raw_bishop_moves(bqpos, occ);
+		}
+		END_FOR_EACH_POS_IN_MASK(bqpos, mask);
+
+		// Rooks and queens:
+		mask = Ngbh_Rook_Attack_Area[pos] & white & qrooks;
+
+		BEGIN_FOR_EACH_POS_IN_MASK(rqpos, mask)
+		{
+			maskFree &= ~get_raw_rook_moves(rqpos, occ);
+		}
+		END_FOR_EACH_POS_IN_MASK(rqpos, mask);
+		return maskFree;
+	}
+	template<bool tbTakeOffFromOcc = false>
+	ALWAYS_INLINE int FreeAroundBlackKing() CONST_RESTRICT
+	{
+		const auto maskFree = GetFreeAround<tbTakeOffFromOcc>(posBlackKing);
+		return std::popcount(maskFree);
+	}
+		
 	// tbWhiteKingUnderCheck can be:
 	// 0 - not under check
 	// 1 - under check; in such case param. posWhiteKingChecker can be filled in (pos or DBL_CHECKED), or left with -1 for the method to find out
