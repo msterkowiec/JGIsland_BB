@@ -42,6 +42,8 @@ std::string MakeFENMirror(const char* szFEN)
 	bool blackRooksOnOrigPos = szFEN[0] == 'r';
 	bool whiteKingOnOrigPos = false;
 	bool blackKingOnOrigPos = false;
+	auto size = res.size();
+	
 	for (size_t i = 0; res[i] != 0; ++i)
 	{
 		if (res[i] == '/')
@@ -57,6 +59,7 @@ std::string MakeFENMirror(const char* szFEN)
 		{
 			switch (res[i])
 			{
+				case ' ':size = i; goto labelEndLooping; // analysis of the position part of FEN is now complete (it was 'size' characters)
 				case '1':++col; break;
 				case '2':col += 2; break;
 				case '3':col += 3; break;
@@ -74,13 +77,21 @@ std::string MakeFENMirror(const char* szFEN)
 		}
 	}
 
+labelEndLooping:	
 	if ((whiteKingOnOrigPos && whiteRooksOnOrigPos) || (blackKingOnOrigPos && blackRooksOnOrigPos))
 		res.clear();
 	else
 	{
 		char* start = (char*)(res.c_str() + first);
-		char* end = (char*)(res.c_str() + res.size());
+		char* end = (char*)(res.c_str() + size);
 		std::reverse(start, end);
+
+		for (size_t i = size; i + 2 < res.size(); ++ i)
+			if (res[i] == ' ' && res[i + 1] >= 'a' && res[i + 1] <= 'h' && (res[i + 2] == '6' || res[i + 2] == '3')) // mirror of the en passant square
+			{
+				res[i + 1] = 'a' + 'h' - res[i + 1];
+				break;
+			}		
 	}
 
 	return res;
@@ -627,9 +638,12 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 	size_t numFailed = 0;	
 	for (size_t i = 0; i < num; ++i)
 	{
-		const auto szFEN = test_suite_realistic[i].first;
+		auto szFEN = test_suite_realistic[i].first;
 		const auto expectedOutcome = test_suite_realistic[i].second;
-
+		std::string sFENMirror;
+		bool mirror = false;
+		
+	labelRetryAsMirror:
 		auto res = bb.SolveTwoMover(szFEN, aMoves.data()); // NOTE: added wrappers since SolveTwoMover is a template method in a template class... gcc and clang require slightly weird syntax with template keyword...
 		if (res < 0)
 			std::cout << "Error parsing FEN: " << szFEN << "\n";
@@ -638,12 +652,24 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 			if (res != expectedOutcome)
 			{
 				std::string additionalInfo = res ? " (checkmate found but expected no solution)" : " (no solution but expected checkmate)";
-				std::cout << "Test failed for FEN=" << szFEN << additionalInfo << "\n";
+				std::cout << (mirror ? "Test failed for mirror; FEN=" : "Test failed for FEN=") << szFEN << additionalInfo << "\n";
 				++numFailed;
 			}
 			else
 				++numSuccessful;
 		}
+
+		// This test is relatively short, so at the same time let's try to solve mirror positions, if applicable (no difference in castling possibilities)
+		if (!mirror)
+		{
+			sFENMirror = MakeFENMirror(szFEN);
+			if (sFENMirror.size())
+			{
+				szFEN = sFENMirror.c_str();
+				mirror = true;
+				goto labelRetryAsMirror;
+			}
+		}		
 	}
 
 	auto end = std::chrono::steady_clock::now();
