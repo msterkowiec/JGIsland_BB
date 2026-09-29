@@ -753,6 +753,89 @@ constexpr std::array<uint64_t, 64> init_knights_that_can_directly_check()
 }
 
 // ------------------------------------------------------
+
+constexpr uint64_t generate_neighborhood_rook_mask(int pos) noexcept
+{
+	uint64_t mask = 0;
+	const int x = pos & 7;
+	const int y = pos >> 3;
+
+	for (int dx = -1; dx <= 1; ++dx)
+		for (int dy = -1; dy <= 1; ++dy)
+		{
+			const int cx = x + dx;
+			const int cy = y + dy;
+			if (cx >= 0 && cx < 8 && cy >= 0 && cy < 8)
+				mask |= generate_rook_mask(cx + cy * 8);
+		}
+
+	return mask;
+}
+
+constexpr uint64_t generate_neighborhood_bishop_mask(int pos) noexcept
+{
+	uint64_t mask = 0;
+	const int x = pos & 7;
+	const int y = pos >> 3;
+
+	for (int dx = -1; dx <= 1; ++dx)
+		for (int dy = -1; dy <= 1; ++dy)
+		{
+			const int cx = x + dx;
+			const int cy = y + dy;
+			if (cx >= 0 && cx < 8 && cy >= 0 && cy < 8)
+				mask |= generate_bishop_mask(cx + cy * 8);
+		}
+
+	return mask;
+}
+
+constexpr uint64_t generate_neighborhood_knight_mask(int pos) noexcept
+{
+	uint64_t mask = 0;
+	const int x = pos & 7;
+	const int y = pos >> 3;
+
+	for (int dx = -1; dx <= 1; ++dx)
+		for (int dy = -1; dy <= 1; ++dy)
+		{
+			const int cx = x + dx;
+			const int cy = y + dy;
+			if (cx >= 0 && cx < 8 && cy >= 0 && cy < 8)
+				mask |= generate_knight_mask(cx + cy * 8);
+		}
+
+	return mask;
+}
+
+constexpr std::array<std::uint64_t, 64> CalcNeighborhoodRookAttackBitboards() noexcept
+{
+	std::array<uint64_t, 64> table{};
+	for (int i = 0; i < 64; ++i) {
+		table[i] = generate_neighborhood_rook_mask(i);
+	}
+	return table;
+}
+
+constexpr std::array<std::uint64_t, 64> CalcNeighborhoodBishopAttackBitboards() noexcept
+{
+	std::array<uint64_t, 64> table{};
+	for (int i = 0; i < 64; ++i) {
+		table[i] = generate_neighborhood_bishop_mask(i);
+	}
+	return table;
+}
+
+constexpr std::array<std::uint64_t, 64> CalcNeighborhoodKnightAttackBitboards() noexcept
+{
+	std::array<uint64_t, 64> table{};
+	for (int i = 0; i < 64; ++i) {
+		table[i] = generate_neighborhood_knight_mask(i);
+	}
+	return table;
+}
+
+// ------------------------------------------------------
 // Function that generates attacks on 1st line 
 constexpr uint8_t gather_rank_attacks(int square_file, uint8_t occ) 
 {
@@ -840,3 +923,8 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Cap
 alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Check_Forward_Area = init_white_pawn_direct_check_forward_area();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Directly_Check = init_bishops_that_can_directly_check();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Directly_Check = init_knights_that_can_directly_check();
+
+// Auxiliary data for fast filtering pieces that can attack neighborhood (currently not used)
+alignas(64) constexpr std::array<std::uint64_t, 64> Ngbh_Rook_Attack_Area = CalcNeighborhoodRookAttackBitboards();
+alignas(64) constexpr std::array<std::uint64_t, 64> Ngbh_Bishop_Attack_Area = CalcNeighborhoodBishopAttackBitboards();
+alignas(64) constexpr std::array<std::uint64_t, 64> Ngbh_Knight_Attack_Area = CalcNeighborhoodKnightAttackBitboards();
