@@ -10,6 +10,7 @@
 #include <array>
 #include <cassert>
 #include "common.h"
+#include "defs.h"
 
 #ifdef __USE_SQUARE_BITBOARD__
 constexpr std::array<uint64_t, 64> init_square_bitboard()
@@ -374,36 +375,36 @@ constexpr std::array<uint64_t, 64> init_white_pawn_check_area()
 				}
 
 		// Promo to knight:
-		if (y == 5)
+		if (y == _6_)
 		{
-			mask |= 1ULL << (x + 6 * 8); // promo capture
+			mask |= 1ULL << (x + _7_ * 8); // promo capture
 			if (x != 0)
 			{
-				mask |= 1ULL << (x - 1 + 6 * 8); // promo forward
+				mask |= 1ULL << (x - 1 + _7_ * 8); // promo forward
 				if (x != 1)
-					mask |= 1ULL << (x - 2 + 6 * 8); // promo capture
+					mask |= 1ULL << (x - 2 + _7_ * 8); // promo capture
 			}
 			if (x != 7)
 			{
-				mask |= 1ULL << (x + 1 + 6 * 8); // promo forward
+				mask |= 1ULL << (x + 1 + _7_ * 8); // promo forward
 				if (x != 6)
-					mask |= 1ULL << (x + 2 + 6 * 8); // promo capture
+					mask |= 1ULL << (x + 2 + _7_ * 8); // promo capture
 			}
 		}
 		else
-			if (y == 6)
+			if (y == _7_)
 			{
 				if (x >= 2)
 				{
-					mask |= 1ULL << (x - 2 + 6 * 8); // promo forward
+					mask |= 1ULL << (x - 2 + _7_ * 8); // promo forward
 					if (x >= 3)
-						mask |= 1ULL << (x - 3 + 6 * 8); // promo capture
+						mask |= 1ULL << (x - 3 + _7_ * 8); // promo capture
 				}
 				if (x <= 5)
 				{
-					mask |= 1ULL << (x + 2 + 6 * 8); // promo forward
+					mask |= 1ULL << (x + 2 + _7_ * 8); // promo forward
 					if (x <= 6)
-						mask |= 1ULL << (x + 3 + 6 * 8); // promo capture
+						mask |= 1ULL << (x + 3 + _7_ * 8); // promo capture
 				}
 				// other squares match queen promo ...
 			}
@@ -446,8 +447,7 @@ constexpr std::array<uint64_t, 64> init_white_pawn_direct_check_area()
 			}
 		}
 
-		// Promo to queen:
-		if (y == 7)
+		if (y == _8_)
 			mask |= 255ULL << 48;
 		else
 			for (int dx = -1; dx <= 1; ++dx)
@@ -456,13 +456,13 @@ constexpr std::array<uint64_t, 64> init_white_pawn_direct_check_area()
 				auto cx = x + dx;
 				while (cx >= 0 && cx < 8 && cy < 8)
 				{
-					if (cy == 7)
+					if (cy == _8_)
 					{
-						mask |= 1ULL << (cx + 6 * 8); // move forward
-						if (cx != 0)
-							mask |= 1ULL << (cx - 1 + 6 * 8); // capture right
-						if (cx != 7)
-							mask |= 1ULL << (cx + 1 + 6 * 8); // capture left
+						mask |= 1ULL << (cx + _7_ * 8); // move forward
+						if (cx != _A_)
+							mask |= 1ULL << (cx - 1 + _7_ * 8); // capture right
+						if (cx != _H_)
+							mask |= 1ULL << (cx + 1 + _7_ * 8); // capture left
 					}
 					++cy;
 					cx += dx;
@@ -470,37 +470,105 @@ constexpr std::array<uint64_t, 64> init_white_pawn_direct_check_area()
 			}
 
 		// Promo to knight:
-		if (y == 5)
+		if (y == _6_)
 		{
-			mask |= 1ULL << (x + 6 * 8); // promo capture
-			if (x != 0)
+			mask |= 1ULL << (x + _7_ * 8); // promo capture
+			if (x != _A_)
 			{
-				mask |= 1ULL << (x - 1 + 6 * 8); // promo forward
+				mask |= 1ULL << (x - 1 + _7_ * 8); // promo forward
 				if (x != 1)
-					mask |= 1ULL << (x - 2 + 6 * 8); // promo capture
+					mask |= 1ULL << (x - 2 + _7_ * 8); // promo capture
 			}
-			if (x != 7)
+			if (x != _H_)
 			{
-				mask |= 1ULL << (x + 1 + 6 * 8); // promo forward
+				mask |= 1ULL << (x + 1 + _7_ * 8); // promo forward
 				if (x != 6)
-					mask |= 1ULL << (x + 2 + 6 * 8); // promo capture
+					mask |= 1ULL << (x + 2 + _7_ * 8); // promo capture
 			}
 		}
 		else
-			if (y == 6)
+			if (y == _7_)
 			{
 				if (x >= 2)
 				{
-					mask |= 1ULL << (x - 2 + 6 * 8); // promo forward
+					mask |= 1ULL << (x - 2 + _7_ * 8); // promo forward
 					if (x >= 3)
-						mask |= 1ULL << (x - 3 + 6 * 8); // promo capture
+						mask |= 1ULL << (x - 3 + _7_ * 8); // promo capture
 				}
 				if (x <= 5)
 				{
-					mask |= 1ULL << (x + 2 + 6 * 8); // promo forward
+					mask |= 1ULL << (x + 2 + _7_ * 8); // promo forward
 					if (x <= 6)
-						mask |= 1ULL << (x + 3 + 6 * 8); // promo capture
+						mask |= 1ULL << (x + 3 + _7_ * 8); // promo capture
 				}
+				// other squares match queen promo ...
+			}
+
+		res[sq] = mask;
+	}
+
+	return res;
+}
+
+constexpr std::array<uint64_t, 64> init_white_pawn_direct_check_forward_area()
+{
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		uint64_t mask = 0;
+		const int x = sq % 8;
+		const int y = sq / 8;
+
+		// Direct check:
+		if (sq >= _A4_)
+		{
+			if (x != _A_)
+			{
+				mask |= 1ULL << (sq - 17); // move forward
+				if (y == 4) // fifth line
+					mask |= 1ULL << (sq - 25); // double move forward
+			}
+			if (x != _H_)
+			{
+				mask |= 1ULL << (sq - 15); // move forward
+				if (y == 4) // fifth line
+					mask |= 1ULL << (sq - 23); // double move forward
+			}
+		}
+
+		// Promo to queen:
+		if (y == _8_)
+			mask |= 255ULL << 48;
+		else
+			for (int dx = -1; dx <= 1; ++dx)
+			{
+				auto cy = y + 1;
+				auto cx = x + dx;
+				while (cx >= 0 && cx < 8 && cy < 8)
+				{
+					if (cy == _8_)
+						mask |= 1ULL << (cx + _7_ * 8); // move forward					
+					++cy;
+					cx += dx;
+				}
+			}
+
+		// Promo to knight:
+		if (y == _6_)
+		{
+			if (x != _A_)			
+				mask |= 1ULL << (x - 1 + _7_ * 8); // promo forward			
+			if (x != _H_)			
+				mask |= 1ULL << (x + 1 + _7_ * 8); // promo forward
+		}
+		else
+			if (y == _7_)
+			{
+				if (x >= 2)				
+					mask |= 1ULL << (x - 2 + _7_ * 8); // promo forward
+				if (x <= 5)				
+					mask |= 1ULL << (x + 2 + _7_ * 8); // promo forward
 				// other squares match queen promo ...
 			}
 
@@ -514,15 +582,61 @@ constexpr std::array<uint64_t, 64> init_white_pawn_direct_capture_check_area()
 {
 	std::array<uint64_t, 64> res{};
 
-	for (int sq = 24; sq < 64; ++sq)
+	for (int sq = 0; sq < 64; ++sq)
 	{
 		const int x = sq & 7;
+		const int y = sq >> 3;
 
-		if (x >= 2)
-			res[sq] |= 1ULL << (sq - 18);
-		if (x < 6)
-			res[sq] |= 1ULL << (sq - 14);
-		res[sq] |= 1ULL << (sq - 16);
+		if (sq >= _A4_)
+		{
+			res[sq] |= 1ULL << (sq - 16);
+			if (x >= 2)
+				res[sq] |= 1ULL << (sq - 18);
+			if (x < 6)
+				res[sq] |= 1ULL << (sq - 14);
+		}
+
+		// Promo to queen:
+		if (y == _8_)
+			res[sq] |= 255ULL << 48;
+		else		
+			for (int dx = -1; dx <= 1; ++dx)
+			{
+				auto cy = y + 1;
+				auto cx = x + dx;
+				while (cx >= 0 && cx < 8 && cy < 8)
+				{
+					if (cy == _8_)
+					{
+						if (cx != _A_)
+							res[sq] |= 1ULL << (cx - 1 + _7_ * 8); // capture right
+						if (cx != _H_)
+							res[sq] |= 1ULL << (cx + 1 + _7_ * 8); // capture left				
+					}
+					++cy;
+					cx += dx;
+				}
+			}		
+
+		// Promo to knight:
+		if (y == _6_)
+		{
+			res[sq] |= 1ULL << (x + _7_ * 8); // promo capture
+			if (x != 0 && x != 1)
+					res[sq] |= 1ULL << (x - 2 + _7_ * 8); // promo capture			
+			if (x != 7 && x != 6)
+				res[sq] |= 1ULL << (x + 2 + _7_ * 8); // promo capture			
+		}
+		else
+			if (y == _7_)
+			{
+				if (x >= 3)
+					res[sq] |= 1ULL << (x - 3 + _7_ * 8); // promo capture				
+				if (x <= 5)
+					res[sq] |= 1ULL << (x + 3 + _7_ * 8); // promo capture				
+				// other squares match queen promo ...
+			}
+		
 	}
 
 	return res;
@@ -723,5 +837,6 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Chec
 
 alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Check_Area = init_white_pawn_direct_check_area();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Capture_Check_Area = init_white_pawn_direct_capture_check_area();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> White_Pawn_Direct_Check_Forward_Area = init_white_pawn_direct_check_forward_area();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishops_That_Can_Directly_Check = init_bishops_that_can_directly_check();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Directly_Check = init_knights_that_can_directly_check();
