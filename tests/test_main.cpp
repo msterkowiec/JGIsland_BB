@@ -443,22 +443,22 @@ TEST(JGIsland_BB_Tests, TestCanWhitePawnCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("8/6p1/3K1kp1/4p1p1/4bPp1/5R2/8/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED DISCO_POSSIBLE), true);
 
 	bb.fromFEN("6K1/6p1/5pkp/6pp/5Pp1/5R2/8/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED NO_DISCO), true);
 
 	bb.fromFEN("6K1/6p1/5pkp/6pp/5Pp1/5b2/5R2/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED NO_DISCO), false);
 
 	bb.fromFEN("8/6K1/8/5pkp/6pp/8/5PRB/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1 NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1 NOT_PINNED NO_DISCO), true);
 
 	bb.fromFEN("8/6K1/8/5pkp/6pp/8/5PBB/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1 NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1 NOT_PINNED NO_DISCO), false);
 
 	bb.fromFEN("r5k1/RP6/8/8/4pp2/8/5K2/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate(_B7_, -1 NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate(_B7_, -1 NOT_PINNED NO_DISCO), true);
 }
 
 TEST(JGIsland_BB_Integration, BasicIntegrationTest)
