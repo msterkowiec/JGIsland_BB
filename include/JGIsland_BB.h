@@ -4643,7 +4643,7 @@ private:
 	// (it is then assumed that bposToCaptureWithEnPassant is the only checker of white king - a double move by pawn cannot be a double check)
 	template<bool tbEnPassantPossible = false>
 	#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant, const bool pinned) CONST_RESTRICT
+	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant, const bool pinned, const bool isDiscoveredCheckPossible) CONST_RESTRICT
 	#else
 	bool CanWhitePawnCheckMate(const int ppos, const int bposToCaptureWithEnPassant) CONST_RESTRICT
 	#endif
@@ -4657,14 +4657,13 @@ private:
 		#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 		assert(IsPinnedFlagOK(ppos, pinned));
 		#endif
-
-		const int posWhiteLongDistAttacker = WhiteMatchOnRayIfAllBetweenEmpty(posBlackKing, ppos);
 		
 		// promo:
 		if (ppos >= _A7_)
 		{
-			// promo forward:
+			// promo forward:			
 			if (IsEmptyAt(ppos + 8)) // move forward possible ?
+			{				
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 				if (!tbCanBePinned || !pinned) // promo forward cannot be along the pinning line or diagonal || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
 				#else
@@ -4675,30 +4674,37 @@ private:
 					const bool bPromoToKnightDirectCheck = IsKnightDiff(ppos + 8, posBlackKing);
 					if (bPromoToKnightDirectCheck)
 					{
-						if (IsCheckMateAfterPromoToKnightDirectCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker >= 0))
+						if (IsCheckMateAfterPromoToKnightDirectCheck<1>(ppos, ppos + 8, isDiscoveredCheckPossible))
 							return true;
 					}
 					else
 						if ((bPromoToQueenDirectCheck = SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(ppos + 8, posBlackKing, ppos)) != 0)						
-							if (IsCheckMateAfterPromoToQueenDirectCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker >= 0))
+							if (IsCheckMateAfterPromoToQueenDirectCheck<1>(ppos, ppos + 8, isDiscoveredCheckPossible))
 								return true;						
 
-					if (posWhiteLongDistAttacker >= 0)
+					if (isDiscoveredCheckPossible)
 					{
 						if (!bPromoToQueenDirectCheck)
+						{
+							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
 							if (IsCheckMateAfterPromoToQueenDiscoveredCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker))
 								return true;
+						}
 						if (!bPromoToKnightDirectCheck)
+						{
+							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
 							if (IsCheckMateAfterPromoToKnightDiscoveredCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker))
 								return true;
+						}
 					}
 				}
+			}
 
 			// promo capture:
 			auto maskToCapture = White_Pawn_Attacks[ppos] & black;
 			#ifdef __USE_FILTERONPROMOCAPTURE__
 			const auto maskToCaptureForDirectCheck = maskToCapture & (Queen_Attacks[posBlackKing] | Knight_Attacks[posBlackKing]);
-			maskToCapture = (posWhiteLongDistAttacker >= 0) ? maskToCapture : maskToCaptureForDirectCheck;
+			maskToCapture = isDiscoveredCheckPossible ? maskToCapture : maskToCaptureForDirectCheck;
 			#endif
 			BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
 			{
@@ -4712,24 +4718,30 @@ private:
 					const bool bPromoToKnightDirectCheck = IsKnightDiff(posToCapture, posBlackKing);
 					if (bPromoToKnightDirectCheck)
 					{
-						if (IsCheckMateAfterPromoToKnightDirectCheck(ppos, posToCapture, posWhiteLongDistAttacker >= 0))
+						if (IsCheckMateAfterPromoToKnightDirectCheck(ppos, posToCapture, isDiscoveredCheckPossible))
 							return true;
 					}
 					else
 						if ((bPromoToQueenDirectCheck = SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(posToCapture, posBlackKing, ppos)) != 0)
 						{
-							if (IsCheckMateAfterPromoToQueenDirectCheck(ppos, posToCapture, posWhiteLongDistAttacker >= 0))
+							if (IsCheckMateAfterPromoToQueenDirectCheck(ppos, posToCapture, isDiscoveredCheckPossible))
 								return true;
 						}
 
-					if (posWhiteLongDistAttacker >= 0)
+					if (isDiscoveredCheckPossible)
 					{
 						if (!bPromoToQueenDirectCheck)
+						{
+							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
 							if (IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
 								return true;
+						}
 						if (!bPromoToKnightDirectCheck)
+						{
+							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
 							if (IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
 								return true;
+						}
 					}
 				}
 			}
@@ -4748,17 +4760,18 @@ private:
 				#endif
 				{
 					assert((ppos & 7) != (posToCapture & 7));
-					const bool bDoubleCheck = posWhiteLongDistAttacker >= 0;
+					const bool bDoubleCheck = isDiscoveredCheckPossible;
 					if (IsCheckMateAfterPawnDirectCheck(ppos, posToCapture, bDoubleCheck))
 						return true;
 				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
-	
+
 			// Move forward with direct check?
 			const bool bMoveForwardPossible = IsEmptyAt(ppos + 8);
 			const bool bKingCheckedAfterMoveForward = ((White_Pawn_Attacks[ppos + 8] & black & kings) != 0) & bMoveForwardPossible;
 			if (bKingCheckedAfterMoveForward)
+			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 				if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
 				#else
@@ -4766,11 +4779,13 @@ private:
 				#endif
 					if (IsCheckMateAfterPawnDirectCheck<0,1>(ppos, ppos + 8))
 						return true;
-	
+			}
+
 			// Double move forward with direct check?
 			constexpr Bitboard secondLine = 255UL << 8;
 			const bool bKingCheckedAfterDoubleMoveForward = bMoveForwardPossible & (((Black_Pawn_Attacks[posBlackKing] >> 16) & (1ULL << ppos) & secondLine) != 0); //((ppos >> 3) == _2_) & ((posBlackKing >> 3) == _5_) & bMoveForwardPossible & (abs((ppos & 7) - (posBlackKing & 7)) == 1);
 			if (bKingCheckedAfterDoubleMoveForward)
+			{
 				if (IsEmptyAt(ppos + 16))
 					#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
 					if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 16, ppos, posWhiteKing))
@@ -4779,12 +4794,14 @@ private:
 					#endif
 						if (IsCheckMateAfterPawnDirectCheck<1,1>(ppos, ppos + 16))
 							return true;
-			
+			}
+
 			// Discovered check without promo (discovered check with a promo already covered)
-			if (posWhiteLongDistAttacker >= 0)
+			if (isDiscoveredCheckPossible)
 			{
 				// Discovered check with a capture (!!note that in the current implementation double check with a capture will be verified twice: here and in the direct check verification !!)
 				auto maskToCapture = White_Pawn_Attacks[ppos] & black;
+				const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
 
 				BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
 				{
@@ -4805,7 +4822,7 @@ private:
 					#else
 					if (!tbCanBePinned || !IsWhitePinned(ppos, ppos + 8))
 					#endif
-					{
+					{						
 						if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
 							return true;
 
@@ -4828,7 +4845,7 @@ private:
 					// Direct check (and maybe double check)
 					if (!IsWhitePinnedIfTakeOffBlackPawn<1>(ppos, bposToCaptureWithEnPassant + 8, bposToCaptureWithEnPassant))
 					{
-						const bool bDoubleCheck = (posWhiteLongDistAttacker >= 0) & ((ppos + posBlackKing) / 2 != bposToCaptureWithEnPassant + 8);
+						const bool bDoubleCheck = isDiscoveredCheckPossible & ((ppos + posBlackKing) / 2 != bposToCaptureWithEnPassant + 8);
 						if (IsCheckMateAfterEnPassantDirectCheck(ppos, bposToCaptureWithEnPassant + 8, bDoubleCheck))
 							return true;
 					}
@@ -4836,7 +4853,8 @@ private:
 				else
 				{
 					// Discovered check with en passant:
-					bool bWhitePawnDisco = posWhiteLongDistAttacker >= 0 && !IsSquareBetween<1>(bposToCaptureWithEnPassant + 8, posBlackKing, posWhiteLongDistAttacker);
+					const int posWhiteLongDistAttacker = isDiscoveredCheckPossible ? WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing) : -1;
+					bool bWhitePawnDisco = isDiscoveredCheckPossible && !IsSquareBetween<1>(bposToCaptureWithEnPassant + 8, posBlackKing, posWhiteLongDistAttacker);
 					bool bBlackPawnDisco = false;
 					int posWhiteLongDistAttackerInEnPassant;
 					if (bWhitePawnDisco)
@@ -5113,7 +5131,7 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant, IsPosInBitmask(pos, whitePinnedPieces)))
+				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant, IsPosInBitmask(pos, whitePinnedPieces), IsPosInBitmask(pos, whitePiecesWithDiscoveredCheck)))
 				#else	
 				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant))
 				#endif
