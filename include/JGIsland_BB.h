@@ -5131,7 +5131,7 @@ private:
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask);
 			{
 				#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant, IsPosInBitmask(pos, whitePinnedPieces)))
+				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant, IsPosInBitmask(pos, whitePinnedPieces), IsPosInBitmask(pos, whitePiecesWithDiscoveredCheck)))
 				#else	
 				if (CanWhitePawnCheckMate<tbEnPassantPossible>(pos, bposToCaptureWithEnPassant))
 				#endif
