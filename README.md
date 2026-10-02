@@ -13,10 +13,11 @@ JGIsland_BB contains ultrafast methods of:
 <!-- -->
 using solely bitboard representation of chessboard and **Hyperbola Quintessence** or **Dense Fancy Magic Bitboards** in order to reduce memory usage to only **32kB** in order to fit entirely in L1 cache (except for Dense Fancy Magic Bitboards that occupy additional **110kB**).
 **More than 70 two-movers per millisecond** can be solved in all solutions mode (without stopping after finding a solution) as measured on Intel i7-14700 (single thread).
+See also a table (at the bottom of this page) that contains more precise information about performance of JGIsland_BB.
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
 **JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers** (https://jgisland.pl) with its source code, contrary to the main product, made public.
-JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%.
+JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%. Two-mover can be considered an 'atomic' operation in chess engines (#1 don't have to be stored in transposition tables, since its analysis is very fast and the result is very quickly pushed away from transposition tables by #2+ anyway)
 
 As already mentioned, one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
 That's why Magic Bitboards were not used but Hyperbola Quintessence** (super small calculations using data in CPU registers and L1 cache).
@@ -74,3 +75,11 @@ I will later provide some more information about results of integrations tests w
 Another finding was the following: Originally I considered this two-mover performance test, an "isolated" test. In a way it is true: in this test memory usage is very low, transposition table is not used, simplicity is at its maximum. However recently I decided to make a fully isolated performance test of Hyperbola Quintessence vs (Dense) Fancy Magic Bitboards. And, to my surprise, I observed performance reversal: Hyperbola Quintessence proved to be 15% faster in this fully isolated test. At first I was really confused, I suspected some error in my performance test (admittedly, it is very easy to create a wrong performance test). However it turned out that most probably all is OK and the results, although unintuitive to me, are fully explainable: in fully isolated test Hyperbola Quintessence does not suffer from register spilling. CPU does nothing but move calculations and does not need registers for anything else. Dense Fancy Magic Bitboards advantage is total simplicity: it does not need any registers for any calculations and this advantage reveals in a more complex context. Need to reach for L2 cache does not seem to be a matter.
 <!-- -->
 First, tentative conclusions: __Although Hyperbola Quitenssence was my first choice and looked L1 cache-friendly and flawless, register spilling seems to be an important obstacle that may encourage to turn to Dense Fancy Magic Bitboards__ (see type FullBitboards_DFMB). This is confirmed by the results of performance test (single thread) on two-movers on Intel i7-14700: more than 70 two-movers per millisecond can be solved using Dense Fancy Magic Bitboards, while only 55 with Hyperbola Quintessence. Integrated tests of J.G.Island - Chess Moremovers with Dense Fancy Magic Bitboards also confirm this conclusion so far. However as soon as CPUs in future (10-20 years) have more registers, Hyperbola Quintessence may outperform its competitors (but it will require recompilation for the target platform, while taking advantage of larger CPU cache by Magics is smooth - without any recompilation).
+
+-----------------------------------------------------------------------------------------
+**Summary - performance of JGIsland_BB** (2026-10-01)
+
+| Two-movers per msec on Intel i7-14700 single thread | Hyperbola Quintessence | Dense Fancy Magic Bitboards |
+| --------------------------------------------------- | ---------------------- | --------------------------- |
+| "Compositions" test suite                           | 57.79                  | 74.13                       |
+| "Realistic" test suite                              | 820.32                 | 1030.62                     |
