@@ -79,7 +79,7 @@ First, tentative conclusions: __Although Hyperbola Quitenssence was my first cho
 -----------------------------------------------------------------------------------------
 **Summary - performance of JGIsland_BB** (2026-10-01)
 
-| Two-movers per msec on Intel i7-14700 single thread | Hyperbola Quintessence | Dense Fancy Magic Bitboards |
-| --------------------------------------------------- | ---------------------- | --------------------------- |
-| "Compositions" test suite                           | 57.79                  | 74.13                       |
-| "Realistic" test suite                              | 820.32                 | 1030.62                     |
+| Two-movers per msec on Intel i7-14700 single thread | $${\color{blue}\text{Hyperbola Quintessence}}$$ | $${\color{blue}\text{Dense Fancy Magic Bitboards}}$$ |
+| --------------------------------------------------- | ---------------------- | --------------------------------- |
+| $${\color{blue}\text{"Compositions" test suite}}$$  | 57.79                  | $${\color{green}\text{74.13}}$$   |
+| $${\color{blue}\text{"Realistic" test suite}}$$     | 820.32                 | $${\color{green}\text{1030.62}}$$ |
