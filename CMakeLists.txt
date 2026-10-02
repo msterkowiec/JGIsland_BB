@@ -31,6 +31,7 @@ target_compile_options(JGIsland_BB INTERFACE
         $<$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>:-O3 -march=native>
     >
 )
+add_compile_definitions($<$<CONFIG:RelWithDebInfo>:IS_RELWITHDEBINFO>)
 
 # 2. MSVC Release Options
 if(MSVC)
