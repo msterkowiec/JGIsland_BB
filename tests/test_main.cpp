@@ -8,6 +8,29 @@
 #include "utils.h"
 #include "../include/JGIsland_BB.h"
 
+bool useDurationMultiplier = false; // the optional duration multiplier is for release builds only (always ON in RelWithDebInfo)
+
+// Override to capture argc/argv:
+int CustomInitAndRun(int* argc, char** argv) 
+{	
+	// Call the actual GoogleTest initialization
+	::testing::InitGoogleTest(argc, argv);
+
+	return RUN_ALL_TESTS();
+}
+
+int main(int argc, char** argv) 
+{
+	#ifdef IS_RELWITHDEBINFO
+	useDurationMultiplier = true;
+	#else
+	useDurationMultiplier = argc > 1 && argv[1][0] == 'm' ; // any param. added that starts with 'm' switches multiplier on
+	#endif
+
+	return CustomInitAndRun(&argc, argv);
+}
+
+// ----------------------------------------------------------
 
 bool IsSolutionAsExpected(int count, const TMove* aMoves, const std::vector<TMove>& expectedSolutions)
 {
@@ -529,6 +552,8 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/1p1N4/bp6/kn3R2/1p3P1p/1P5P/8/5K2"), 1);	
 }
 
+// Here performance tests start
+
 template<MoveGenMethodT MoveGenMethod>
 size_t RunTestFindMoveThatMatesInTwoMoves()
 {
@@ -540,6 +565,15 @@ size_t RunTestFindMoveThatMatesInTwoMoves()
 	constexpr auto num = sizeof(test_suite) / sizeof(test_suite[0]);
 	size_t numSuccessful = 0;
 	size_t numFailed = 0;
+	
+	#ifdef NDEBUG
+	if (useDurationMultiplier)
+		std::cout << "[   INFO   ] ***** NOTE *** Duration multiplier for performance tests is ON *****\n";
+	else
+		std::cout << "[   INFO   ] Duration multiplier for performance tests is OFF - add any argument when starting program to make performance tests run longer\n";
+	size_t mult = useDurationMultiplier ? 10 : 1;
+	for (size_t j = 0; j < mult; ++j)
+	#endif	
 	for (size_t i = 0; i < num; ++i)
 	{
 		const auto szFEN = test_suite[i].first.c_str();
@@ -585,6 +619,11 @@ size_t RunTestFindMoveThatMatesInTwoMoves_Mirrors()
 	constexpr auto num = sizeof(test_suite) / sizeof(test_suite[0]);
 	size_t numSuccessful = 0;
 	size_t numFailed = 0;
+
+	#ifdef NDEBUG
+	size_t mult = useDurationMultiplier ? 10 : 1;
+	for (size_t j = 0; j < mult; ++j)
+	#endif	
 	for (size_t i = 0; i < num; ++i)
 	{
 		const auto szFENOrig = test_suite[i].first.c_str();
@@ -636,6 +675,11 @@ size_t RunTestRealisticFindMoveThatMatesInTwoMoves()
 	constexpr auto num = sizeof(test_suite_realistic) / sizeof(test_suite_realistic[0]);
 	size_t numSuccessful = 0;
 	size_t numFailed = 0;	
+	
+	#ifdef NDEBUG
+	size_t mult = useDurationMultiplier ? 20 : 1;
+	for (size_t j = 0; j < mult; ++j)
+	#endif	
 	for (size_t i = 0; i < num; ++i)
 	{
 		auto szFEN = test_suite_realistic[i].first;
