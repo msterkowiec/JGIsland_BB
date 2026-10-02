@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 	#ifdef IS_RELWITHDEBINFO
 	useDurationMultiplier = true;
 	#else
-	useDurationMultiplier = argc > 1; // any param. added switches multiplier on
+	useDurationMultiplier = argc > 1 && argv[1][0] == 'm' ; // any param. added that starts with 'm' switches multiplier on
 	#endif
 
 	return CustomInitAndRun(&argc, argv);
