@@ -709,6 +709,12 @@ TEST(JGIsland_BB_Integration, TestCompositionsFindMoveThatMatesInTwoMoves_DFMB_M
 	EXPECT_EQ(numFailed, 0);
 }
 
+TEST(JGIsland_BB_Integration, TestRealisticFindMoveThatMatesInTwoMoves_HQ)
+{
+	auto numFailed = RunTestRealisticFindMoveThatMatesInTwoMoves<MoveGenMethodT::HyperbolaQuintessence>();
+	EXPECT_EQ(numFailed, 0);
+}
+
 TEST(JGIsland_BB_Integration, TestRealisticFindMoveThatMatesInTwoMoves_DFMB)
 {
 	auto numFailed = RunTestRealisticFindMoveThatMatesInTwoMoves<MoveGenMethodT::DenseFancyMagics>();
