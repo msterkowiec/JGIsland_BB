@@ -17,7 +17,7 @@ See also a table (at the bottom of this page) that contains more precise informa
 You can freely reuse this code inside your chess engine(s) - see LICENCE file for details.
 
 **JGIsland_BB is a greenfield part of J.G.Island - Chess Moremovers** (https://jgisland.pl) with its source code, contrary to the main product, made public.
-JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%. Two-mover can be considered an 'atomic' operation in chess engines (#1 don't have to be stored in transposition tables, since its analysis is very fast and the result is very quickly pushed away from transposition tables by #2+ anyway)
+JGIsland_BB was added to J.G.Island - Chess Moremovers in its version 11.0 and it decreased total times on the test suite (https://jgisland.pl/download/reports/testsuite.php) by about -10%. Two-mover can be considered an 'atomic' operation in chess engines (#1 positions don't have to be stored in transposition tables, since analysis of #1 is very fast and the result is very quickly pushed away from transposition tables by #2+ anyway)
 
 As already mentioned, one of the assumptions of this project was to minimize memory usage and reduce latencies keeping all the data in L1 cache of CPU.
 That's why Magic Bitboards were not used but Hyperbola Quintessence** (super small calculations using data in CPU registers and L1 cache).
