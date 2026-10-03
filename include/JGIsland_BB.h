@@ -653,7 +653,7 @@ private:
 		static_assert(!tbKnownToExist || tbGetPos); // no need to call with tbKnownToExist==true and tbGetPos==false (guaranteed 1 to be returned then)
 
 		if constexpr (tbBlack && !tbBlackHaveRookLikes && !tbBlackHaveBishopLikes)
-			return 0ULL;
+			return tbGetPos ? -1 : 0;
 
 		const auto mask = GetCandidatesForLongDistanceFigureInDir<tbBlack>(pos, posBase);
 		if (tbKnownToExist || mask)
@@ -694,7 +694,7 @@ private:
 		static_assert(!tbKnownToExist || tbGetPos); // no need to call with tbKnownToExist==true and tbGetPos==false (guaranteed 1 to be returned then)
 
 		if constexpr (tbBlack && !tbBlackHaveRookLikes && !tbBlackHaveBishopLikes)
-			return 0ULL;
+			return tbGetPos ? -1 : 0;
 
 		const auto dir = dirLookup.DirFromDxDy(dx, dy);
 		const auto rayMask = rayLookup.GetRayInDir(pos, dir);
@@ -810,7 +810,7 @@ private:
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
 		if constexpr (!tbBlackHaveRookLikes && !tbBlackHaveBishopLikes)
-			return 0ULL;
+			return tbGetPos ? -1 : 0;
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		#ifdef __JGI_BB_PEDANTIC__
@@ -838,7 +838,7 @@ private:
 		assert((sq_to_bb(posWhitePawnToTakeOff)) & white & pawns);
 
 		if constexpr (!tbBlackHaveRookLikes && !tbBlackHaveBishopLikes)
-			return 0ULL;
+			return tbGetPos ? -1 : 0;
 
 		const auto mask = (sq_to_bb(posWhitePawnToTakeOff));
 		#ifdef __JGI_BB_PEDANTIC__
@@ -892,7 +892,7 @@ private:
 		assert(pos != posBase);
 
 		if constexpr (!tbBlackHaveRookLikes && !tbBlackHaveBishopLikes)
-			return 0ULL;
+			return -1;
 
 		const auto mask = black & rayLookup.MatchOnRay(pos, posBase, qrooks, qbishops);
 		if ((mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(pos, posBase))
@@ -2989,7 +2989,7 @@ private:
 			
 			const auto rawBishopMoves = get_raw_bishop_moves(pos, occ);
 			const auto rawRookMoves = get_raw_rook_moves(pos, occ);
-			Bitboard blackLongDistAttackers; 
+			Bitboard whiteLongDistAttackers; 
 			if constexpr (tbOnlyCheckingMoves)
 			{
 				const bool allBetweenEmpty = AllBetweenEmpty(posBlackKing, pos);
@@ -2998,12 +2998,12 @@ private:
 				const auto maskForQueens = BOOL_EXTEND64(diagAttack|lineAttack);
 				const auto maskForRooks = BOOL_EXTEND64(lineAttack) | whitePiecesWithDiscoveredCheck;
 				const auto maskForBishops = BOOL_EXTEND64(diagAttack) | whitePiecesWithDiscoveredCheck;
-				blackLongDistAttackers = (((rawBishopMoves | rawRookMoves) & queens() & maskForQueens) | (rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks)) & white;
+				whiteLongDistAttackers = (((rawBishopMoves | rawRookMoves) & queens() & maskForQueens) | (rawBishopMoves & bishops() & maskForBishops) | (rawRookMoves & rooks() & maskForRooks)) & white;
 			}
 			else
-				blackLongDistAttackers = ((rawBishopMoves & qbishops) | (rawRookMoves & qrooks)) & white;
+				whiteLongDistAttackers = ((rawBishopMoves & qbishops) | (rawRookMoves & qrooks)) & white;
 
-			BEGIN_FOR_EACH_POS_IN_MASK(rbpos, blackLongDistAttackers)
+			BEGIN_FOR_EACH_POS_IN_MASK(rbpos, whiteLongDistAttackers)
 			{
 				if (!tbVerifyPinning || !IsWhitePinned(rbpos, pos))
 					if (!tbOnlyMatingMoves || WillWhiteLongDistanceFigureMoveBeCheck<tbOnlyMatingMoves,1>(rbpos, pos, whitePiecesWithDiscoveredCheck & (1ULL << rbpos)))
@@ -3013,7 +3013,7 @@ private:
 							aMoves[count++].set(rbpos, pos);
 
 			}
-			END_FOR_EACH_POS_IN_MASK(rbpos, blackLongDistAttackers);			
+			END_FOR_EACH_POS_IN_MASK(rbpos, whiteLongDistAttackers);			
 		}
 		END_FOR_EACH_POS_IN_MASK(pos, tmpMaskBetween);
 		
