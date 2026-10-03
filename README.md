@@ -81,5 +81,5 @@ First, tentative conclusions: __Although Hyperbola Quitenssence was my first cho
 
 | Two-movers per msec on Intel i7-14700 single thread | $${\color{blue}\text{Hyperbola Quintessence}}$$ | $${\color{blue}\text{Dense Fancy Magic Bitboards}}$$ |
 | --------------------------------------------------- | ---------------------- | --------------------------------- |
-| $${\color{blue}\text{"Compositions" test suite}}$$  | 57.79                  | $${\color{green}\text{74.13}}$$   |
-| $${\color{blue}\text{"Realistic" test suite}}$$     | 820.32                 | $${\color{green}\text{1030.62}}$$ |
+| ["Compositions" test suite](tests/integration_tests_suite.h)        | 57.79  | $${\color{green}\text{74.13}}$$   |
+| ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 820.32 | $${\color{green}\text{1030.62}}$$ |
