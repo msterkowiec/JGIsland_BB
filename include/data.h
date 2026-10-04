@@ -243,6 +243,41 @@ constexpr std::array<uint64_t, 64> init_king_attacks()
 	return king_attacks;
 }
 
+constexpr std::array<uint64_t, 64> init_diamond_neighborhood()
+{
+	std::array<uint64_t, 64> res{};
+
+	for (int sq = 0; sq < 64; ++sq)
+	{
+		const int x = sq & 7;
+		const int y = sq >> 3;
+
+		for (int dx = -1; dx <= 1; ++dx)
+			for (int dy = -1; dy <= 1; ++dy)
+				if (dx | dy)
+				{
+					int cx = x + dx;
+					int cy = y + dy;
+					if (cx >= 0 && cy >= 0 && cx < 8 && cy < 8)
+						res[sq] |= 1ULL << (cx + cy * 8);
+					if (dx == 0)
+					{
+						cy += dy;
+						if (cy >= 0 && cy < 8)
+							res[sq] |= 1ULL << (cx + cy * 8);
+					}
+					else if (dy == 0)
+					{
+						cx += dx;
+						if (cx >= 0 && cx < 8)
+							res[sq] |= 1ULL << (cx + cy * 8);
+					}
+				}
+	}
+
+	return res;
+}
+
 template<bool tbFileMasks> // otherwise lineMasks
 constexpr std::array<uint64_t, 64> init_line_masks()
 {
@@ -902,6 +937,7 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> Knight_Attacks = Calc
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Bishop_Attacks = CalcBishopAttackBitboards();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Rook_Attacks = CalcRookAttackBitboards();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> Queen_Attacks = InitQueenAttackMasks();
+alignas(64) inline constexpr std::array<std::uint64_t, 64> Diamond_Neighborhood = init_diamond_neighborhood();
 
 alignas(64) inline constexpr std::array<std::uint64_t, 64> King_Attacks = init_king_attacks();
 alignas(64) inline constexpr std::array<std::uint64_t, 64> King_Attacks_Ext = init_king_attacks<1>(); // incl.king's square
