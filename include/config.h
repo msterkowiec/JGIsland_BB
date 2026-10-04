@@ -21,7 +21,7 @@
 #define __USE_FIRSTRANKATTACKSLOOKUP__ // if on, it speeds up about 1%; it is a slight extention of pure Hyperbola Quintessence that requires only 512B of additional lookup; for details see https://www.chessprogramming.org/First_Rank_Attacks
 
 
-#define __PREEMPTIVE_WHITEPINNEDPIECES__ // This macro should be on - it seems responsible for about 2% speed-up; NOTE: it also switches on not only a preemptive call to GetWhitePinnedPieces but also GetWhitePiecesThatCanMakeDiscoveredCheck
+#define __PREEMPTIVE_WHITEPINNEDPIECES__ // the switch no longer supported (removal cleans the code significantly) - now this feature is unconditionally ON; speeds up more than 2%; GetWhitePinnedPieces() always called preemptively
 
 
 // #define __PREEMPTIVE_BLACKPINNEDPIECES__ // It should be off (not defined), since statistically already the first Black move found is a refutation, so we should not make this preemptive check (this macro is for IsImmediateMateAfterAnyBlackResponse)
@@ -65,6 +65,10 @@
 #define __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__ // speeds up about ~1% although significantly increases compilation time in release mode (and binary size); the speed-up should be higher in case of #2 subproblems (not real two-movers)
 //#define __USE_OPTIMFORMISSINGBLACKKNIGHTS__ // significantly increases binary size (~70%) but provides no measurable performance gain on JGIsland_BB test suite
 
+//#define __USE_FORCECMOVINLONGDISTANCEFIGUREINDIR__ // should rather be off - causes a small slow-down (~1%), most probably register spilling is responsible for it
+//#define __USE_DISCOVEREDCHECKFILTERING__  // should rather be off - seems to cause a small slow-down (~0.5%)
+//#define __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__ // significantly increases binary size and compilation time; speeds up ~1% on "realistic" test suite only; requires __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
+
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
 // (tb prefix stands for Template Boolean but in this context it means just Compile-Time Boolean)
@@ -87,3 +91,6 @@ inline constexpr bool tbMemUsageOptimInBetweenLookup = true;
 inline constexpr bool tbMemUsageOptimInBetweenLookup = false;
 #endif
 
+#if defined(__USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__) && !defined(__USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__)
+#error "__USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__ requires __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__"
+#endif
