@@ -401,21 +401,15 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKingCheckMate)
 	EXPECT_EQ(bb.CanWhiteKingCheckMate(), false);
 }
 
-#ifdef __PREEMPTIVE_WHITEPINNEDPIECES__
-#define NOT_PINNED ,false
-#define NO_DISCO ,false
-#define DISCO_POSSIBLE ,true
-#else
-#define NOT_PINNED
-#define NO_DISCO
-#define DISCO_POSSIBLE
-#endif
+constexpr bool NOT_PINNED = false;
+constexpr bool NO_DISCO = false;
+constexpr bool DISCO_POSSIBLE = true;
 
 TEST(JGIsland_BB_Tests, TestCanWhiteKnightCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("3N2rk/6pp/8/8/8/8/8/4K3");
-	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_D8_ NO_DISCO), true);
+	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_D8_, NO_DISCO), true);
 
 	#ifndef __PREEMPTIVE_WHITEPINNEDPIECES__ // when preemptive pinning verification is on, this call should not be made - it would just raise assertion failure
 	bb.fromFEN("2KN2rk/6pp/8/8/8/8/8/8");
@@ -423,65 +417,65 @@ TEST(JGIsland_BB_Tests, TestCanWhiteKnightCheckMate)
 	#endif
 
 	bb.fromFEN("2K3bk/7p/8/8/8/2N5/8/B7");
-	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_C3_ DISCO_POSSIBLE), true);
+	EXPECT_EQ(bb.CanWhiteKnightCheckMate(_C3_, DISCO_POSSIBLE), true);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhiteBishopCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("3K4/5p2/5kp1/3P1p2/7P/8/8/6B1");	
-	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_G1_ NO_DISCO NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_G1_, NO_DISCO, NOT_PINNED), true);
 		
 	bb.fromFEN("3K4/5p2/5kp1/3P4/7P/8/5B2/8");
-	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_ NO_DISCO NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_, NO_DISCO, NOT_PINNED), false);
 
 	bb.fromFEN("3K4/5p2/5kp1/3P4/7P/8/5B2/5R2");
-	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_ DISCO_POSSIBLE NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteBishopCheckMate(_F2_, DISCO_POSSIBLE, NOT_PINNED), true);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhiteRookCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("3K4/5p2/5kpP/3P4/3P3P/8/1R6/8");
-	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ NO_DISCO NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_, NO_DISCO, NOT_PINNED), true);
 
 	bb.fromFEN("3K4/5p2/5kp1/8/7P/8/1R6/B7");
-	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ DISCO_POSSIBLE NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_, DISCO_POSSIBLE, NOT_PINNED), false);
 
 	bb.fromFEN("3K4/5p2/1P3kp1/5p2/7P/8/1R6/B7");
-	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_ DISCO_POSSIBLE NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteRookCheckMate(_B2_, DISCO_POSSIBLE, NOT_PINNED), true);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhiteQueenCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("8/8/5k2/8/7K/1B6/8/2Q5");
-	EXPECT_EQ(bb.CanWhiteQueenCheckMate(_C1_ NOT_PINNED), true);
+	EXPECT_EQ(bb.CanWhiteQueenCheckMate(_C1_, NOT_PINNED), true);
 
 	bb.fromFEN("8/8/4pk2/8/7K/1B6/8/2Q5");
-	EXPECT_EQ(bb.CanWhiteQueenCheckMate(_C1_ NOT_PINNED), false);
+	EXPECT_EQ(bb.CanWhiteQueenCheckMate(_C1_, NOT_PINNED), false);
 }
 
 TEST(JGIsland_BB_Tests, TestCanWhitePawnCheckMate)
 {
 	FullBitboards_HQ bb;
 	bb.fromFEN("8/6p1/3K1kp1/4p1p1/4bPp1/5R2/8/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED DISCO_POSSIBLE), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1, NOT_PINNED, DISCO_POSSIBLE), true);
 
 	bb.fromFEN("6K1/6p1/5pkp/6pp/5Pp1/5R2/8/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED NO_DISCO), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1, NOT_PINNED, NO_DISCO), true);
 
 	bb.fromFEN("6K1/6p1/5pkp/6pp/5Pp1/5b2/5R2/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1 NOT_PINNED NO_DISCO), false);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F4_, -1, NOT_PINNED, NO_DISCO), false);
 
 	bb.fromFEN("8/6K1/8/5pkp/6pp/8/5PRB/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1 NOT_PINNED NO_DISCO), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1, NOT_PINNED, NO_DISCO), true);
 
 	bb.fromFEN("8/6K1/8/5pkp/6pp/8/5PBB/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1 NOT_PINNED NO_DISCO), false);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate<0>(_F2_, -1, NOT_PINNED, NO_DISCO), false);
 
 	bb.fromFEN("r5k1/RP6/8/8/4pp2/8/5K2/8");
-	EXPECT_EQ(bb.CanWhitePawnCheckMate(_B7_, -1 NOT_PINNED NO_DISCO), true);
+	EXPECT_EQ(bb.CanWhitePawnCheckMate(_B7_, -1, NOT_PINNED, NO_DISCO), true);
 }
 
 TEST(JGIsland_BB_Integration, BasicIntegrationTest)
@@ -550,6 +544,10 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/P4K2/1Q2P3/1N1PB3/8/8/3p1np1/3Bbrkb"), 1);
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("4B1Q1/8/5N2/p7/rp4p1/qn2K1P1/kp1N4/1R6"), 1);
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/1p1N4/bp6/kn3R2/1p3P1p/1P5P/8/5K2"), 1);	
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("7k/5P2/8/6PP/6NR/6pN/ppb3PR/7K"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("2Bbr3/3Pr1P1/1P1kP1P1/NP4P1/4K3/8/8/8"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("7k/8/P5K1/8/8/8/8/8"), 1);
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/8/P3p3/1N2p3/1K2k1P1/6P1/4PPP1/8"), 1);	
 }
 
 // Here performance tests start
