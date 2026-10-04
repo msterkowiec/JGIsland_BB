@@ -79,7 +79,9 @@ First, tentative conclusions: __Although Hyperbola Quitenssence was my first cho
 -----------------------------------------------------------------------------------------
 **Summary - performance of JGIsland_BB** (2026-10-01)
 
-| Two-movers per msec on Intel i7-14700<br>single thread on Windows| $${\color{blue}\text{Hyperbola Quintessence}}$$ | $${\color{blue}\text{Dense Fancy Magic Bitboards}}$$ |
+| Two-movers per msec on Intel i7-14700<br>single thread on Windows, compiled with MSVC*| $${\color{blue}\text{Hyperbola Quintessence}}$$ | $${\color{blue}\text{Dense Fancy Magic Bitboards}}$$ |
 | --------------------------------------------------- | ---------------------- | --------------------------------- |
 | ["Compositions" test suite](tests/integration_tests_suite.h)        | 57.79  | $${\color{green}\text{74.13}}$$   |
 | ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 820.32 | $${\color{green}\text{1030.62}}$$ |
+
+\* a version compiled with gcc on Windows is about 3% faster
