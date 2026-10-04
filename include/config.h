@@ -67,7 +67,7 @@
 
 //#define __USE_FORCECMOVINLONGDISTANCEFIGUREINDIR__ // should rather be off - causes a small slow-down (~1%), most probably register spilling is responsible for it
 //#define __USE_DISCOVEREDCHECKFILTERING__  // should rather be off - seems to cause a small slow-down (~0.5%)
-//#define __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__ // significantly increases binary size and compilation time; speeds up ~1% on "realistic" test suite only; requires __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
+#define __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__ // significantly increases binary size and compilation time; speeds up ~1% on "realistic" test suite only; requires __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
 
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
