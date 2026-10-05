@@ -85,4 +85,4 @@ First, tentative conclusions: __Although Hyperbola Quitenssence was my first cho
 | ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 820.32 | $${\color{green}\text{1030.62**}}$$ |
 
 \* a version compiled with gcc on Windows is about 3% faster\
-\** a further speed-up of about 3% can be reached here using macro \_\_USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES\_\_ (but it increases compilation time and binary size significantly)
+\** a further speed-up of about 3% can be reached here using a config macro \_\_USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES\_\_ (but it increases compilation time and binary size significantly)
