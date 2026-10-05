@@ -77,12 +77,12 @@ Another finding was the following: Originally I considered this two-mover perfor
 First, tentative conclusions: __Although Hyperbola Quitenssence was my first choice and looked L1 cache-friendly and flawless, register spilling seems to be an important obstacle that may encourage to turn to Dense Fancy Magic Bitboards__ (see type FullBitboards_DFMB). This is confirmed by the results of performance test (single thread) on two-movers on Intel i7-14700: more than 70 two-movers per millisecond can be solved using Dense Fancy Magic Bitboards, while only 55 with Hyperbola Quintessence. Integrated tests of J.G.Island - Chess Moremovers with Dense Fancy Magic Bitboards also confirm this conclusion so far. However as soon as CPUs in future (10-20 years) have more registers, Hyperbola Quintessence may outperform its competitors (but it will require recompilation for the target platform, while taking advantage of larger CPU cache by Magics is smooth - without any recompilation).
 
 -----------------------------------------------------------------------------------------
-**Summary - performance of JGIsland_BB** (2026-10-01)
+**Summary - performance of JGIsland_BB** (2026-10-05)
 
 | Two-movers per msec on Intel i7-14700<br>single thread on Windows, compiled with MSVC*| $${\color{blue}\text{Hyperbola Quintessence}}$$ | $${\color{blue}\text{Dense Fancy Magic Bitboards}}$$ |
 | --------------------------------------------------- | ---------------------- | --------------------------------- |
-| ["Compositions" test suite](tests/integration_tests_suite.h)        | 57.79  | $${\color{green}\text{74.13}}$$   |
-| ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 820.32 | $${\color{green}\text{1030.62**}}$$ |
+| ["Compositions" test suite](tests/integration_tests_suite.h)        | 59.53  | $${\color{green}\text{74.13}}$$   |
+| ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 842.26 | $${\color{green}\text{1030.62**}}$$ |
 
 \* a version compiled with gcc on Windows is about 3% faster\
 \** a further speed-up of about 3% can be reached here using a config macro \_\_USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES\_\_ (but it increases compilation time and binary size significantly)
