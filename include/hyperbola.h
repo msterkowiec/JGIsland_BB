@@ -17,10 +17,9 @@ ALWAYS_INLINE Bitboard get_raw_rook_moves_hq(const int square, const Bitboard oc
 	assert(IsValidPos(square));
 
 	Bitboard raw_moves = 0ULL;
-
-	const Bitboard slider = sq_to_bb(square);
-	const Bitboard slider2 = slider + slider;
-
+	
+	const Bitboard slider2 = 2ULL << square; // slider = 1ULL << square
+	
 	if constexpr (Dir == 0 || CTABS(Dir) == 1)
 	{
 		#ifdef __USE_FIRSTRANKATTACKSLOOKUP__
@@ -49,7 +48,8 @@ ALWAYS_INLINE Bitboard get_raw_rook_moves_hq(const int square, const Bitboard oc
 	{
 		const Bitboard mask_f = file_masks[square];
 		const Bitboard forward_f = (occupancy & mask_f) - slider2;
-		const Bitboard reverse_f = bswap64(bswap64(occupancy & mask_f) - (2 * bswap64(slider)));
+		const Bitboard helper = 2ULL << (square ^ 56); // 2 * bswap64(slider);
+		const Bitboard reverse_f = bswap64(bswap64(occupancy & mask_f) - helper);
 		raw_moves |= (forward_f ^ reverse_f) & mask_f;
 	}
 
@@ -64,7 +64,7 @@ ALWAYS_INLINE static  auto get_raw_bishop_moves_hq(const int square, const Bitbo
 
 	// Hyperbola Quintessence
 	const Bitboard helper = 2ULL << (square ^ 56); // 2 * bswap64(slider);	
-	const Bitboard slider = sq_to_bb(square);
+	const Bitboard slider2 = 2ULL << square; // slider = 1ULL << square
 
 	#ifdef __USE_OPTIMIZED_HQ__
 	if constexpr (Dir == 0) // both diag and anti-diag - perf.tests don't show any speed-up, so for now __USE_OPTIMIZED_HQ__ commented out
@@ -72,8 +72,8 @@ ALWAYS_INLINE static  auto get_raw_bishop_moves_hq(const int square, const Bitbo
 		// let's try to make instructions sort of interlaced hoping to get boost from CPU ILP:
 		const Bitboard mask_d = diagonal_masks[square];
 		const Bitboard mask_ad = anti_diagonal_masks[square];
-		const Bitboard forward_d = (occupancy & mask_d) - slider - slider;
-		const Bitboard forward_ad = (occupancy & mask_ad) - slider - slider;
+		const Bitboard forward_d = (occupancy & mask_d) - slider2;
+		const Bitboard forward_ad = (occupancy & mask_ad) - slider2;
 		const Bitboard reverse_d = bswap64(bswap64(occupancy & mask_d) - helper);
 		const Bitboard reverse_ad = bswap64(bswap64(occupancy & mask_ad) - helper);
 		return ((forward_d ^ reverse_d) & mask_d) | ((forward_ad ^ reverse_ad) & mask_ad); // return diagonal_moves | anti_diagonal_moves
@@ -87,7 +87,7 @@ ALWAYS_INLINE static  auto get_raw_bishop_moves_hq(const int square, const Bitbo
 		if constexpr (Dir >= 0)
 		{
 			const Bitboard mask_d = diagonal_masks[square];
-			const Bitboard forward_d = (occupancy & mask_d) - slider - slider;
+			const Bitboard forward_d = (occupancy & mask_d) - slider2;
 			const Bitboard reverse_d = bswap64(bswap64(occupancy & mask_d) - helper);
 			res = (forward_d ^ reverse_d) & mask_d;
 		}
@@ -98,7 +98,7 @@ ALWAYS_INLINE static  auto get_raw_bishop_moves_hq(const int square, const Bitbo
 		if constexpr (Dir <= 0)
 		{
 			const Bitboard mask_ad = anti_diagonal_masks[square];
-			const Bitboard forward_ad = (occupancy & mask_ad) - slider - slider;
+			const Bitboard forward_ad = (occupancy & mask_ad) - slider2;
 			const Bitboard reverse_ad = bswap64(bswap64(occupancy & mask_ad) - helper);
 			res |= ((forward_ad ^ reverse_ad) & mask_ad);
 		}
