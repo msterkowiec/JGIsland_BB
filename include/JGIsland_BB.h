@@ -2924,7 +2924,7 @@ private:
 					else
 					{
 						static_assert(!(tbOnlyIfPreventsImmediateMate && !tbOneIsEnough), ""); // combination not implemented yet
-						if (tbOnlyIfPreventsImmediateMate && tbOneIsEnough)
+						if constexpr(tbOnlyIfPreventsImmediateMate && tbOneIsEnough)
 						{
 							if (!IsImmediateMateAfterPromoMoveForwardByBlackPawn<tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(pos, pos - 8))
 								return 1;
@@ -7179,3 +7179,4 @@ using FullBitboards_HQ = FullBitboards<MoveGenMethodT::HyperbolaQuintessence>;
 using FullBitboards_FMB = FullBitboards<MoveGenMethodT::FancyMagics>;
 using FullBitboards_DFMB = FullBitboards<MoveGenMethodT::DenseFancyMagics>;
 static_assert(sizeof(FullBitboards_DFMB) <= 64); // let's not exceed this limit - it can degrade performance
+
