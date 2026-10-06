@@ -81,8 +81,8 @@ First, tentative conclusions: __Although Hyperbola Quitenssence was my first cho
 
 | Two-movers per msec on Intel i7-14700<br>single thread on Windows, compiled with MSVC*| $${\color{blue}\text{Hyperbola Quintessence}}$$ | $${\color{blue}\text{Dense Fancy Magic Bitboards}}$$ |
 | --------------------------------------------------- | ---------------------- | --------------------------------- |
-| ["Compositions" test suite](tests/integration_tests_suite.h)        | 62.96  | $${\color{green}\text{77.31}}$$   |
-| ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 842.88 | $${\color{green}\text{1021.33**}}$$ |
+| ["Compositions" test suite](tests/integration_tests_suite.h)        | 63.66  | $${\color{green}\text{78.26}}$$   |
+| ["Realistic" test suite](tests/integration_tests_suite_realistic.h) | 854.96 | $${\color{green}\text{1034.38**}}$$ |
 
 \* a version compiled with gcc on Windows is about 3% faster\
 \** a further speed-up of about 3% can be reached here using a config macro \_\_USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES\_\_ (but it increases compilation time and binary size significantly)
