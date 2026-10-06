@@ -20,15 +20,11 @@
 
 #define __USE_FIRSTRANKATTACKSLOOKUP__ // if on, it speeds up about 1%; it is a slight extention of pure Hyperbola Quintessence that requires only 512B of additional lookup; for details see https://www.chessprogramming.org/First_Rank_Attacks
 
-
 #define __PREEMPTIVE_WHITEPINNEDPIECES__ // the switch no longer supported (removal cleans the code significantly) - now this feature is unconditionally ON; speeds up more than 2%; GetWhitePinnedPieces() always called preemptively
-
-
-// #define __PREEMPTIVE_BLACKPINNEDPIECES__ // It should be off (not defined), since statistically already the first Black move found is a refutation, so we should not make this preemptive check (this macro is for IsImmediateMateAfterAnyBlackResponse)
+// #define __PREEMPTIVE_BLACKPINNEDPIECES__ //  the switch no longer supported (removal cleans the code significantly)  - now this feature is unconditionally OFF, since statistically already the first Black move found is a refutation, so we should not make this preemptive check
 
 #define __USE_OPTIM_FOR_NON_CAPTURE__ // should rather be on - the observed speed-up is about 1-2%
 #define __USE_OPTIM_FOR_NON_CAPTURE_BY_KING__ // should rather be on; here the difference is that we have to pay one branch for this feature but as an additional advantage we have black king's moves sorted (captures analyzed first) - perf.tests indicate a tiny improvement
-
 
 #define __USE_OPTIM_FOR_SAMEDIAGORLINE__ // seems to cause a tiny performance speed-up, ~0.5%
 
@@ -68,6 +64,7 @@
 //#define __USE_FORCECMOVINLONGDISTANCEFIGUREINDIR__ // should rather be off - causes a small slow-down (~1%), most probably register spilling is responsible for it
 //#define __USE_DISCOVEREDCHECKFILTERING__  // should rather be off - seems to cause a small slow-down (~0.5%)
 //#define __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__ // significantly increases binary size and compilation time; speeds up ~3% on "realistic" test suite only; requires __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
+#define __USE_BLACKNONCAPTUREMOVESLATER__ // should rather be on, since it speeds up 3% 'compositions' test suite, although seems to slightly slow down 'realistic' test suite (~0.5%)
 
 // -------------------------------------------------------------------------------------------------------------
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
