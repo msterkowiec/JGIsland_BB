@@ -2529,19 +2529,22 @@ private:
 				}
 				else
 				{
-					const auto posDiscoveredChecker = (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, posFrom)) ? WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing) : -1;
-					if (posDiscoveredChecker >= 0)
+					if constexpr (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes)
 					{
-						if constexpr (!tbCheckMateOnly)
-							return true;
-						if constexpr (fPromo == FGR_KNIGHT)
-							return IsCheckMateAfterPromoToKnightDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
-						else if constexpr (fPromo == FGR_QUEEN)
-							return IsCheckMateAfterPromoToQueenDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
-						else if constexpr (fPromo == FGR_ROOK)
-							assert(false); // return IsCheckMateAfterPromoToRookDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
-						else if constexpr (fPromo == FGR_BISHOP)
-							assert(false); // return IsCheckMateAfterPromoToBishopDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+						const auto posDiscoveredChecker = (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, posFrom)) ? WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing) : -1;
+						if (posDiscoveredChecker >= 0)
+						{
+							if constexpr (!tbCheckMateOnly)
+								return true;
+							if constexpr (fPromo == FGR_KNIGHT)
+								return IsCheckMateAfterPromoToKnightDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+							else if constexpr (fPromo == FGR_QUEEN)
+								return IsCheckMateAfterPromoToQueenDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+							else if constexpr (fPromo == FGR_ROOK)
+								assert(false); // return IsCheckMateAfterPromoToRookDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+							else if constexpr (fPromo == FGR_BISHOP)
+								assert(false); // return IsCheckMateAfterPromoToBishopDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+						}
 					}
 				}
 			}
@@ -2555,7 +2558,7 @@ private:
 					if (bPromoToKnightDirectCheck | bPromoToQueenDirectCheck)
 						return true;
 
-				const auto posDiscoveredChecker = (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, posFrom)) ? WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing) : -1;
+				const auto posDiscoveredChecker = ((tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes) && SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, posFrom)) ? WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing) : -1;
 				if constexpr (!tbCheckMateOnly)
 					if (posDiscoveredChecker >= 0)
 						return true;
@@ -2576,13 +2579,14 @@ private:
 									return true;
 					}
 
-					if (posDiscoveredChecker >= 0)
-					{
-						if (!bPromoToQueenDirectCheck && IsCheckMateAfterPromoToQueenDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker))
-							return true;
-						else
-							return !bPromoToKnightDirectCheck && IsCheckMateAfterPromoToKnightDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
-					}
+					if constexpr (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes)
+						if (posDiscoveredChecker >= 0)
+						{
+							if (!bPromoToQueenDirectCheck && IsCheckMateAfterPromoToQueenDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker))
+								return true;
+							else
+								return !bPromoToKnightDirectCheck && IsCheckMateAfterPromoToKnightDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+						}
 				}
 			}
 		}
@@ -2601,19 +2605,20 @@ private:
 						else
 							return IsCheckMateAfterPawnDirectCheck<0, tbKnownToBeNotACapture>(posFrom, posTo);
 
-			if (SameDiagonalOrLineAndAllBetweenEmpty(posFrom, posBlackKing))
-			{
-				const auto posDiscoveredChecker = WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing);
-				if (posDiscoveredChecker >= 0)
+			if constexpr (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes)
+				if (SameDiagonalOrLineAndAllBetweenEmpty(posFrom, posBlackKing))
 				{
-					const bool bMoveForward = SameFile(posTo, posFrom);
-					if (!bMoveForward || !SameFile(posDiscoveredChecker, posFrom)) // not a move forward while long distance attacker on the same file?
-						if constexpr (!tbCheckMateOnly)
-							return true;
-						else
-							return IsCheckMateAfterPawnDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+					const auto posDiscoveredChecker = WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing);
+					if (posDiscoveredChecker >= 0)
+					{
+						const bool bMoveForward = SameFile(posTo, posFrom);
+						if (!bMoveForward || !SameFile(posDiscoveredChecker, posFrom)) // not a move forward while long distance attacker on the same file?
+							if constexpr (!tbCheckMateOnly)
+								return true;
+							else
+								return IsCheckMateAfterPawnDiscoveredCheck<tbKnownToBeNotACapture>(posFrom, posTo, posDiscoveredChecker);
+					}
 				}
-			}
 		}
 
 		return false;
@@ -4454,32 +4459,35 @@ private:
 	{
 		assert(IsValidPos(posWhiteKing));
 		assert(white & kings & (1ULL << posWhiteKing));
-		
-		const auto mask = white & rayLookup.MatchOnRay(posWhiteKing, posBlackKing, qrooks, qbishops);
-		if ((mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, posBlackKing))
-			if (int posWhiteLongDistAttacker; (posWhiteLongDistAttacker = ValidateCandidateForLongDistanceFigureInDir(mask, posWhiteKing, posBlackKing)) >= 0)
-			{
-				#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
-				const auto blackPawnAttacks = BlackPawnAttacks();
-				const auto blackKnightAttacks = BlackKnightAttacks();
-				auto mask = King_Attacks[posWhiteKing] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing) & ~King_Attacks[posBlackKing] & ~blackPawnAttacks & ~blackKnightAttacks;
-				#else			
-				auto mask = King_Attacks[posWhiteKing] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
-				#endif
 
-				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+		if constexpr (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes)
+		{
+			const auto mask = white & rayLookup.MatchOnRay(posWhiteKing, posBlackKing, qrooks, qbishops);
+			if ((mask != 0) & SameDiagonalOrLineAndAllBetweenEmpty(posWhiteKing, posBlackKing))
+				if (int posWhiteLongDistAttacker; (posWhiteLongDistAttacker = ValidateCandidateForLongDistanceFigureInDir(mask, posWhiteKing, posBlackKing)) >= 0)
 				{
 					#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
-					if (!IsSquareAttackedByBlackIfTakeOffWhiteKing<-1>(pos))
-					#else				
-					if (!IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
+					const auto blackPawnAttacks = BlackPawnAttacks();
+					const auto blackKnightAttacks = BlackKnightAttacks();
+					auto mask = King_Attacks[posWhiteKing] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing) & ~King_Attacks[posBlackKing] & ~blackPawnAttacks & ~blackKnightAttacks;
+					#else			
+					auto mask = King_Attacks[posWhiteKing] & (~white) & ~GetBetweenMask(posWhiteLongDistAttacker, posBlackKing);
 					#endif
-						if (IsCheckMateAfterKingDiscoveredCheck(pos, posWhiteLongDistAttacker))
-							return true;
-				}
-				END_FOR_EACH_POS_IN_MASK(pos, mask);
-			}			
-
+	
+					BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
+					{
+						#ifdef __USE_OPTIMINCANWHITEKINGCHECKMATE__
+						if (!IsSquareAttackedByBlackIfTakeOffWhiteKing<-1>(pos))
+						#else				
+						if (!IsSquareAttackedByBlackIfTakeOffWhiteKing(pos))
+						#endif
+							if (IsCheckMateAfterKingDiscoveredCheck(pos, posWhiteLongDistAttacker))
+								return true;
+					}
+					END_FOR_EACH_POS_IN_MASK(pos, mask);
+				}			
+		}
+		
 		if ((tbShortCastlingPossible | tbLongCastlingPossible) && IsWhiteKingAt(_E1_))
 		{
 			assert(!IsSquareAttackedByBlack(_E1_));
@@ -4570,21 +4578,22 @@ private:
 							if (IsCheckMateAfterPromoToQueenDirectCheck<1>(ppos, ppos + 8, isDiscoveredCheckPossible))
 								return true;						
 
-					if (isDiscoveredCheckPossible)
-					{
-						if (!bPromoToQueenDirectCheck)
+					if constexpr(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes) 
+						if (isDiscoveredCheckPossible)
 						{
-							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
-							if (IsCheckMateAfterPromoToQueenDiscoveredCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker))
-								return true;
+							if (!bPromoToQueenDirectCheck)
+							{
+								const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
+								if (IsCheckMateAfterPromoToQueenDiscoveredCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker))
+									return true;
+							}
+							if (!bPromoToKnightDirectCheck)
+							{
+								const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
+								if (IsCheckMateAfterPromoToKnightDiscoveredCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker))
+									return true;
+							}
 						}
-						if (!bPromoToKnightDirectCheck)
-						{
-							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
-							if (IsCheckMateAfterPromoToKnightDiscoveredCheck<1>(ppos, ppos + 8, posWhiteLongDistAttacker))
-								return true;
-						}
-					}
 				}
 			}
 
@@ -4612,21 +4621,22 @@ private:
 								return true;
 						}
 
-					if (isDiscoveredCheckPossible)
-					{
-						if (!bPromoToQueenDirectCheck)
+					if constexpr(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes) 
+						if (isDiscoveredCheckPossible)
 						{
-							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
-							if (IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
-								return true;
+							if (!bPromoToQueenDirectCheck)
+							{
+								const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
+								if (IsCheckMateAfterPromoToQueenDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
+									return true;
+							}
+							if (!bPromoToKnightDirectCheck)
+							{
+								const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
+								if (IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
+									return true;
+							}
 						}
-						if (!bPromoToKnightDirectCheck)
-						{
-							const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
-							if (IsCheckMateAfterPromoToKnightDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
-								return true;
-						}
-					}
 				}
 			}
 			END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
@@ -4669,33 +4679,34 @@ private:
 			}
 
 			// Discovered check without promo (discovered check with a promo already covered)
-			if (isDiscoveredCheckPossible)
-			{
-				// Discovered check with a capture (!!note that in the current implementation double check with a capture will be verified twice: here and in the direct check verification !!)
-				auto maskToCapture = White_Pawn_Attacks[ppos] & black;
-				const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
-
-				BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
+			if constexpr(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes) 
+				if (isDiscoveredCheckPossible)
 				{
-					if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(posToCapture, ppos, posWhiteKing))
-						if (IsCheckMateAfterPawnDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
-							return true;
-				}
-				END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
-
-				// Discovered check with a move forward:
-				if (!SameFile(posBlackKing, ppos) & bMoveForwardPossible)
-					if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
-					{						
-						if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
-							return true;
-
-						// Discovered check with a double move forward:
-						if ((ppos <= _H2_) & IsEmptyAt(ppos + 16))
-							if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 16, posWhiteLongDistAttacker)) // no need to pass info about possible en passant, since it never prevents discovered check
+					// Discovered check with a capture (!!note that in the current implementation double check with a capture will be verified twice: here and in the direct check verification !!)
+					auto maskToCapture = White_Pawn_Attacks[ppos] & black;
+					const int posWhiteLongDistAttacker = WhiteLongDistanceFigureInDir<1, 1>(ppos, posBlackKing);
+	
+					BEGIN_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture)
+					{
+						if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(posToCapture, ppos, posWhiteKing))
+							if (IsCheckMateAfterPawnDiscoveredCheck(ppos, posToCapture, posWhiteLongDistAttacker))
 								return true;
 					}
-			}
+					END_FOR_EACH_POS_IN_MASK(posToCapture, maskToCapture);
+	
+					// Discovered check with a move forward:
+					if (!SameFile(posBlackKing, ppos) & bMoveForwardPossible)
+						if (!tbCanBePinned || !pinned || IsSquareAlongTheLineOrDiag(ppos + 8, ppos, posWhiteKing))
+						{						
+							if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 8, posWhiteLongDistAttacker))
+								return true;
+	
+							// Discovered check with a double move forward:
+							if ((ppos <= _H2_) & IsEmptyAt(ppos + 16))
+								if (IsCheckMateAfterPawnDiscoveredCheck(ppos, ppos + 16, posWhiteLongDistAttacker)) // no need to pass info about possible en passant, since it never prevents discovered check
+									return true;
+						}
+				}
 		}		
 
 		// en passant:
