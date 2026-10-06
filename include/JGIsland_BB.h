@@ -2559,7 +2559,7 @@ private:
 						return true;
 
 				const auto posDiscoveredChecker = ((tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes) && SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, posFrom)) ? WhiteLongDistanceFigureInDir<1>(posFrom, posBlackKing) : -1;
-				if constexpr (!tbCheckMateOnly)
+				if constexpr (!tbCheckMateOnly && (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes))
 					if (posDiscoveredChecker >= 0)
 						return true;
 
@@ -3924,6 +3924,7 @@ private:
 		assert(white & kings & (sq_to_bb(fromPos)));
 		assert((white & (sq_to_bb(toPos))) == 0);
 		assert((white & (1ULL << posWhiteLongDistAttacker)) != 0);
+		static_assert(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes);
 
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
@@ -3959,6 +3960,7 @@ private:
 		assert((fromPos >> 3) == _7_);
 		assert(toPos >= _A8_);
 		assert((white & (1ULL << posWhiteLongDistAttacker)) != 0);
+		static_assert(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes);
 
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
@@ -4024,6 +4026,7 @@ private:
 		assert(toPos >= _A8_);
 		assert((white & (1ULL << posWhiteLongDistAttacker)) != 0);
 		assert(!IsKnightDiff(toPos, posBlackKing));
+		static_assert(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes);
 
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
@@ -4074,6 +4077,7 @@ private:
 		assert(white & pawns & (sq_to_bb(fromPos)));
 		assert((white & (sq_to_bb(toPos))) == 0);
 		assert((white & (1ULL << posWhiteLongDistAttacker)) != 0);
+		static_assert(tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes);
 
 		const auto fromMask = (sq_to_bb(fromPos));
 		const auto toMask = (sq_to_bb(toPos));
