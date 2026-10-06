@@ -1562,7 +1562,8 @@ private:
 		return bDirectCheck ? toPos : -1;
 	}
 
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
+	// Template param. tbSkipCheck added because checking moves are usually analyzed first separately
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false, bool tbSkipCheck = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackQueen(const int fromPos, const int toPos) CONST_RESTRICT
 	{
 		assert(IsValidPos(fromPos));
@@ -1590,7 +1591,10 @@ private:
 			// Verify if white king checked and dispatch to proper template version:
 			const bool bDirectCheck = IsDirectCheckByBlackQueen(toPos);		
 			if (bDirectCheck)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 	
@@ -1606,7 +1610,10 @@ private:
 			// Verify if white king checked and dispatch to proper template version:
 			const bool bDirectCheck = IsDirectCheckByBlackQueen(toPos);
 			if (bDirectCheck)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(toPos);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
@@ -1617,7 +1624,8 @@ private:
 		
 		return res;
 	}
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
+	// Template param. tbSkipCheck added because checking moves are usually analyzed first separately
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false, bool tbSkipCheck = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackRook(const int fromPos, const int toPos) CONST_RESTRICT
 	{
 		assert(IsValidPos(fromPos));
@@ -1644,7 +1652,10 @@ private:
 			// Find checker(s) and dispatch to proper template version:
 			const auto posWhiteKingChecker = IsCheckByBlackRook(fromPos, toPos);
 			if (posWhiteKingChecker >= 0)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 	
@@ -1659,7 +1670,10 @@ private:
 			// Find checker(s) and dispatch to proper template version:
 			const auto posWhiteKingChecker = IsCheckByBlackRook(fromPos, toPos);
 			if (posWhiteKingChecker >= 0)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
@@ -1669,7 +1683,8 @@ private:
 		
 		return res;
 	}
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
+	// Template param. tbSkipCheck added because checking moves are usually analyzed first separately
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false, bool tbSkipCheck = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackBishop(const int fromPos, const int toPos) CONST_RESTRICT
 	{
 		assert(IsValidPos(fromPos));
@@ -1696,7 +1711,10 @@ private:
 			// First find checker(s) and dispatch to proper template version:
 			const auto posWhiteKingChecker = IsCheckByBlackBishop(fromPos, toPos);		
 			if (posWhiteKingChecker >= 0)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 	
@@ -1711,7 +1729,10 @@ private:
 			// First find checker(s) and dispatch to proper template version:
 			const auto posWhiteKingChecker = IsCheckByBlackBishop(fromPos, toPos);			
 			if (posWhiteKingChecker >= 0)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
@@ -1721,7 +1742,8 @@ private:
 		
 		return res;
 	}
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
+	// Template param. tbSkipCheck added because checking moves are usually analyzed first separately
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false, bool tbSkipCheck = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKnight(const int fromPos, const int toPos) CONST_RESTRICT
 	{
 		assert(IsValidPos(fromPos));
@@ -1748,7 +1770,10 @@ private:
 			// First find checker(s) and dispatch to proper template version:
 			const auto posWhiteKingChecker = IsCheckByBlackKnight(fromPos, toPos);
 			if (posWhiteKingChecker >= 0)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 	
@@ -1763,7 +1788,10 @@ private:
 			// First find checker(s) and dispatch to proper template version:
 			const auto posWhiteKingChecker = IsCheckByBlackKnight(fromPos, toPos);			
 			if (posWhiteKingChecker >= 0)
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);
 			else
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 
@@ -2110,9 +2138,9 @@ private:
 
 		return res;
 	}
-
-	// Alias: FindMoveThatMatesAfterMoveByBlackKing
-	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false>
+	
+	// Template param. tbSkipCheck added because checking moves are usually analyzed first separately
+	template<bool tbWhiteShortCastlingPossible, bool tbWhiteLongCastlingPossible, bool tbKnownThatItIsNotACapture = false, bool tbSkipCheck = false>
 	ALWAYS_INLINE bool IsImmediateMateAfterMoveByBlackKing(const int toPos) CONST_RESTRICT
 	{		
 		constexpr bool tbDiscoveredCheckPossible = tbBlackHaveBishopLikes || tbBlackHaveRookLikes;
@@ -2147,7 +2175,10 @@ private:
 			if (!tbDiscoveredCheckPossible || !SameDiagonalOrLineAndAllBetweenEmpty<1>(fromPos, posWhiteKing) || (maskCandidatesForDiscoveredChecker = GetCandidatesForBlackLongDistanceFigureInDir(fromPos, posWhiteKing)) == 0 || (posWhiteKingChecker = ValidateCandidateForLongDistanceFigureInDir(maskCandidatesForDiscoveredChecker, fromPos, posWhiteKing)) < 0)
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker); // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker); // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
 	
 			*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
 		}
@@ -2163,7 +2194,10 @@ private:
 			if (!tbDiscoveredCheckPossible || !SameDiagonalOrLineAndAllBetweenEmpty<1>(fromPos, posWhiteKing) || (maskCandidatesForDiscoveredChecker = GetCandidatesForBlackLongDistanceFigureInDir(fromPos, posWhiteKing)) == 0 || (posWhiteKingChecker = ValidateCandidateForLongDistanceFigureInDir(maskCandidatesForDiscoveredChecker, fromPos, posWhiteKing)) < 0)
 				res = FindMoveThatMates<0, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
-				res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);  // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
+				if constexpr (tbSkipCheck)
+					res = true;
+				else
+					res = FindMoveThatMates<1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>(posWhiteKingChecker);  // no need to verify !IsSquareBetween(to, posDiscoveredChecker, posWhiteKing) since AllBetweenEmpty and BlackLongDistanceFigureInDir were called AFTER moving bl.king
 
 			const_cast<FullBitboards*>(this)->black ^= moveMask;
 			const_cast<FullBitboards*>(this)->kings ^= moveMask;	
@@ -5468,6 +5502,9 @@ private:
 			// A method to find fast refutations - after a check White don't have many responses and the analysis is likely to be completed very fast
 			if (!IsImmediateMateAfterAnyBlackCheck<tbBlackCastlingFlags>(blackDiscoveredCheckers, legalMovesFound))
 				return false;
+			constexpr bool tbSkipCheck = true; // checking moves already analyzed
+			#else
+			constexpr bool tbSkipCheck = false;
 			#endif
 			
 			const auto occ = this->occ();
@@ -5486,14 +5523,14 @@ private:
 				BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 				{
 					auto movesMask = get_bishop_moves(pos, occ, black) | get_rook_moves(pos, occ, black);
-				
+					
 					#ifdef __USE_OPTIM_FOR_NON_CAPTURE__
 					auto figureCaptureMovesMask = movesMask & white & (~pawns);
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, figureCaptureMovesMask)
 					{					
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, false, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5504,7 +5541,7 @@ private:
 					{					
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, false, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5563,7 +5600,7 @@ private:
 					{					
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, false, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5621,7 +5658,7 @@ private:
 					{
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, false, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5676,7 +5713,7 @@ private:
 					{
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5693,7 +5730,7 @@ private:
 					{
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5710,7 +5747,7 @@ private:
 					{
 						if (!IsBlackPinned(pos, posTo))
 						{
-							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true, tbSkipCheck>(pos, posTo))
 								return false;
 							legalMovesFound = true;
 						}
@@ -5740,7 +5777,7 @@ private:
 				{
 					if (!IsSquareAttackedByWhite<-1>(posTo)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
 					{
-						if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posTo))
+						if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, false, tbSkipCheck>(posTo))
 							return false;
 						legalMovesFound = true;
 					}
@@ -5759,7 +5796,7 @@ private:
 					auto captureMovesMask = movesMask & white;
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
 					{
-						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
+						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, false, tbSkipCheck>(pos, posTo))
 							return false;
 						legalMovesFound = true;
 					}
@@ -5767,7 +5804,7 @@ private:
 					auto nonCaptureMovesMask = movesMask & ~white;
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
 					{
-						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+						if (!IsImmediateMateAfterMoveByBlackKnight<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true, tbSkipCheck>(pos, posTo))
 							return false;
 						legalMovesFound = true;
 					}
@@ -7213,3 +7250,4 @@ using FullBitboards_HQ = FullBitboards<MoveGenMethodT::HyperbolaQuintessence>;
 using FullBitboards_FMB = FullBitboards<MoveGenMethodT::FancyMagics>;
 using FullBitboards_DFMB = FullBitboards<MoveGenMethodT::DenseFancyMagics>;
 static_assert(sizeof(FullBitboards_DFMB) <= 64); // let's not exceed this limit - it can degrade performance
+
