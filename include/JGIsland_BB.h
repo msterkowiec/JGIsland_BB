@@ -5463,10 +5463,6 @@ private:
 		{
 			bool legalMovesFound = false;
 
-			#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-			const auto blackPinnedPieces = GetBlackPinnedPieces();
-			#endif
-
 			#ifdef __USE_BLACKCHECKINGMOVESFIRST__
 			const auto blackDiscoveredCheckers = GetBlackPiecesThatCanMakeDiscoveredCheck();
 			// A method to find fast refutations - after a check White don't have many responses and the analysis is likely to be completed very fast
@@ -5476,6 +5472,12 @@ private:
 			
 			const auto occ = this->occ();
 			
+			#ifdef __USE_BLACKNONCAPTUREMOVESLATER__
+			alignas(64) char arPosLongDistFigures[64];
+			Bitboard arFigureMoves[64];
+			int numQueens = 0;
+			#endif
+
 			// Queens:
 			Bitboard mask;
 			if constexpr(tbBlackHaveRookLikes || tbBlackHaveBishopLikes)
@@ -5489,11 +5491,7 @@ private:
 					auto figureCaptureMovesMask = movesMask & white & (~pawns);
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, figureCaptureMovesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5504,11 +5502,7 @@ private:
 					auto pawnCaptureMovesMask = movesMask & white & pawns;
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, pawnCaptureMovesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5517,13 +5511,16 @@ private:
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, pawnCaptureMovesMask);			
 					auto nonCaptureMovesMask = movesMask & ~white;
+
+					#ifdef __USE_BLACKNONCAPTUREMOVESLATER__
+					arPosLongDistFigures[numQueens] = pos;
+					arFigureMoves[numQueens++] = nonCaptureMovesMask;
+					#else
+					
+					int numLongDistanceFigures = 0;
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
 								return false;
@@ -5531,16 +5528,13 @@ private:
 						}
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+					#endif
 			
 					#else				
 			
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5553,6 +5547,9 @@ private:
 				END_FOR_EACH_POS_IN_MASK(pos, mask);
 			}
 
+			#ifdef __USE_BLACKNONCAPTUREMOVESLATER__
+			int numWithRooks = numQueens;
+			#endif
 			if constexpr (tbBlackHaveRookLikes)
 			{
 				mask = rooks() & black & ~blackDiscoveredCheckers; // rook discovered checkers already analyzed
@@ -5564,11 +5561,7 @@ private:
 					auto captureMovesMask = movesMask & white;
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5577,13 +5570,15 @@ private:
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
 					auto nonCaptureMovesMask = movesMask & ~white;
+
+					#ifdef __USE_BLACKNONCAPTUREMOVESLATER__
+					arPosLongDistFigures[numWithRooks] = pos;
+					arFigureMoves[numWithRooks++] = nonCaptureMovesMask;
+					#else
+
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
 								return false;
@@ -5591,16 +5586,13 @@ private:
 						}
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+					#endif
 
 					#else
 				
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 					{					
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5613,6 +5605,9 @@ private:
 				END_FOR_EACH_POS_IN_MASK(pos, mask);
 			}
 
+			#ifdef __USE_BLACKNONCAPTUREMOVESLATER__
+			int numWithBishops = numWithRooks;
+			#endif
 			if constexpr (tbBlackHaveBishopLikes)
 			{
 				mask = bishops() & black & ~blackDiscoveredCheckers; // bishops discovered checkers already analyzed
@@ -5624,11 +5619,7 @@ private:
 					auto captureMovesMask = movesMask & white;
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask)
 					{
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5637,13 +5628,15 @@ private:
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, captureMovesMask);
 					auto nonCaptureMovesMask = movesMask & ~white;
+
+					#ifdef __USE_BLACKNONCAPTUREMOVESLATER__
+					arPosLongDistFigures[numWithBishops] = pos;
+					arFigureMoves[numWithBishops++] = nonCaptureMovesMask;
+					#else
+
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
 					{
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
 								return false;
@@ -5651,16 +5644,13 @@ private:
 						}
 					}
 					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);
+					#endif
 
 					#else
 				
 					BEGIN_FOR_EACH_POS_IN_MASK(posTo, movesMask)
 					{
-						#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-						if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(posTo, pos, posBlackKing))
-						#else
 						if (!IsBlackPinned(pos, posTo))
-						#endif
 						{
 							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, posTo))
 								return false;
@@ -5672,17 +5662,96 @@ private:
 				}
 				END_FOR_EACH_POS_IN_MASK(pos, mask);
 			}
+			
+			#if defined(__USE_OPTIM_FOR_NON_CAPTURE__) && defined(__USE_BLACKNONCAPTUREMOVESLATER__)
+			if constexpr (tbBlackHaveBishopLikes || tbBlackHaveRookLikes)
+			{
+				int i = 0;
+				for (; i < numQueens; ++i)
+				{
+					const auto pos = arPosLongDistFigures[i];
+					auto nonCaptureMovesMask = arFigureMoves[i];
 
-			#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-			mask = knights & black & ~blackPinnedPieces;
-			#else
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+					{
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackQueen<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);				
+				}
+				
+				for (; i < numWithRooks; ++i)
+				{
+					const auto pos = arPosLongDistFigures[i];
+					auto nonCaptureMovesMask = arFigureMoves[i];
+
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+					{
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackRook<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);				
+				}
+				
+				for (; i < numWithBishops; ++i)
+				{
+					const auto pos = arPosLongDistFigures[i];
+					auto nonCaptureMovesMask = arFigureMoves[i];
+
+					BEGIN_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask)
+					{
+						if (!IsBlackPinned(pos, posTo))
+						{
+							if (!IsImmediateMateAfterMoveByBlackBishop<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, true>(pos, posTo))
+								return false;
+							legalMovesFound = true;
+						}
+					}
+					END_FOR_EACH_POS_IN_MASK(posTo, nonCaptureMovesMask);				
+				}
+			}
+			#endif			
+
+			// Let's analyze king moves before knights' moves - statistics show that much more refutations is by king's move, particularly in 'realistic' test suite
+			{ 
+				// let's try to minimize the scope of the variables below
+				assert(kings & black);
+				const auto whitePawnAttacks = WhitePawnAttacks();
+				const auto whiteKnightAttacks = WhiteKnightAttacks();
+
+				#ifdef __USE_PEDANTICFILTERINGOUTMOVESALREADYANALYZED__ // tests show it not worth doing (very unlikely to have a discovered check with bl.king that was not a refutation, so no need to lose any time on this filtering)
+				const bool bCanMakeDiscoveredCheck = (blackDiscoveredCheckers & black & kings) != 0;
+				const Bitboard alongTheDiagOrLine = BOOL_EXTEND64(!bCanMakeDiscoveredCheck) | GetCommonDiagOrLine(posWhiteKing, posBlackKing); // if discovered check by Bl.King is not possible, this mask will be all ones
+
+				mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks & alongTheDiagOrLine;
+				#else
+				mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
+				#endif
+
+				BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
+				{
+					if (!IsSquareAttackedByWhite<-1>(posTo)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
+					{
+						if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posTo))
+							return false;
+						legalMovesFound = true;
+					}
+				}
+				END_FOR_EACH_POS_IN_MASK(pos, mask);
+			}
+
 			mask = knights & black & ~blackDiscoveredCheckers; // knights discovered checkers already analyzed
-			#endif
 			BEGIN_FOR_EACH_POS_IN_MASK(pos, mask)
 			{
-				#if !defined(__PREEMPTIVE_BLACKPINNEDPIECES__)
 				if (!IsBlackAbsolutelyPinned(pos))
-				#endif
 				{
 					auto movesMask = Knight_Attacks[pos] & ~black;
 					
@@ -5718,33 +5787,6 @@ private:
 			}
 			END_FOR_EACH_POS_IN_MASK(pos, mask);
 			
-			{ 
-				// let's try to minimize the scope of the variables below
-				assert(kings & black);
-				const auto whitePawnAttacks = WhitePawnAttacks();
-				const auto whiteKnightAttacks = WhiteKnightAttacks();
-
-				#ifdef __USE_PEDANTICFILTERINGOUTMOVESALREADYANALYZED__ // tests show it not worth doing (very unlikely to have a discovered check with bl.king that was not a refutation, so no need to lose any time on this filtering)
-				const bool bCanMakeDiscoveredCheck = (blackDiscoveredCheckers & black & kings) != 0;
-				const Bitboard alongTheDiagOrLine = BOOL_EXTEND64(!bCanMakeDiscoveredCheck) | GetCommonDiagOrLine(posWhiteKing, posBlackKing); // if discovered check by Bl.King is not possible, this mask will be all ones
-
-				mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks & alongTheDiagOrLine;
-				#else
-				mask = King_Attacks[posBlackKing] & ~black & ~King_Attacks[posWhiteKing] & ~whitePawnAttacks & ~whiteKnightAttacks;
-				#endif
-
-				BEGIN_FOR_EACH_POS_IN_MASK(posTo, mask)
-				{
-					if (!IsSquareAttackedByWhite<-1>(posTo)) // -1==long dist. figures only (squares attacked by white king, pawns or knights already filtered out)
-					{
-						if (!IsImmediateMateAfterMoveByBlackKing<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(posTo))
-							return false;
-						legalMovesFound = true;
-					}
-				}
-				END_FOR_EACH_POS_IN_MASK(pos, mask);
-			}
-
 			if constexpr (tbBlackCastlingFlags != 0 && tbBlackHaveRookLikes)
 			{
 				if (posBlackKing == _E8_) // this is probably redundant (assert might be enough) but a very predictable branch anyway
@@ -5779,11 +5821,7 @@ private:
 				auto captureMask = Black_Pawn_Attacks[pos] & white;
 				BEGIN_FOR_EACH_POS_IN_MASK(capturePos, captureMask)
 				{
-					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(capturePos, pos, posBlackKing))
-					#else
 					if (!IsBlackPinned(pos, capturePos))
-					#endif
 					{
 						if (!IsImmediateMateAfterCaptureByBlackPawn<tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible>(pos, capturePos))
 							return false;
@@ -5794,11 +5832,7 @@ private:
 
 				if (IsEmptyAt(pos - 8))
 				{
-					#ifdef __PREEMPTIVE_BLACKPINNEDPIECES__
-					if (!IsPosInBitmask(pos, blackPinnedPieces) || IsSquareAlongTheLineOrDiag(pos - 8, pos, posBlackKing))
-					#else
 					if (!IsBlackPinned(pos, pos - 8))
-					#endif
 					{
 						legalMovesFound = true;
 						if (!IsImmediateMateAfterMoveForwardByBlackPawn< tbWhiteCastlingShortPossible, tbWhiteCastlingLongPossible, 1>(pos, pos - 8))
@@ -7179,4 +7213,3 @@ using FullBitboards_HQ = FullBitboards<MoveGenMethodT::HyperbolaQuintessence>;
 using FullBitboards_FMB = FullBitboards<MoveGenMethodT::FancyMagics>;
 using FullBitboards_DFMB = FullBitboards<MoveGenMethodT::DenseFancyMagics>;
 static_assert(sizeof(FullBitboards_DFMB) <= 64); // let's not exceed this limit - it can degrade performance
-
