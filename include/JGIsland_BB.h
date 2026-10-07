@@ -553,9 +553,9 @@ private:
 			if constexpr (!tbWhiteHaveBishopLikes && !tbWhiteHaveRookLikes)
 				return false;
 			if constexpr (!tbWhiteHaveBishopLikes)
-				return SameLineAndAllBetweenEmpty<tbSkipAssertionOnSameSquares>(pos1, pos2);
+				return SameLineAndAllBetweenEmpty(pos1, pos2);
 			if constexpr (!tbWhiteHaveRookLikes)
-				return SameDiagAndAllBetweenEmpty<tbSkipAssertionOnSameSquares>(pos1, pos2);
+				return SameDiagAndAllBetweenEmpty(pos1, pos2);
 		}		
 
 		if constexpr (tbUseFlagsOfBlackLongDistanceFigures)
