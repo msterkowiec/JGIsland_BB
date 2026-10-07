@@ -540,7 +540,7 @@ private:
 
 		return AllBetweenEmpty(pos1, pos2) & (SameDiag(pos1, pos2));
 	}
-	template<bool tbUseFlagsOfBlackLongDistanceFigures = false>
+	template<bool tbUseFlagsOfBlackLongDistanceFigures = false, bool tbUseFlagsOfWhiteLongDistanceFigures = false>
 	ALWAYS_INLINE bool SameDiagonalOrLineAndAllBetweenEmpty(const int pos1, const int pos2) CONST_RESTRICT
 	{
 		assert(IsValidPos(pos1));
@@ -1306,7 +1306,7 @@ private:
 		assert((sq_to_bb(pos)) & black);
 
 		if constexpr (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes)
-			if (SameDiagonalOrLineAndAllBetweenEmpty<0,0,1>(posBlackKing, pos))
+			if (SameDiagonalOrLineAndAllBetweenEmpty<0,1>(posBlackKing, pos))
 				if (const auto mask = GetCandidatesForWhiteLongDistanceFigureInDir(pos, posBlackKing))
 					return IsCandidateForLongDistanceFigureInDirValid(mask, pos, posBlackKing);
 			
