@@ -612,9 +612,15 @@ private:
 		{
 			const auto rayMask = GetRay(pos, posBase);
 			if constexpr (tbKnownGeneralDir == 0) // diagonal		
+			{
+				assert(SameDiag(pos, posBase));
 				return rayMask & (tbBlack ? black : white) & qbishops;
+			}
 			else // rookLike dir
+			{
+				assert(SameLine(pos, posBase));
 				return rayMask & (tbBlack ? black : white) & qrooks;
+			}
 		}
 	}	
 	template<char tbKnownGeneralDir = -1> // -1==unknown, 0 for diagonals, 1 for rows/columns
