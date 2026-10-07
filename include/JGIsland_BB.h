@@ -1290,12 +1290,9 @@ private:
 
 		if constexpr (tbWhiteHaveBishopLikes || tbWhiteHaveRookLikes)
 			if (SameDiagonalOrLineAndAllBetweenEmpty(posBlackKing, pos))
-			{
-				constexpr char tbGeneralDir = (!tbWhiteHaveBishopLikes) ? 1 : ((!tbWhiteHaveRookLikes) ? 0 : -1); // let's use any prior/compile-time knowledge we have
-				if (const auto mask = GetCandidatesForWhiteLongDistanceFigureInDir<tbGeneralDir>(pos, posBlackKing))
+				if (const auto mask = GetCandidatesForWhiteLongDistanceFigureInDir(pos, posBlackKing))
 					return IsCandidateForLongDistanceFigureInDirValid(mask, pos, posBlackKing);
-			}
-
+			
 		return false;
 	}
 	ALWAYS_INLINE bool IsWhiteAbsolutelyPinned(const int pos) CONST_RESTRICT
@@ -1306,12 +1303,9 @@ private:
 
 		if constexpr (tbBlackHaveBishopLikes || tbBlackHaveRookLikes)		
 			if (SameDiagonalOrLineAndAllBetweenEmpty<1>(posWhiteKing, pos))
-			{
-				constexpr char tbGeneralDir = (!tbBlackHaveBishopLikes) ? 1 : ((!tbBlackHaveRookLikes) ? 0 : -1); // let's use any prior/compile-time knowledge we have
-				if (const auto mask = GetCandidatesForBlackLongDistanceFigureInDir<tbGeneralDir>(pos, posWhiteKing))
+				if (const auto mask = GetCandidatesForBlackLongDistanceFigureInDir(pos, posWhiteKing))
 					return IsCandidateForLongDistanceFigureInDirValid(mask, pos, posWhiteKing);
-			}
-				
+						
 		return false;
 	}
 
