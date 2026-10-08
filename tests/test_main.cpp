@@ -549,6 +549,7 @@ TEST(JGIsland_BB_Integration, BasicIntegrationTest)
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("7k/8/P5K1/8/8/8/8/8"), 1);
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/8/P3p3/1N2p3/1K2k1P1/6P1/4PPP1/8"), 1);	
 	EXPECT_EQ(bb.SolveTwoMover_OneSolution("3knB2/5P2/3K4/8/8/8/8/8"), 0);	
+	EXPECT_EQ(bb.SolveTwoMover_OneSolution("8/2p2p1p/R1N2k1P/5P2/2pP1K1P/2P5/8/8"), 1);
 }
 
 // Here performance tests start
