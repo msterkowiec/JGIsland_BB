@@ -4968,13 +4968,13 @@ private:
 			}
 			else if constexpr(!tbWhiteHaveRookLikes)
 			{										
-				if (((Bishop_Attacks[posBlackKing] & white & qbishops) == 0) & ((white & pawns & seventhLine) == 0))
+				if (((Ngbh_Bishop_Attack_Area[posBlackKing] & white & qbishops) == 0) & ((white & pawns & seventhLine) == 0))
 					if (FreeAroundBlackKing() > 1 + ((white & qbishops) != 0)) // the last white bishop may have been captured in the previous Black move (while tbWhiteHaveBishopLikes is still true - no dispatching after Black capture for performance reasons)
 						return false;
 			}
 			else if constexpr (!tbWhiteHaveBishopLikes)
 			{				
-				if (((Rook_Attacks[posBlackKing] & white & qrooks) == 0) & ((white & pawns & seventhLine) == 0))
+				if (((Ngbh_Rook_Attack_Area[posBlackKing] & white & qrooks) == 0) & ((white & pawns & seventhLine) == 0))
 					if (FreeAroundBlackKing() > 1 + ((white & qrooks) != 0))  // the last white rook may have been captured in the previous Black move (while tbWhiteHaveRookLikes is still true - no dispatching after Black capture for performance reasons)
 						return false;
 			}
