@@ -70,6 +70,9 @@
 // Additional constexpr boolean values to simplify code based on config macros (while config values above can be alterned, the code below should stay intact)
 // (tb prefix stands for Template Boolean but in this context it means just Compile-Time Boolean)
 
+namespace JGIsland_BB
+{
+
 #ifdef __USE_WHITEPAWNCHECKOPTIM__
 inline constexpr bool tbUseWhitePawnCheckOptim = true;
 #else
@@ -87,6 +90,8 @@ inline constexpr bool tbMemUsageOptimInBetweenLookup = true;
 #else
 inline constexpr bool tbMemUsageOptimInBetweenLookup = false;
 #endif
+
+} // namespace JGIsland_BB
 
 #if defined(__USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__) && !defined(__USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__)
 #error "__USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__ requires __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__"
