@@ -28,6 +28,9 @@
 // 15.7 kB with tbReduceMemUsage == false
 //
 
+namespace JGIsland_BB
+{
+
 template<bool tbReduceMemUsage = false> // reducing mem.usage (using common index_map) seems to incur a very small but measurable impact on performance
 struct BetweenLookupExt
 {
@@ -304,3 +307,4 @@ public:
 // Instantiate globally at compile time. This lands straight into the read-only (.rodata) segment of the binary
 inline constexpr BetweenLookupExt<tbMemUsageOptimInBetweenLookup> betweenLookup = BetweenLookupExt<tbMemUsageOptimInBetweenLookup>::CreateBetweenLookupExt();
 
+} //namespace JGIsland_BB
