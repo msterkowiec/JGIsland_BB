@@ -6,6 +6,9 @@
 
 #pragma once
 
+namespace JGIsland_BB
+{
+
 inline constexpr int _A_ = 0; 
 inline constexpr int _B_ = 1;
 inline constexpr int _C_ = 2;
@@ -123,3 +126,5 @@ inline constexpr int BLACK_KNIGHT = (CLR_BLACK + FGR_KNIGHT);
 inline constexpr int BLACK_BISHOP = (CLR_BLACK + FGR_BISHOP);
 inline constexpr int BLACK_ROOK = (CLR_BLACK + FGR_ROOK);
 inline constexpr int BLACK_QUEEN = (CLR_BLACK + FGR_QUEEN);
+
+} //namespace JGIsland_BB
