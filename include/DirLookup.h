@@ -10,6 +10,9 @@
 #include "common.h"
 #include <array>
 
+namespace JGIsland_BB
+{
+
 class DirLookup
 {
 
@@ -134,3 +137,5 @@ private:
 }; // class DirLookup
 
 constexpr inline DirLookup dirLookup;
+
+} //namespace JGIsland_BB

@@ -19,6 +19,9 @@
 #include <cassert>
 #include <bit>
 
+namespace JGIsland_BB
+{
+
 struct TMove
 {
 	BYTE nFrom;
@@ -383,3 +386,5 @@ ALWAYS_INLINE bool HasSingleBit(const Bitboard val)
 	else	
 		return (val != 0) & ((val & (val - 1)) == 0);
 }
+
+} // namespace JGIsland_BB

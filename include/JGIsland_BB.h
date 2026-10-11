@@ -20,6 +20,9 @@
 #include "fancy_magics.h"
 #include "fancy_magics_dense.h"
 
+namespace JGIsland_BB
+{
+
 enum class MoveGenMethodT { HyperbolaQuintessence, FancyMagics, DenseFancyMagics };
 
 template<MoveGenMethodT MoveGenMethod = MoveGenMethodT::HyperbolaQuintessence, bool tbBlackHaveRookLikes = true, bool tbBlackHaveBishopLikes = true, bool tbWhiteHaveRookLikes = true, bool tbWhiteHaveBishopLikes = true>
@@ -7277,3 +7280,4 @@ using FullBitboards_FMB = FullBitboards<MoveGenMethodT::FancyMagics>;
 using FullBitboards_DFMB = FullBitboards<MoveGenMethodT::DenseFancyMagics>;
 static_assert(sizeof(FullBitboards_DFMB) <= 64); // let's not exceed this limit - it can degrade performance
 
+} // namespace JGIsland_BB

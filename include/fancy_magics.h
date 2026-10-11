@@ -16,6 +16,9 @@
 #include <random>
 #include <bit>
 
+namespace JGIsland_BB
+{
+
 namespace FancyMagicBitboards
 {
 
@@ -387,5 +390,7 @@ ALWAYS_INLINE uint64_t get_raw_rook_moves_fmb(int sq, uint64_t occupancy)
     uint64_t hash = (blockers * m.magic) >> m.shift;
     return GlobalRooks->shared_pool[m.offset + hash];
 }
+
+} //namespace JGIsland_BB
 
 #endif

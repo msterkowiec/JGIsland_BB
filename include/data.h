@@ -12,6 +12,9 @@
 #include "common.h"
 #include "defs.h"
 
+namespace JGIsland_BB
+{
+
 #ifdef __USE_SQUARE_BITBOARD__
 constexpr std::array<uint64_t, 64> init_square_bitboard()
 {
@@ -964,3 +967,5 @@ alignas(64) inline constexpr std::array<std::uint64_t, 64> Knights_That_Can_Dire
 alignas(64) constexpr std::array<std::uint64_t, 64> Ngbh_Rook_Attack_Area = CalcNeighborhoodRookAttackBitboards();
 alignas(64) constexpr std::array<std::uint64_t, 64> Ngbh_Bishop_Attack_Area = CalcNeighborhoodBishopAttackBitboards();
 alignas(64) constexpr std::array<std::uint64_t, 64> Ngbh_Knight_Attack_Area = CalcNeighborhoodKnightAttackBitboards();
+
+} //namespace JGIsland_BB

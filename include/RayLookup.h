@@ -10,6 +10,9 @@
 #include "DirLookup.h"
 #include "common.h"
 
+namespace JGIsland_BB
+{
+
 class RayLookup
 {	
 public:
@@ -123,3 +126,4 @@ private:
 
 inline constexpr RayLookup rayLookup;
 
+} //namespace JGIsland_BB
