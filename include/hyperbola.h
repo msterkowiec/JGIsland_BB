@@ -10,6 +10,9 @@
 #include "config.h"
 #include "utils.h"
 
+namespace JGIsland_BB
+{
+
 template<char Dir = 0> //Dir 0 = any, 1/-1 == horizontal, 8/-8 == vertical
 ALWAYS_INLINE Bitboard get_raw_rook_moves_hq(const int square, const Bitboard occupancy)
 {
@@ -106,3 +109,5 @@ ALWAYS_INLINE static  auto get_raw_bishop_moves_hq(const int square, const Bitbo
 		return res;
 	}
 }
+
+} // namespace JGIsland_BB
