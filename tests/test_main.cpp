@@ -7,6 +7,7 @@
 #define private public // dirty trick for UTs only 
 #include "utils.h"
 #include "../include/JGIsland_BB.h"
+using namespace JGIsland_BB;
 
 bool useDurationMultiplier = false; // the optional duration multiplier is for release builds only (always ON in RelWithDebInfo)
 
