@@ -18,6 +18,8 @@
 #define ALWAYS_INLINE inline __attribute__((always_inline))
 #endif
 
+namespace JGIsland_BB
+{
 typedef unsigned char FIGURE;
 using BYTE = std::uint8_t;
 
@@ -30,6 +32,8 @@ using BYTE = std::uint8_t;
 	// Fallback for any other compiler:
 	using Bitboard = uint64_t;
 #endif
+
+} // namespace JGIsland_BB
 
 #if defined(__clang__) 
 	#define CONST_RESTRICT const
