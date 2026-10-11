@@ -14,6 +14,9 @@
 #include <random>
 #include <algorithm>
 
+namespace JGIsland_BB
+{
+
 namespace DenseFancyMagicBitboards
 {
 
@@ -264,3 +267,4 @@ ALWAYS_INLINE Bitboard get_raw_bishop_moves_dfmb(int sq, Bitboard occupancy)
     return magicRecord.ptr[idx];
 }
 
+} //namespace JGIsland_BB
