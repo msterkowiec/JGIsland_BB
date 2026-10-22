@@ -3141,7 +3141,7 @@ private:
 		{
 			const int pos = std::countr_zero(matchMask) - 8;
 			if (!tbVerifyPinning || !IsWhitePinned(pos, pos + 8))
-				if (pos >= _A2_)
+				if (pos >= _A7_)
 				{
 					if constexpr (tbOneIsEnough && !tbOnlyCheckingMoves)
 						return 1;
