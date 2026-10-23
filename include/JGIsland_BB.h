@@ -2524,7 +2524,7 @@ private:
 					bDirectCheck = SameDiagonalOrLineAndAllBetweenEmptyIfTakeOffWhitePawn(posBlackKing, posTo, posFrom);
 				else if constexpr (fPromo == FGR_ROOK)
 					bDirectCheck = SameLineAndAllBetweenEmptyIfTakeOffWhitePawn(posBlackKing, posTo, posFrom);
-				else if constexpr (fPromo == FGR_ROOK)
+				else if constexpr (fPromo == FGR_BISHOP)
 					bDirectCheck = SameDiagAndAllBetweenEmptyIfTakeOffWhitePawn(posBlackKing, posTo, posFrom);
 
 				if (bDirectCheck)
