@@ -7251,24 +7251,28 @@ public:
 			if (moves[i] != ' ')
 				szMove[idx++] = moves[i];
 			else
-			{
-				szMove[idx] = 0;
-				auto move = StringToMove(szMove);
-				if (move.nFrom == 0 && move.nTo == 0)
+				if (idx != 0)
 				{
-					res.clear();
-					break;
+					szMove[idx] = 0;
+					auto move = StringToMove(szMove);
+					if (move.nFrom == 0 && move.nTo == 0)
+					{
+						res.clear();
+						break;
+					}
+					res.push_back(move);
+					idx = 0;
 				}
-				res.push_back(move);
-				idx = 0;
-			}
 
-		szMove[idx] = 0;
-		auto move = StringToMove(szMove);
-		if (move.nFrom == 0 && move.nTo == 0)		
-			res.clear();
-		else		
-			res.push_back(move);
+		if (idx != 0)
+		{
+			szMove[idx] = 0;
+			auto move = StringToMove(szMove);
+			if (move.nFrom == 0 && move.nTo == 0)		
+				res.clear();
+			else		
+				res.push_back(move);
+		}
 
 		return res;
 	}
