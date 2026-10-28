@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstring>
 #include "config.h"
 #include "data.h"
 #include "utils.h"
@@ -19,6 +16,11 @@
 #include "hyperbola.h"
 #include "fancy_magics.h"
 #include "fancy_magics_dense.h"
+
+#include <vector>
+#include <string>
+#include <cstring>
+#include <bit>
 
 namespace JGIsland_BB
 {
@@ -1875,7 +1877,7 @@ private:
 			const_cast<FullBitboards*>(this)->qbishops ^= toMask;
 			#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
 			if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+				res = std::bit_cast<const FullBitboards<MoveGenMethod,1,1>>(*this).template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
 			#endif
 			// TODO: maybe find checker(s) and dispatch to proper template version?
@@ -1931,7 +1933,7 @@ private:
 			
 			#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
 			if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+				res = std::bit_cast<const FullBitboards<MoveGenMethod,1,1>>(*this).template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
 			#endif
 				// TODO: maybe find checker(s) and dispatch to proper template version?
@@ -3756,12 +3758,12 @@ private:
 			
 			if ((tbWhiteHaveRookLikes || tbWhiteHaveBishopLikes) && bDoubleCheck)
 				if constexpr(!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 			else
 				if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 
@@ -3777,12 +3779,12 @@ private:
 
 			if ((tbWhiteHaveRookLikes || tbWhiteHaveBishopLikes) && bDoubleCheck)
 				if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 			else
 				if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 
@@ -3996,7 +3998,7 @@ private:
 
 			assert(!SameDiagonalOrLineAndAllBetweenEmpty(toPos, posBlackKing));
 			if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-				res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
+				res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 			else
 				res = !FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 
@@ -4013,7 +4015,7 @@ private:
 
 			assert(!SameDiagonalOrLineAndAllBetweenEmpty(toPos, posBlackKing));
 			if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-				res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
+				res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 			else
 				res = !FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 
@@ -6171,7 +6173,7 @@ private:
 			const_cast<FullBitboards*>(this)->qbishops |= toMask;
 
 			if constexpr(!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+				res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 			else
 				res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 
@@ -6188,7 +6190,7 @@ private:
 					const_cast<FullBitboards*>(this)->qrooks |= toMask;
 
 					if constexpr (!tbWhiteHaveRookLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 
@@ -6197,7 +6199,7 @@ private:
 						const_cast<FullBitboards*>(this)->qrooks ^= toMask;
 						const_cast<FullBitboards*>(this)->qbishops |= toMask;
 						if constexpr (!tbWhiteHaveBishopLikes)
-							res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+							res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 						else
 							res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					}
@@ -6211,14 +6213,14 @@ private:
 				case FGR_BISHOP:
 					const_cast<FullBitboards*>(this)->qbishops |= toMask;
 					if constexpr(!tbWhiteHaveBishopLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					break;
 				case FGR_ROOK:
 					const_cast<FullBitboards*>(this)->qrooks |= toMask;
 					if constexpr (!tbWhiteHaveRookLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					break;
@@ -6226,7 +6228,7 @@ private:
 					const_cast<FullBitboards*>(this)->qbishops |= toMask;
 					const_cast<FullBitboards*>(this)->qrooks |= toMask;
 					if constexpr (!tbWhiteHaveBishopLikes || !tbWhiteHaveRookLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					break;
@@ -6643,27 +6645,28 @@ private:
 
 			switch(dispatcher)
 			{
+				// Use std::bit_cast below instead of reinterpret_cast to make sure strict aliasing rule is preserved (formally reinterpret_cast would introduce UB); the copy will be optimized out by compilers - the data will be reinterpreted in a safe way
 				#ifdef __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__
-				case 0: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 1: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 2: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 3: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 0: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 1: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 2: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 3: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 			
-				case 4: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 5: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 6: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 7: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 4: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 5: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 6: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 7: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 
-				case 8: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 9: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 10: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 11: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 8: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 9: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 10: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 11: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 				#endif
 
-				case 12: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 13: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 14: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 15: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 12: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 13: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 14: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 15: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 1>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 			}
 
 			assert(false);
