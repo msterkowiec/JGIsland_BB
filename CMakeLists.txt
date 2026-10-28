@@ -15,6 +15,10 @@ if(MSVC)
 	add_compile_options(/bigobj) # config option __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__ increased binary size significantly
 endif()
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+   add_compile_options(-Wno-dangling-else)
+endif()
+
 add_library (JGIsland_BB INTERFACE)
 
 
