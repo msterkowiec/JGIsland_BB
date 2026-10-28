@@ -7,9 +7,6 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstring>
 #include "config.h"
 #include "data.h"
 #include "utils.h"
@@ -19,6 +16,11 @@
 #include "hyperbola.h"
 #include "fancy_magics.h"
 #include "fancy_magics_dense.h"
+
+#include <vector>
+#include <string>
+#include <cstring>
+#include <bit>
 
 namespace JGIsland_BB
 {
@@ -6643,27 +6645,28 @@ private:
 
 			switch(dispatcher)
 			{
+				// Use std::bit_cast below instead of reinterpret_cast to make sure strict aliasing rule is preserved (formally reinterpret_cast would introduce UB); the copy will be optimized out by compilers - the data will be reinterpreted in a safe way
 				#ifdef __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__
-				case 0: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 1: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 2: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 3: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 0: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 1: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 2: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 3: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 			
-				case 4: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 5: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 6: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 7: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 0>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 4: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 5: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 6: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 7: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 0>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 
-				case 8: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 9: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 10: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 11: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 8: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 0, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 9: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 0, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 10: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 0, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 11: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 0, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 				#endif
 
-				case 12: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 13: return reinterpret_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 14: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
-				case 15: return reinterpret_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 1>*>(this)->template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 12: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 0, 1, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 13: return std::bit_cast<const FullBitboards<MoveGenMethod, 0, 1, 1, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 14: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 0, 1, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
+				case 15: return std::bit_cast<const FullBitboards<MoveGenMethod, 1, 1, 1, 1>>(*this).FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 			}
 
 			assert(false);
