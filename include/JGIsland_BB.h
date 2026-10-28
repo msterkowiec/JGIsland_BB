@@ -1877,7 +1877,7 @@ private:
 			const_cast<FullBitboards*>(this)->qbishops ^= toMask;
 			#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
 			if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+				res = std::bit_cast<const FullBitboards<MoveGenMethod,1,1>>(*this).template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
 			#endif
 			// TODO: maybe find checker(s) and dispatch to proper template version?
@@ -1933,7 +1933,7 @@ private:
 			
 			#ifdef __USE_OPTIMFORMISSINGBLACKLONGDISTANCEFIGURES__
 			if constexpr(!tbBlackHaveBishopLikes || !tbBlackHaveRookLikes)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod,1,1>*>(this)->template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
+				res = std::bit_cast<const FullBitboards<MoveGenMethod,1,1>>(*this).template FindMoveThatMates<-1, 0, tbWhiteShortCastlingPossible, tbWhiteLongCastlingPossible>();
 			else
 			#endif
 				// TODO: maybe find checker(s) and dispatch to proper template version?
@@ -3758,12 +3758,12 @@ private:
 			
 			if ((tbWhiteHaveRookLikes || tbWhiteHaveBishopLikes) && bDoubleCheck)
 				if constexpr(!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 			else
 				if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 
@@ -3779,12 +3779,12 @@ private:
 
 			if ((tbWhiteHaveRookLikes || tbWhiteHaveBishopLikes) && bDoubleCheck)
 				if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, DBL_CHECKED>(DBL_CHECKED);
 			else
 				if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-					res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
+					res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 				else
 					res = !FindOneValidMove4BlackWhenChecked<0, 1>(toPos);
 
@@ -3998,7 +3998,7 @@ private:
 
 			assert(!SameDiagonalOrLineAndAllBetweenEmpty(toPos, posBlackKing));
 			if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-				res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
+				res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 			else
 				res = !FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 
@@ -4015,7 +4015,7 @@ private:
 
 			assert(!SameDiagonalOrLineAndAllBetweenEmpty(toPos, posBlackKing));
 			if constexpr (!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-				res = !reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
+				res = !std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 			else
 				res = !FindOneValidMove4BlackWhenChecked<0, 1>(posWhiteLongDistAttacker);
 
@@ -6173,7 +6173,7 @@ private:
 			const_cast<FullBitboards*>(this)->qbishops |= toMask;
 
 			if constexpr(!tbWhiteHaveRookLikes || !tbWhiteHaveBishopLikes)
-				res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+				res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 			else
 				res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 
@@ -6190,7 +6190,7 @@ private:
 					const_cast<FullBitboards*>(this)->qrooks |= toMask;
 
 					if constexpr (!tbWhiteHaveRookLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 
@@ -6199,7 +6199,7 @@ private:
 						const_cast<FullBitboards*>(this)->qrooks ^= toMask;
 						const_cast<FullBitboards*>(this)->qbishops |= toMask;
 						if constexpr (!tbWhiteHaveBishopLikes)
-							res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+							res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 						else
 							res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					}
@@ -6213,14 +6213,14 @@ private:
 				case FGR_BISHOP:
 					const_cast<FullBitboards*>(this)->qbishops |= toMask;
 					if constexpr(!tbWhiteHaveBishopLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, tbWhiteHaveRookLikes, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					break;
 				case FGR_ROOK:
 					const_cast<FullBitboards*>(this)->qrooks |= toMask;
 					if constexpr (!tbWhiteHaveRookLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, tbWhiteHaveBishopLikes>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					break;
@@ -6228,7 +6228,7 @@ private:
 					const_cast<FullBitboards*>(this)->qbishops |= toMask;
 					const_cast<FullBitboards*>(this)->qrooks |= toMask;
 					if constexpr (!tbWhiteHaveBishopLikes || !tbWhiteHaveRookLikes)
-						res = reinterpret_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>*>(this)->template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
+						res = std::bit_cast<const FullBitboards<MoveGenMethod, tbBlackHaveRookLikes, tbBlackHaveBishopLikes, 1, 1>>(*this).template IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					else
 						res = IsImmediateMateAfterAnyBlackResponse<0, tbWhiteCastlingFlags, tbBlackCastlingFlags>();
 					break;
