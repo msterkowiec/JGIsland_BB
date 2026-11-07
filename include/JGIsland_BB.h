@@ -6645,7 +6645,7 @@ private:
 
 			switch(dispatcher)
 			{
-				// Use std::bit_cast below instead of reinterpret_cast to make sure strict aliasing rule is preserved (formally reinterpret_cast would introduce UB); the copy will be optimized out by compilers - the data will be reinterpreted in a safe way
+				// Use std::bit_cast below instead of reinterpret_cast to make sure strict aliasing rule is preserved (formally reinterpret_cast would introduce UB); the copy will likely be optimized away by compilers - the data will be reinterpreted in a safe way
 				#ifdef __USE_OPTIMFORMISSINGWHITELONGDISTANCEFIGURES__
 				case 0: return std::bit_cast<FullBitboards<MoveGenMethod, 0, 0, 0, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
 				case 1: return std::bit_cast<FullBitboards<MoveGenMethod, 0, 1, 0, 0>>(*this).template FindMoveThatMatesInTwoMoves<tbWhiteKingUnderCheck, tbEnPassantPossible, tbWhiteCastlingFlags, tbBlackCastlingFlags, tbFindAllSolutionsAndFillBuf, false>(posWhiteKingChecker, bposToCaptureWithEnPassant, pMoves);
