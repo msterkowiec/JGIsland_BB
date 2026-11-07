@@ -19,12 +19,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
    add_compile_options(-Wno-dangling-else)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
-   add_compile_options(-fconstexpr-steps=2000000)
-endif()
-
 add_library (JGIsland_BB INTERFACE)
-
 
 target_include_directories(JGIsland_BB INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
