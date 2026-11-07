@@ -16,11 +16,10 @@ if(MSVC)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-   add_compile_options(-Wno-dangling-else)
+   add_compile_options(-Wno-dangling-else -fconstexpr-loop-limit=2000000)
 endif()
 
 add_library (JGIsland_BB INTERFACE)
-
 
 target_include_directories(JGIsland_BB INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
