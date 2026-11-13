@@ -28608,5 +28608,6 @@ inline std::pair<const char*, short> test_suite_realistic [] = {
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/2q5/8", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/1q6/8", 0},
 		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b4/q7/8", 0},
-		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b1q2/8/8", 0},		
+		{"2R1Kb2/kpBR4/pp4n1/1Ppppr2/P4PN1/1n1b1q2/8/8", 0},	
+	    {"8/8/2n5/8/7B/4k3/3p2K1/3R4", 0},
 };

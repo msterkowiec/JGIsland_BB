@@ -1888,14 +1888,23 @@ private:
 				*(const_cast<FullBitboards*>(this)) = bbSaved; // restore
 				return false;
 			}
-		}
+			else
+				if constexpr(tbVerifyPromoWithCheckOnly)
+				{
+					const_cast<FullBitboards*>(this)->qrooks ^= toMask;
+					const_cast<FullBitboards*>(this)->qbishops ^= toMask;				
+				}
+			}
 
 		if (!tbVerifyPromoWithCheckOnly || IsKnightDiff(toPos, posWhiteKing) || (SameDiagonalOrLineAndAllBetweenEmpty(fromPos, posWhiteKing) && BlackLongDistanceFigureInDir(fromPos, posWhiteKing))) // !tbVerifyPromoWithCheckOnly or direct check or discovered check		
 		{
 			bool res;
 			// 2) Try promo to knight (no need to check bishop and rook for immediate checkmate)
-			const_cast<FullBitboards*>(this)->qrooks ^= toMask;
-			const_cast<FullBitboards*>(this)->qbishops ^= toMask;
+			if constexpr (!tbVerifyPromoWithCheckOnly)
+			{
+				const_cast<FullBitboards*>(this)->qrooks ^= toMask;
+				const_cast<FullBitboards*>(this)->qbishops ^= toMask;
+			}			
 			const_cast<FullBitboards*>(this)->knights ^= toMask;			
 
 			// TODO: maybe find checker(s) and dispatch to proper template version?
