@@ -1902,8 +1902,8 @@ private:
 			// 2) Try promo to knight (no need to check bishop and rook for immediate checkmate)
 			if constexpr (!tbVerifyPromoWithCheckOnly)
 			{
-				const_cast<BitboardsNQ*>(this)->qrooks ^= toMask;
-				const_cast<BitboardsNQ*>(this)->qbishops ^= toMask;
+				const_cast<FullBitboards*>(this)->qrooks ^= toMask;
+				const_cast<FullBitboards*>(this)->qbishops ^= toMask;
 			}			
 			const_cast<FullBitboards*>(this)->knights ^= toMask;			
 
